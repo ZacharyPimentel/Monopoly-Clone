@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "totoro";
+    src: url("./assets/fonts/spumoni-regular.ttf");
+    font-weight: 400;
+}
+
+@font-face{
+    font-family:"montserrat";
+    src: url("./assets//fonts/montserrat-regular.ttf");
+    font-weight:400;
+}
+@font-face{
+    font-family:"montserrat";
+    src: url("./assets//fonts/montserrat-bold.ttf");
+    font-weight:700;
+}
+
+
+*{
+    font-family: "montserrat";
+}
+
+.custom-scrollbar{
+    scrollbar-width: thin;
+    scrollbar-color:grey;
+}
