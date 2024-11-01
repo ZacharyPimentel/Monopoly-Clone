@@ -10,6 +10,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             SELECT p.*, pi.iconurl
             FROM Player p
             LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
+            WHERE p.Id = @Id
         ";
         return await db.QuerySingleAsync<Player>(query, new { Id = id });
     }

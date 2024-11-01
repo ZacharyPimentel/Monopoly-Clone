@@ -1,9 +1,4 @@
-import { useMemo } from "react";
 import { useGameState } from "../../../../stateProviders/GameStateProvider";
-import React from "react";
-import { PlayerListItemInGame } from "./components/PlayerListItemInGame";
-import { PlayerListItemInLobby } from "./components/PlayerListItemLobby";
-import { iconMappings } from "../../../../helpers/IconMappings";
 import { useGlobalDispatch } from "../../../../stateProviders/GlobalStateProvider";
 import { PlayerEditModal } from "../../../../globalComponents/GlobalModal/modalContent/PlayerEditModal";
 
@@ -20,9 +15,9 @@ export const PlayerList = () => {
                     {gameState.players.map( (player) => {
                         const isCurrentPlayer = player.id === gameState.currentSocketPlayer?.playerId;
                         return (
-                            <li key={player.id} className='flex flex-col gap-[20px]'>
+                            <li style={{opacity:player.active ? '1' : '0.5'}} key={player.id} className='flex flex-col gap-[20px]'>
                                 <div className='flex items-center gap-[20px]'>
-                                    <img className='w-[30px] h-[30px]' src={iconMappings.find( (mapping) => mapping.id === player.iconId)?.url}/>
+                                    <img className='w-[30px] h-[30px]' src={player.iconUrl}/>
                                     <p>{player.playerName} {isCurrentPlayer ? '(You)' : ''}</p>
                                     {isCurrentPlayer && (<>
                                         <button onClick={() => globalDispatch({modalOpen:true,modalContent:<PlayerEditModal player={player}/>})}>
