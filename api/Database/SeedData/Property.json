@@ -1,0 +1,18 @@
+[
+    {
+        "Id":1,
+        "SetId":1,
+        "BoardSpaceId":2,
+        "PurchasePrice":60,
+        "MortgageValue":50,
+        "UpgradeCost": 50
+    },
+    {
+        "Id":2,
+        "setId":1,
+        "BoardSpaceId":4,
+        "PurchasePrice":60,
+        "MortgageValue":50,
+        "UpgradeCost": 50
+    }
+]

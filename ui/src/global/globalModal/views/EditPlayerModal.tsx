@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { useGameState } from "../../GameStateProvider"
 import { PlayerInfoForm } from "../../PlayerInfoForm"
+import { useGameState } from "../../../stateProviders/GameStateProvider"
 
 export const EditPlayerModal = () => {
     const gameState = useGameState()

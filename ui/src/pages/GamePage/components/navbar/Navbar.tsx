@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGameState } from "../../../../global/GameStateProvider"
+import { useGameState } from "../../../../stateProviders/GameStateProvider"
 import { Player } from "../../../../types/GameState";
 
 export const Navbar = () => {

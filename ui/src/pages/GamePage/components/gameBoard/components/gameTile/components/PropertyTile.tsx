@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useGameState } from "../../../../../../../global/GameStateProvider";
+import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
 import { setTilePositions } from "../../../../../../../helpers/tilePositions";
 import { getPropertyInformation } from "../../../../../../../helpers/getPropertyInformation";
 

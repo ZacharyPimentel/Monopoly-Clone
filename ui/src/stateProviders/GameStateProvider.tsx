@@ -1,14 +1,18 @@
 import { createContext, useCallback, useContext,useEffect,useState } from 'react';
-import { GameState, Player } from '../types/GameState';
-import { LoadingSpinner } from './LoadingSpinner';
-import { GameStarted } from './globalModal/views/GameStarted';
-import { GameNotStarted } from './globalModal/views/GameNotStarted';
+import { GameState } from '../types/GameState';
 import { RichUpTheme } from '../themes/RichUpTheme';
+import { Game } from '../types/controllers/Game';
+import { LoadingSpinner } from '../global/LoadingSpinner';
+import { useGlobalDispatch } from './GlobalStateProvider';
+import { PlayerCreateModal } from '../global/GlobalModal/modalContent/PlayerCreateModal';
+import { Player } from '../types/controllers/Player';
 
 const GameStateContext = createContext<any | null>(null);
 const GameDispatchContext = createContext<(newState:Partial<GameState>) => void>(() => {});
 
 export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
+
+  const globalDispatch = useGlobalDispatch();
 
   const initialGameState:GameState = {
     //@ts-ignore
@@ -16,10 +20,10 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     players:[],
     currentPlayer:null,
     gameInProgress:false,
-    modalOpen:true,
-    modalContent: null,
     theme: RichUpTheme,
     boardRotation:90,
+    gameState:null,
+    currentSocketPlayer:null
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -30,27 +34,33 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
   },[])
 
   useEffect( () => {
-    gameState.ws.on("UpdateGameInProgress", (newValue:boolean) => {
-      console.log("UpdateGameInProgress: ", newValue)
-      updateGameState({gameInProgress:newValue});
-      if(newValue === true){
-          updateGameState({modalContent: <GameStarted/>})
-      }else{
-        updateGameState({modalContent: <GameNotStarted/>})
-      }
-    })
-    gameState.ws.on("UpdateCurrentPlayer", (currentPlayer:Player) => {
-      console.log("UpdateCurrentPlayer: ", currentPlayer)
-        updateGameState({currentPlayer})
-    });       
-    gameState.ws.on("UpdateCurrentPlayers", (players:Player[]) => {
-      console.log("UpdateCurrentPlayers: ", players)
-        updateGameState({players})
-    });
-},[]);
+      if(!gameState.ws)return
+
+      gameState.ws.on("OnConnectGameState", (gameState:Game) => {
+          console.log('gameState',gameState)
+          updateGameState({gameState})
+      });
+
+      gameState.ws.on("UpdateCurrentPlayer", (currentSocketPlayer) => {
+        console.log('currentPlayer',currentSocketPlayer)
+          updateGameState({currentSocketPlayer})
+      });       
+      gameState.ws.on("UpdatePlayers", (players:Player[]) => {
+        console.log("UpdateCurrentPlayers: ", players)
+          updateGameState({players})
+      });
+  },[]);
+
+  useEffect( () => {
+    if(!gameState.currentSocketPlayer) return
+
+    if(!gameState.currentSocketPlayer.playerId){
+      globalDispatch({modalOpen:true,modalContent:<PlayerCreateModal/>})
+    }
+  },[gameState.currentSocketPlayer])
 
   //only let people through once they've connected to the socket
-  if(!gameState || !gameState.currentPlayer?.id){
+  if(!gameState || !gameState.currentSocketPlayer){
     return <div className='flex justify-center items-center h-full w-full'><LoadingSpinner/></div>
   }
 

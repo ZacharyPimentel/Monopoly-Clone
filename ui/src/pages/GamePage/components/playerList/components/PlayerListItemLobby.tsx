@@ -1,8 +1,8 @@
 import { Player } from "../../../../../types/GameState";
-import { useGameDispatch, useGameState } from "../../../../../global/GameStateProvider";
+import { useGameDispatch, useGameState } from "../../../../../stateProviders/GameStateProvider";
 import { PlayerIcon } from "../../../../../global/PlayerIcon";
 import { useMemo, useState } from "react";
-import { EditPlayerModal } from "../../../../../global/globalModal/views/EditPlayerModal";
+import { EditPlayerModal } from "../../../../../global/GlobalModal/views/EditPlayerModal";
 import { iconMappings } from "../../../../../helpers/IconMappings";
 
 export const PlayerListItemInLobby:React.FC<{player:Player}> = ({player}) =>{

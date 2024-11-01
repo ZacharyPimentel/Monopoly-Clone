@@ -1,28 +1,17 @@
 import { ReactNode } from "react"
+import { Game } from "./controllers/Game"
+import { Player } from "./controllers/Player"
 
 export type GameState = {
     ws: signalR.HubConnection
     players:Player[]
-    currentPlayer: Player | null
+    currentSocketPlayer: {playerId:string,socketId:string} | null
     gameInProgress:boolean
     modalOpen:boolean
     modalContent:ReactNode | null
     theme:Theme
     boardRotation: 0 | 90 | 180 | 270
-}
-
-export type Player = {
-    id:string,
-    isActive:boolean
-    isCurrentGameParticipant:boolean
-    isMyTurn:boolean
-    nickName:string | null
-    positionOnBoard:number
-    gamePieceID:number
-    gamePieceURL:string
-    isConnected:boolean
-    money:number
-    isReady:boolean
+    gameState:Game | null
 }
 
 export type Theme = {

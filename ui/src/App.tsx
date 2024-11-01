@@ -1,17 +1,19 @@
 import { Route, Routes } from "react-router-dom"
-import { GameStateProvider } from "./global/GameStateProvider"
+import { GameStateProvider } from "./stateProviders/GameStateProvider"
 import { GamePage } from "./pages/GamePage/GamePage"
-import { GlobalModal } from "./global/globalModal/GlobalModal"
+import { GlobalModal } from "./global/GlobalModal/GlobalModal"
+import { GlobalStateProvider } from "./stateProviders/GlobalStateProvider"
 
 export const App = () => {
   return (
     <Routes>
       <Route path='/' element={
-        
-        <GameStateProvider>
-          <GlobalModal/>
-          <GamePage/>
-        </GameStateProvider>
+        <GlobalStateProvider>
+          <GameStateProvider>
+            <GlobalModal/>
+            <GamePage/>
+          </GameStateProvider>
+        </GlobalStateProvider>
       }>
       </Route>
     </Routes>

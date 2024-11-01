@@ -1,6 +1,6 @@
 export const iconMappings:IconMapping[] = [
     {id:1,url:'/assets/gamePieces/dustball.png'},
-    {id:2,url:'/assets/gamePieces/dustball.png'},
+    {id:2,url:'/assets/gamePieces/daisy.png'},
     {id:3,url:'/assets/gamePieces/dustball.png'},
     {id:4,url:'/assets/gamePieces/dustball.png'},
     {id:5,url:'/assets/gamePieces/dustball.png'},

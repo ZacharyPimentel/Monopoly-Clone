@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { useGameState } from "../../../../../../../global/GameStateProvider"
+import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
 import { railroadTilePositions } from "../../../../../../../helpers/tilePositions";
 
 export const Railroad:React.FC<{position:number}> = ({position}) => {

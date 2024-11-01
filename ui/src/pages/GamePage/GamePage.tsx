@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useGameState } from "../../global/GameStateProvider"
+import { useGameState } from "../../stateProviders/GameStateProvider"
 import { GameBoard } from "./components/gameBoard/GameBoard";
 import { Navbar } from "./components/navbar/Navbar";
-import { PlayerList } from "./components/playerList/PlayerList";
 
 export const GamePage = () => {
 

@@ -28,3 +28,12 @@
     scrollbar-width: thin;
     scrollbar-color:grey;
 }
+
+.text-input{
+    @apply border border-black p-[5px] rounded;
+}
+
+.required::after{
+    content:' *';
+    color:tomato;
+}

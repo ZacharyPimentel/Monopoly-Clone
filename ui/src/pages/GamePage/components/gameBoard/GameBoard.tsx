@@ -81,7 +81,9 @@ export const GameBoard = () => {
                     </div>
                 </div>
             </div>
-            <GameInformation />
+            <div className='h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll'>
+                <GameInformation />
+            </div>
         </div>
     )
 }

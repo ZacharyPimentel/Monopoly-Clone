@@ -1,0 +1,34 @@
+[
+    {
+        "Id": 1,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 2,
+        "IconUrl": "/assets/gamePieces/daisy.png"
+    },
+    {
+        "Id": 3,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 4,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 5,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 6,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 7,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    },
+    {
+        "Id": 8,
+        "IconUrl": "/assets/gamePieces/dustball.png"
+    }
+]
