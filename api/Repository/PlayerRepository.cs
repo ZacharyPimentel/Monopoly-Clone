@@ -6,14 +6,23 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
 
     public async Task<Player> GetByIdAsync(string id)
     {
-        var query = "SELECT * FROM PLAYER WHERE Id = @Id";
-        return await db.QuerySingleOrDefaultAsync<Player>(query, new {Id = id});
+        var query = @"
+            SELECT p.*, pi.iconurl
+            FROM Player p
+            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
+        ";
+        return await db.QuerySingleAsync<Player>(query, new { Id = id });
     }
 
     public async Task<IEnumerable<Player>> GetAllAsync()
     {
-        var query = "SELECT * FROM Player";
-        return await db.QueryAsync<Player>(query);
+        var query = @"
+            SELECT p.*, pi.iconurl
+            FROM Player p
+            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
+        ";
+        var players = await db.QueryAsync<Player>(query);
+        return players.AsList();
     }
     public async Task<IEnumerable<Player>> Search(PlayerSearchParams searchParams)
     {
@@ -65,5 +74,27 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
 
         var result = await db.ExecuteAsync(sql,parameters);
         return result > 0;
+    }
+
+    public async Task<Player> Create(PlayerCreateParams createparams)
+    {
+        var uuid = Guid.NewGuid().ToString();
+        
+        var addNewPlayer = @"
+            INSERT INTO Player (Id,PlayerName,IconId)
+            VALUES (@Id,@PlayerName, @IconId)
+        ";
+
+        var parameters = new 
+        {
+            Id = uuid,
+            createparams.PlayerName,
+            createparams.IconId,
+        };
+
+        await db.ExecuteAsync(addNewPlayer,parameters);
+
+        var newPlayer = await GetByIdAsync(uuid);
+        return newPlayer;
     }
 }

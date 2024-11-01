@@ -1,5 +1,6 @@
 import { BoardSpace } from "../types/controllers/BoardSpace";
 import { Player, PlayerWhereParams } from "../types/controllers/Player";
+import { PlayerIcon } from "../types/controllers/PlayerIcon";
 import { useHttp } from "./useHttp";
 
 export const useApi = () => {
@@ -14,6 +15,11 @@ export const useApi = () => {
         player:{
             search: async(whereParams:Partial<PlayerWhereParams>):Promise<Player[]> => {
                 return await request.get(`${apiUrl}/player`,whereParams)
+            }
+        },
+        playerIcon:{
+            getAll: async():Promise<PlayerIcon[]> => {
+                return await request.get(`${apiUrl}/playerIcon`);
             }
         }
     }

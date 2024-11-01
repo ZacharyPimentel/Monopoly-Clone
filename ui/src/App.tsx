@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom"
 import { GameStateProvider } from "./stateProviders/GameStateProvider"
 import { GamePage } from "./pages/GamePage/GamePage"
-import { GlobalModal } from "./global/GlobalModal/GlobalModal"
+import { GlobalModal } from "./globalComponents/GlobalModal/GlobalModal"
 import { GlobalStateProvider } from "./stateProviders/GlobalStateProvider"
 
 export const App = () => {

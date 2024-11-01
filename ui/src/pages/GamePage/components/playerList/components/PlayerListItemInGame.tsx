@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Player } from "../../../../../types/GameState";
 import { useGameState } from "../../../../../stateProviders/GameStateProvider";
-import { PlayerIcon } from "../../../../../global/PlayerIcon";
+import { PlayerIcon } from "../../../../../globalComponents/PlayerIcon";
 
 export const PlayerListItemInGame:React.FC<{player:Player}> = ({player}) =>{
 

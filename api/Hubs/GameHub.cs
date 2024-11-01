@@ -17,12 +17,12 @@ class GameHub(
         gameState.Players.Add(newPlayer);
         await Clients.Caller.SendAsync("UpdateCurrentPlayer", newPlayer);
 
-        var activePlayers = await playerRepository.Search(new PlayerSearchParams { Active = true});
+        var allPlayers = await playerRepository.GetAllAsync();
 
         var getGame = "SELECT * FROM GAME";
         var game = await db.QueryFirstOrDefaultAsync<Game>(getGame);
         await Clients.Caller.SendAsync("OnConnectGameState", game);
-        await Clients.All.SendAsync("UpdatePlayers", activePlayers);
+        await Clients.All.SendAsync("UpdatePlayers", allPlayers);
         return base.OnConnectedAsync();
     }
 
@@ -37,8 +37,9 @@ class GameHub(
             await playerRepository.Update(currentPlayer.PlayerId, new PlayerUpdateParams {Active = false});
         }
 
+        var allPlayers = await playerRepository.GetAllAsync();
         gameState.RemovePlayer(Context.ConnectionId);
-        await Clients.All.SendAsync("UpdatePlayers", gameState.Players);
+        await Clients.All.SendAsync("UpdatePlayers", allPlayers);
         return base.OnDisconnectedAsync(exception);
     }
 
@@ -46,10 +47,10 @@ class GameHub(
     {
         var currentPlayer = gameState.GetPlayer(Context.ConnectionId);
         currentPlayer.PlayerId = playerId;
-        await playerRepository.Update(currentPlayer.PlayerId, new PlayerUpdateParams {Active = true});
-        var activePlayers = await playerRepository.Search(new PlayerSearchParams { Active = true});
+        await playerRepository.Update(playerId, new PlayerUpdateParams {Active = true});
+        var allPlayers = await playerRepository.GetAllAsync();
 
-        await Clients.All.SendAsync("UpdatePlayers",activePlayers);
+        await Clients.All.SendAsync("UpdatePlayers",allPlayers);
         await Clients.Caller.SendAsync("UpdateCurrentPlayer", currentPlayer);
     }
 
@@ -57,36 +58,24 @@ class GameHub(
     {
         SocketPlayer currentPlayer = gameState.GetPlayer(Context.ConnectionId);
 
-        var uuid = Guid.NewGuid().ToString();
-        
-        var addNewPlayer = @"
-            INSERT INTO Player (Id,PlayerName,IconId)
-            VALUES (@Id,@PlayerName, @IconId)
-        ";
-
-        var parameters = new 
+        var newPlayer = await playerRepository.Create(new PlayerCreateParams
         {
-            Id = uuid,
             PlayerName = name,
-            IconId = iconId,
-        };
+            IconId = iconId
+        });
 
-        await db.ExecuteAsync(addNewPlayer,parameters);
+        currentPlayer.PlayerId = newPlayer.Id;
 
-        var newPlayer = await playerRepository.GetByIdAsync(uuid);
+        var allPlayers = await playerRepository.GetAllAsync();
 
-        currentPlayer.PlayerId = newPlayer!.Id;
-
-        var activePlayers = await playerRepository.Search(new PlayerSearchParams {Active = true});
-        
         await Clients.Caller.SendAsync("UpdateCurrentPlayer",currentPlayer);
-        await Clients.All.SendAsync("UpdatePlayers",activePlayers);
+        await Clients.All.SendAsync("UpdatePlayers",allPlayers);
     }
 
     public async Task UpdatePlayer(string playerId, PlayerUpdateParams playerUpdateParams)
     {
         await playerRepository.Update(playerId, playerUpdateParams);
-        var activePlayers = await playerRepository.Search(new PlayerSearchParams { Active = true});
-        await Clients.All.SendAsync("UpdatePlayers",activePlayers);
+        var allPlayers = await playerRepository.GetAllAsync();
+        await Clients.All.SendAsync("UpdatePlayers",allPlayers);
     }
 }

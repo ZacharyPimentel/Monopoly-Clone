@@ -6,7 +6,7 @@ export const useWebSocket = () => {
     
     return {
         player:{
-            update: async(playerId:string,updateParams:PlayerUpdateParams) => {
+            update: async(playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
                 gameState.ws.invoke("UpdatePlayer",playerId,updateParams)
             }
         }

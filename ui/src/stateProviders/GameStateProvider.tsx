@@ -2,9 +2,9 @@ import { createContext, useCallback, useContext,useEffect,useState } from 'react
 import { GameState } from '../types/GameState';
 import { RichUpTheme } from '../themes/RichUpTheme';
 import { Game } from '../types/controllers/Game';
-import { LoadingSpinner } from '../global/LoadingSpinner';
+import { LoadingSpinner } from '../globalComponents/LoadingSpinner';
 import { useGlobalDispatch } from './GlobalStateProvider';
-import { PlayerCreateModal } from '../global/GlobalModal/modalContent/PlayerCreateModal';
+import { PlayerCreateModal } from '../globalComponents/GlobalModal/modalContent/PlayerCreateModal';
 import { Player } from '../types/controllers/Player';
 
 const GameStateContext = createContext<any | null>(null);

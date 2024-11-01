@@ -5,7 +5,7 @@ import { PlayerListItemInGame } from "./components/PlayerListItemInGame";
 import { PlayerListItemInLobby } from "./components/PlayerListItemLobby";
 import { iconMappings } from "../../../../helpers/IconMappings";
 import { useGlobalDispatch } from "../../../../stateProviders/GlobalStateProvider";
-import { PlayerEditModal } from "../../../../global/GlobalModal/modalContent/PlayerEditModal";
+import { PlayerEditModal } from "../../../../globalComponents/GlobalModal/modalContent/PlayerEditModal";
 
 export const PlayerList = () => {
 
