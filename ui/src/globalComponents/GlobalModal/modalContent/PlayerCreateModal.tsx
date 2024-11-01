@@ -79,6 +79,7 @@ export const PlayerCreateModal = () => {
             <button
                 onClick={() => {
                     gameState.ws.invoke("AddNewPlayer",name,selectedIconId);
+                    globalDispatch({modalOpen:false,modalContent:null})
                 }}
                 disabled={name === '' || selectedIconId === 0} 
                 className='bg-totorodarkgreen text-white w-fit p-[10px] min-w-[100px] rounded mx-auto disabled:bg-[grey]'
