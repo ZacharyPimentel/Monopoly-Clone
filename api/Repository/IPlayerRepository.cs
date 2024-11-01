@@ -7,6 +7,7 @@ public class PlayerUpdateParams
     public bool? Active {get;set;}
     public string? PlayerName { get; set;}
     public int? IconId { get; set;}
+    public bool? IsReadyToPlay { get; set;}
 
 }
 

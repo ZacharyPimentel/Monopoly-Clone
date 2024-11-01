@@ -5,8 +5,13 @@ export const useWebSocket = () => {
     const gameState = useGameState();
     
     return {
+        gameState:{
+            setLastDiceRoll: (rolls:number[]) => {
+                gameState.ws.invoke("SetLastDiceRoll",rolls)
+            }
+        },
         player:{
-            update: async(playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
+            update: (playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
                 gameState.ws.invoke("UpdatePlayer",playerId,updateParams)
             }
         }

@@ -23,7 +23,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     theme: RichUpTheme,
     boardRotation:90,
     gameState:null,
-    currentSocketPlayer:null
+    currentSocketPlayer:null,
+    lastDiceRoll:null
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -49,6 +50,9 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
         console.log("UpdateCurrentPlayers: ", players)
           updateGameState({players})
       });
+      gameState.ws.on("UpdateLastDiceRoll", (lastDiceRoll:number[]) => {
+        updateGameState({lastDiceRoll})
+      })
   },[]);
 
   useEffect( () => {

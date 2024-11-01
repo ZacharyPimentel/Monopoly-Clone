@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import { PlayerList } from "../../../playerList/PlayerList"
 import { GameStatus } from "./components/GameStatus"
 import { Trades } from "./components/Trades"
 import { Rules } from "./components/Rules"
 import { OwnedProperties } from "./components/OwnedProperties"
+import { PlayerList } from "../playerList/PlayerList"
 
 export const GameInformation:React.FC<{}> = ({}) => {
 

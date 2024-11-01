@@ -2,13 +2,15 @@ import { useRef } from "react";
 import { GameInformation } from "./components/gameInformation/GameInformation"
 import { GameTile } from "./components/gameTile/GameTile";
 import TotoroFamily from './assets/totorofamily.svg?react';
+import { CenterBoardDisplay } from "./components/CenterBoardDisplay/CenterBoardDisplay";
 
 export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
     return (
         <div className='justify-center w-full h-full flex flex-wrap'>
-            <div ref={gameBoardRef} className='p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen'>
+            <div ref={gameBoardRef} className='p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
+                <CenterBoardDisplay/>
                 <div className='flex w-full'>
                     {/* Top Left Square */}
                     <div className='aspect-square min-w-[10%]'>

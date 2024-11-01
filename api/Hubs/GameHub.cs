@@ -23,6 +23,7 @@ class GameHub(
         var game = await db.QueryFirstOrDefaultAsync<Game>(getGame);
         await Clients.Caller.SendAsync("OnConnectGameState", game);
         await Clients.All.SendAsync("UpdatePlayers", allPlayers);
+        await Clients.All.SendAsync("UpdateLastDiceRoll",gameState.LastDiceRoll);
         return base.OnConnectedAsync();
     }
 
@@ -77,5 +78,11 @@ class GameHub(
         await playerRepository.Update(playerId, playerUpdateParams);
         var allPlayers = await playerRepository.GetAllAsync();
         await Clients.All.SendAsync("UpdatePlayers",allPlayers);
+    }
+
+    public async Task SetLastDiceRoll(int[] rolls)
+    {
+        gameState.SetLastDiceRoll(rolls);
+        await Clients.All.SendAsync("UpdateLastDiceRoll",rolls);
     }
 }

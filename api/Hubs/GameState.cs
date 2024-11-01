@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 class GameState<T> where T : Hub{
     public ConcurrentDictionary<string, HubCallerContext> All { get; } = new();
     public List<SocketPlayer> Players {get;set;} = [];
+    public int[]? LastDiceRoll = null;
     public bool GameInProgress = false;
 
     public SocketPlayer GetPlayer(string playerID){
@@ -20,5 +21,10 @@ class GameState<T> where T : Hub{
                 Players.RemoveAt(i);
             }
         }
+    }
+
+    public void SetLastDiceRoll(int[] rolls)
+    {
+        LastDiceRoll = rolls;
     }
 }

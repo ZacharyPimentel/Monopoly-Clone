@@ -11,7 +11,8 @@ export type GameState = {
     modalContent:ReactNode | null
     theme:Theme
     boardRotation: 0 | 90 | 180 | 270
-    gameState:Game | null
+    gameState:Game | null,
+    lastDiceRoll:number[] | null
 }
 
 export type Theme = {

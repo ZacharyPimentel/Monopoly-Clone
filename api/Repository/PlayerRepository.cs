@@ -56,13 +56,18 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.PlayerName = updateParams.PlayerName;
         }
+        if(updateParams.IsReadyToPlay.HasValue)
+        {
+            currentPlayer.IsReadyToPlay = updateParams.IsReadyToPlay.Value;
+        }
         
         var sql = @"
             UPDATE Player
             SET
                 Active = @Active,
                 IconId = @IconId,
-                PlayerName = @PlayerName
+                PlayerName = @PlayerName,
+                IsReadyToPlay = @IsReadyToPlay
             WHERE Id = @Id
         ";
 
@@ -70,7 +75,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.Id,
             currentPlayer.Active,
             currentPlayer.IconId,
-            currentPlayer.PlayerName
+            currentPlayer.PlayerName,
+            currentPlayer.IsReadyToPlay,
         };
 
         var result = await db.ExecuteAsync(sql,parameters);
