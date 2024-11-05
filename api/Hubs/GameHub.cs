@@ -7,7 +7,8 @@ namespace SignalRWebpack.Hubs;
 
 class GameHub(
     GameState<GameHub> gameState,IDbConnection db,
-    IPlayerRepository playerRepository
+    IPlayerRepository playerRepository,
+    IGameRepository gameRepository
 ) : Hub{
 
     public async override Task<Task> OnConnectedAsync()
@@ -21,7 +22,7 @@ class GameHub(
 
         var getGame = "SELECT * FROM GAME";
         var game = await db.QueryFirstOrDefaultAsync<Game>(getGame);
-        await Clients.Caller.SendAsync("OnConnectGameState", game);
+        await Clients.Caller.SendAsync("UpdateGameState", game);
         await Clients.All.SendAsync("UpdatePlayers", allPlayers);
         await Clients.All.SendAsync("UpdateLastDiceRoll",gameState.LastDiceRoll);
         return base.OnConnectedAsync();
@@ -77,7 +78,32 @@ class GameHub(
     {
         await playerRepository.Update(playerId, playerUpdateParams);
         var allPlayers = await playerRepository.GetAllAsync();
+        var activePlayers = allPlayers.Where(x => x.Active).ToList();
+        var currentGame = await gameRepository.GetByIdAsync(1);
+        
         await Clients.All.SendAsync("UpdatePlayers",allPlayers);
+        
+        //if at least two players are all ready and the game is in lobby, start the game
+        if (currentGame.InLobby && activePlayers.All(x => x.IsReadyToPlay == true) && activePlayers.Count >= 2)
+        {
+            await gameRepository.Update(currentGame.Id, new GameUpdateParams{
+                InLobby = false,
+                GameStarted = true
+            });
+            await playerRepository.UpdateMany(
+                new PlayerWhereParams {Active = true},
+                new PlayerUpdateParams {
+                    InCurrentGame = true,
+                    IsReadyToPlay = false
+                }
+            );
+
+            var updatedGame = await gameRepository.GetByIdAsync(1);
+            var updatedPlayers = await playerRepository.GetAllAsync();
+
+            await Clients.All.SendAsync("UpdateGameState",updatedGame);
+            await Clients.All.SendAsync("UpdatePlayers",updatedPlayers);
+        }
     }
 
     public async Task SetLastDiceRoll(int[] rolls)

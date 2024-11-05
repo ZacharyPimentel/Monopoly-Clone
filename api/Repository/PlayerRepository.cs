@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text;
 using Dapper;
 
 public class PlayerRepository(IDbConnection db): IPlayerRepository
@@ -25,7 +26,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         var players = await db.QueryAsync<Player>(query);
         return players.AsList();
     }
-    public async Task<IEnumerable<Player>> Search(PlayerSearchParams searchParams)
+    public async Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams)
     {
         var sql = "SELECT * FROM Player WHERE 1=1"; // 1=1 is a common pattern to simplify dynamic WHERE clauses
 
@@ -81,6 +82,53 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
 
         var result = await db.ExecuteAsync(sql,parameters);
         return result > 0;
+    }
+
+    public async Task<bool> UpdateMany(PlayerWhereParams whereParams, PlayerUpdateParams updateParams)
+    {
+        // Start building the SQL query
+        var sql = new StringBuilder("UPDATE Player SET ");
+
+        // Dynamically build the SET clause from the updateParams
+        var updateClauses = new List<string>();
+        foreach (var property in updateParams.GetType().GetProperties())
+        {
+            if(property.GetValue(updateParams)  != null){
+                updateClauses.Add($"{property.Name} = @{property.Name}");
+            }
+        }
+        sql.Append(string.Join(", ", updateClauses));
+
+        // Build the WHERE clause from whereParams
+        var whereClauses = new List<string>();
+        foreach (var property in whereParams.GetType().GetProperties())
+        {
+            whereClauses.Add($"{property.Name} = @Where{property.Name}");
+        }
+        sql.Append(" WHERE ");
+        sql.Append(string.Join(" AND ", whereClauses));
+
+        // Combine the update and where parameters into a single anonymous object
+        var parameters = new DynamicParameters();
+
+        // Add the update parameters
+        foreach (var property in updateParams.GetType().GetProperties())
+        {
+            if(property.GetValue(updateParams)  != null)
+            {
+                parameters.Add($"@{property.Name}", property.GetValue(updateParams));
+            }
+        }
+
+        // Add the where parameters with a prefix to avoid conflicts
+        foreach (var property in whereParams.GetType().GetProperties())
+        {
+            parameters.Add($"@Where{property.Name}", property.GetValue(whereParams));
+        }
+
+        // Execute the update
+        var result = await db.ExecuteAsync(sql.ToString(), parameters);
+        return result > 0; // Returns the number of rows affected
     }
 
     public async Task<Player> Create(PlayerCreateParams createparams)

@@ -37,7 +37,7 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
   useEffect( () => {
       if(!gameState.ws)return
 
-      gameState.ws.on("OnConnectGameState", (gameState:Game) => {
+      gameState.ws.on("UpdateGameState", (gameState:Game) => {
           console.log('gameState',gameState)
           updateGameState({gameState})
       });

@@ -5,7 +5,6 @@ class GameState<T> where T : Hub{
     public ConcurrentDictionary<string, HubCallerContext> All { get; } = new();
     public List<SocketPlayer> Players {get;set;} = [];
     public int[]? LastDiceRoll = null;
-    public bool GameInProgress = false;
 
     public SocketPlayer GetPlayer(string playerID){
         for(int i=0 ; i<Players.Count ; i++){

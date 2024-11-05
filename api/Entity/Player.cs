@@ -7,6 +7,7 @@ public class Player
     public int Money { get; set;}
     public int CurrentBoardSpace { get; set;}
     public bool IsReadyToPlay { get; set;} = false;
+    public bool InCurrentGame { get; set;} = false;
     
     //Joined properties from PlayerIcon
     public required string IconUrl { get; set;}
