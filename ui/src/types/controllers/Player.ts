@@ -5,6 +5,7 @@ export type Player = {
     playerName:string
     isReadyToPlay:boolean
     active:boolean
+    money:number
 }
 
 export type PlayerWhereParams = {

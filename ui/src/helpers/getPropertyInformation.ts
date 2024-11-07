@@ -1,4 +1,4 @@
-import { Theme } from "../types/GameState";
+import { Theme } from "../types/stateProviders/GameState";
 import { setTilePositions } from "./tilePositions";
 
 export const getPropertyInformation = (theme:Theme,position:number) => {

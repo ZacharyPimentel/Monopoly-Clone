@@ -9,6 +9,7 @@ public class PlayerUpdateParams
     public int? IconId { get; set;}
     public bool? IsReadyToPlay { get; set;}
     public bool? InCurrentGame { get; set;}
+    public int? Money { get; set;}
 
 }
 

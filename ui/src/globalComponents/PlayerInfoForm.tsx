@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGameDispatch, useGameState } from "../stateProviders/GameStateProvider";
 import { iconMappings } from "../helpers/IconMappings";
-import { GameState } from "../types/GameState";
+import { GameState } from "../types/stateProviders/GameState";
 
 export const PlayerInfoForm = () => {
     const gameState = useGameState();

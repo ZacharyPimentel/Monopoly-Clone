@@ -1,6 +1,6 @@
 import { Player } from "../../../../../../../types/controllers/Player"
 
-export const PlayerListItem:React.FC<{player:Player}> = ({player}) => {
+export const PlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
     return (
         <li style={{opacity:player.active ? '1' : '0.5'}} key={player.id} className='flex flex-col gap-[20px]'>
             <div className='flex items-center gap-[20px]'>

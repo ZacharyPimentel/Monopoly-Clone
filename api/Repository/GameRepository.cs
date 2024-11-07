@@ -25,13 +25,18 @@ public class GameRepository(IDbConnection db) : IGameRepository
         {
             currentGame.GameOver = updateParams.GameOver.Value;
         }
+        if(updateParams.StartingMoney.HasValue)
+        {
+            currentGame.StartingMoney = updateParams.StartingMoney.Value;
+        }
         
         var sql = @"
             UPDATE Game
             SET
                 InLobby = @Inlobby,
                 GameStarted = @GameStarted,
-                GameOver = @GameOver
+                GameOver = @GameOver,
+                StartingMoney = @StartingMoney
             WHERE Id = @Id
         ";
 
@@ -40,6 +45,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
             currentGame.InLobby,
             currentGame.GameStarted,
             currentGame.GameOver,
+            currentGame.StartingMoney,
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

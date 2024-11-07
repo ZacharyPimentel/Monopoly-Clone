@@ -80,7 +80,8 @@ public class DatabaseInitializer
                     Id Integer PRIMARY KEY,
                     InLobby BOOLEAN DEFAULT true,
                     GameOver BOOLEAN DEFAULT false,
-                    GameStarted BOOLEAN DEFAULT false
+                    GameStarted BOOLEAN DEFAULT false,
+                    StartingMoney Integer DEFAULT 1500
                 );
                 INSERT INTO GAME (ID) values(1);
 

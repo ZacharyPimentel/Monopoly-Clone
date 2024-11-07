@@ -1,13 +1,11 @@
-import { PlayerEditModal } from "../../../../../../globalComponents/GlobalModal/modalContent/PlayerEditModal";
 import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
-import { useGlobalDispatch } from "../../../../../../stateProviders/GlobalStateProvider";
-import { CurrentPlayerListItem } from "./components/CurrentPlayerListItem";
-import { PlayerListItem } from "./components/PlayerListItem";
+import { CurrentPlayerInLobbyListItem } from "./components/CurrentPlayerInLobbyListItem";
+import { PlayerInGameListitem } from "./components/PlayerInGameListitem";
+import { PlayerInLobbyListItem } from "./components/PlayerInLobbyListItem";
 
 export const PlayerList = () => {
 
     const gameState = useGameState();
-    const globalDispatch = useGlobalDispatch();
     
     return (
         <div className='flex flex-col gap-[10px] p-[10px] bg-totorogreen'>
@@ -18,13 +16,16 @@ export const PlayerList = () => {
                     {gameState.players.map( (player) => {
                         const isCurrentPlayer = player.id === gameState.currentSocketPlayer?.playerId;
                         return (
-                            isCurrentPlayer
-                                ? <CurrentPlayerListItem key={player.id} player={player}/>
-                                : <PlayerListItem key={player.id} player={player}/>
+                            gameState.gameState?.gameStarted 
+                                ? <PlayerInGameListitem player={player} key={player.id}/>
+                                : isCurrentPlayer
+                                    ? <CurrentPlayerInLobbyListItem key={player.id} player={player}/>
+                                    : <PlayerInLobbyListItem key={player.id} player={player}/>
                         )
                     })}
                 </ul>
             )}
+
             {/* Invalid players have just joined and don't have any info set */}
             {gameState.players.length === 0 && (
                 <p className='text-center'>There are no players just yet.</p>

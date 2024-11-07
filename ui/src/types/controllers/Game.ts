@@ -3,4 +3,5 @@ export type Game = {
     inLobby:boolean
     gameOver:boolean
     gameStarted:boolean
+    startingMoney:number
 }

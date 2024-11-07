@@ -94,7 +94,8 @@ class GameHub(
                 new PlayerWhereParams {Active = true},
                 new PlayerUpdateParams {
                     InCurrentGame = true,
-                    IsReadyToPlay = false
+                    IsReadyToPlay = false,
+                    Money = currentGame.StartingMoney
                 }
             );
 
@@ -104,6 +105,12 @@ class GameHub(
             await Clients.All.SendAsync("UpdateGameState",updatedGame);
             await Clients.All.SendAsync("UpdatePlayers",updatedPlayers);
         }
+    }
+    public async Task UpdateRules(int gameId, GameUpdateParams gameUpdateParams)
+    {
+        await gameRepository.Update(gameId,gameUpdateParams);
+        var updatedGame = await gameRepository.GetByIdAsync(gameId);
+        await Clients.All.SendAsync("UpdateGameState",updatedGame);
     }
 
     public async Task SetLastDiceRoll(int[] rolls)

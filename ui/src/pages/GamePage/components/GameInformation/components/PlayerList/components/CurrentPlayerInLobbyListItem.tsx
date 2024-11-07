@@ -3,7 +3,7 @@ import { useWebSocket } from "../../../../../../../hooks/useWebSocket";
 import { useGlobalDispatch } from "../../../../../../../stateProviders/GlobalStateProvider"
 import { Player } from "../../../../../../../types/controllers/Player"
 
-export const CurrentPlayerListItem:React.FC<{player:Player}> = ({player}) => {
+export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
 
     const globalDispatch = useGlobalDispatch();
     const webSocket = useWebSocket();

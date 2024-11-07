@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext,useEffect,useState } from 'react';
-import { GameState } from '../types/GameState';
+import { GameState } from '../types/stateProviders/GameState';
 import { RichUpTheme } from '../themes/RichUpTheme';
 import { Game } from '../types/controllers/Game';
 import { LoadingSpinner } from '../globalComponents/LoadingSpinner';
@@ -24,7 +24,7 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     boardRotation:90,
     gameState:null,
     currentSocketPlayer:null,
-    lastDiceRoll:null
+    lastDiceRoll:null,
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -67,6 +67,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
   if(!gameState || !gameState.currentSocketPlayer){
     return <div className='flex justify-center items-center h-full w-full'><LoadingSpinner/></div>
   }
+
+  
 
   return (
     <GameStateContext.Provider value={gameState}>
