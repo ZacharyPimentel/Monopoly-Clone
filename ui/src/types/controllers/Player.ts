@@ -5,7 +5,9 @@ export type Player = {
     playerName:string
     isReadyToPlay:boolean
     active:boolean
+    boardSpaceId:number
     money:number
+    rollCount:number
 }
 
 export type PlayerWhereParams = {
@@ -16,4 +18,6 @@ export type PlayerUpdateParams = {
     iconId:number,
     playerName:string,
     isReadyToPlay:boolean
+    boardSpaceId:number
+    rollCount:number
 }

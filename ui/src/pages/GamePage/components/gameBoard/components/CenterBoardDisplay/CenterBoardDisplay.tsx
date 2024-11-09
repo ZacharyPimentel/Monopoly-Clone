@@ -1,9 +1,27 @@
-import { DiceRoller } from "../DiceRoller/DiceRoller"
+import { useMemo } from "react";
+import { useGameState } from "../../../../../../stateProviders/GameStateProvider"
+import { CurrentTurn } from "./CurrentTurn/CurrentTurn";
+import { NotCurrentTurn } from "./NotCurrentTurn/NotCurrentTurn";
 
 export const CenterBoardDisplay = () => {
+
+    const gameState = useGameState();
+
+    if(gameState.gameState?.inLobby){
+        return (
+            <div className='rounded flex justify-center items-center w-full h-full'>
+                <p className='text-white font-bold'>Waiting to start the game until all players are ready.</p>
+            </div>
+        )
+    }
+
     return (
-        <div className='bg-[rgba(255,255,255,1)] rounded p-[5px] absolute z-[1] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[25%] h-[25%]'>
-            <DiceRoller/>
+        <div className='rounded flex justify-center items-center w-full h-full'>
+            {gameState.currentSocketPlayer?.playerId === gameState.gameState?.currentPlayerTurn
+                ? <CurrentTurn/>
+                : <NotCurrentTurn/>
+            }
+            
         </div>
     )
 }

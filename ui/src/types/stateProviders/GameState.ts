@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { Game } from "../controllers/Game"
 import { Player } from "../controllers/Player"
+import { BoardSpace } from "../controllers/BoardSpace"
 
 export type GameState = {
     ws: signalR.HubConnection
@@ -12,6 +13,8 @@ export type GameState = {
     boardRotation: 0 | 90 | 180 | 270
     gameState:Game | null,
     lastDiceRoll:number[] | null
+    rolling:boolean
+    boardSpaces:BoardSpace[]
 }
 
 export type Theme = {

@@ -22,6 +22,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             SELECT p.*, pi.iconurl
             FROM Player p
             LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
+            ORDER BY Id
         ";
         var players = await db.QueryAsync<Player>(query);
         return players.AsList();
@@ -37,6 +38,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             sql += " AND Active = @IsActive";
             parameters.Add("IsActive", searchParams.Active.Value);
         }
+        
+        sql += " ORDER BY Id";
 
         var players = await db.QueryAsync<Player>(sql, parameters);
         return players.AsList();
@@ -61,6 +64,14 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.IsReadyToPlay = updateParams.IsReadyToPlay.Value;
         }
+        if(updateParams.BoardSpaceId.HasValue)
+        {
+            currentPlayer.BoardSpaceId = updateParams.BoardSpaceId.Value;
+        }
+        if(updateParams.RollCount.HasValue)
+        {
+            currentPlayer.RollCount = updateParams.RollCount.Value;
+        }
         
         var sql = @"
             UPDATE Player
@@ -68,7 +79,9 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
                 Active = @Active,
                 IconId = @IconId,
                 PlayerName = @PlayerName,
-                IsReadyToPlay = @IsReadyToPlay
+                IsReadyToPlay = @IsReadyToPlay,
+                BoardSpaceId = @BoardSpaceId,
+                RollCount = @RollCount
             WHERE Id = @Id
         ";
 
@@ -78,6 +91,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.IconId,
             currentPlayer.PlayerName,
             currentPlayer.IsReadyToPlay,
+            currentPlayer.BoardSpaceId,
+            currentPlayer.RollCount
         };
 
         var result = await db.ExecuteAsync(sql,parameters);
@@ -99,15 +114,22 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         }
         sql.Append(string.Join(", ", updateClauses));
 
-        // Build the WHERE clause from whereParams
+        // Build the WHERE clause from whereParams if it exists
         var whereClauses = new List<string>();
         foreach (var property in whereParams.GetType().GetProperties())
         {
-            whereClauses.Add($"{property.Name} = @Where{property.Name}");
+            if (property.GetValue(whereParams) != null)
+            {
+                whereClauses.Add($"{property.Name} = @Where{property.Name}");
+            }
         }
-        sql.Append(" WHERE ");
-        sql.Append(string.Join(" AND ", whereClauses));
 
+        if(whereClauses.Count > 0)
+        {
+            sql.Append(" WHERE ");
+            sql.Append(string.Join(" AND ", whereClauses));
+        }
+        
         // Combine the update and where parameters into a single anonymous object
         var parameters = new DynamicParameters();
 
@@ -125,6 +147,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             parameters.Add($"@Where{property.Name}", property.GetValue(whereParams));
         }
+
+        Console.WriteLine(sql);
 
         // Execute the update
         var result = await db.ExecuteAsync(sql.ToString(), parameters);

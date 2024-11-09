@@ -6,6 +6,7 @@ import { LoadingSpinner } from '../globalComponents/LoadingSpinner';
 import { useGlobalDispatch } from './GlobalStateProvider';
 import { PlayerCreateModal } from '../globalComponents/GlobalModal/modalContent/PlayerCreateModal';
 import { Player } from '../types/controllers/Player';
+import { useApi } from '../hooks/useApi';
 
 const GameStateContext = createContext<any | null>(null);
 const GameDispatchContext = createContext<(newState:Partial<GameState>) => void>(() => {});
@@ -13,6 +14,7 @@ const GameDispatchContext = createContext<(newState:Partial<GameState>) => void>
 export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
 
   const globalDispatch = useGlobalDispatch();
+  const api = useApi()
 
   const initialGameState:GameState = {
     //@ts-ignore
@@ -25,6 +27,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     gameState:null,
     currentSocketPlayer:null,
     lastDiceRoll:null,
+    rolling:false,
+    boardSpaces:[]
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -63,12 +67,17 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     }
   },[gameState.currentSocketPlayer])
 
+  useEffect( () => {
+    (async () => {
+      const boardSpaces = await api.boardSpace.getAll();
+      updateGameState({boardSpaces})
+    })()
+  },[])
+
   //only let people through once they've connected to the socket
-  if(!gameState || !gameState.currentSocketPlayer){
+  if(!gameState || !gameState.currentSocketPlayer || !gameState.boardSpaces){
     return <div className='flex justify-center items-center h-full w-full'><LoadingSpinner/></div>
   }
-
-  
 
   return (
     <GameStateContext.Provider value={gameState}>

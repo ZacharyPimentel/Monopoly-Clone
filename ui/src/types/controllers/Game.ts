@@ -4,4 +4,5 @@ export type Game = {
     gameOver:boolean
     gameStarted:boolean
     startingMoney:number
+    currentPlayerTurn:string | null
 }

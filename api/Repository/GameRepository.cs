@@ -3,10 +3,23 @@ using Dapper;
 
 public class GameRepository(IDbConnection db) : IGameRepository
 {
-    public async Task<Game> GetByIdAsync( int id)
+    public async Task<Game> GetByIdAsync( int gameId)
     {
-        var sql = "SELECT * FROM GAME WHERE Id = @Id";
-        var game = await db.QuerySingleAsync<Game>(sql,id);
+        //get the current game, join the current player turn from TurnOrder
+        var sql = @"
+            WITH FilteredTurnOrder AS (
+                SELECT t.PlayerId, t.GameId, t.PlayOrder
+                FROM TURNORDER AS t
+                WHERE HasPlayed = false
+                ORDER BY PlayOrder
+                LIMIT 1
+            )
+            SELECT g.*, f.PlayerId AS CurrentPlayerTurn
+            FROM Game as g
+            LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
+                WHERE g.Id = @Id
+        ";
+        var game = await db.QuerySingleAsync<Game>(sql,gameId);
         return game;
     }
     public async Task<bool> Update(int id,GameUpdateParams updateParams)

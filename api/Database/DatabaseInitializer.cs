@@ -90,17 +90,6 @@ public class DatabaseInitializer
                     IconUrl text
                 );
 
-                CREATE TABLE IF NOT EXISTS PLAYER(
-                    Id TEXT PRIMARY KEY,
-                    PlayerName TEXT,
-                    Active BOOLEAN DEFAULT true,
-                    Money INTEGER,
-                    CurrentBoardSpace Integer,
-                    IconId Integer NULL CHECK (IconId BETWEEN 1 AND 8),
-                    InCurrentGame BOOLEAN DEFAULT false,
-                    IsReadyToPlay BOOLEAN DEFAULT false
-                );
-
                 CREATE TABLE IF NOT EXISTS BOARDSPACECATEGORY(
                     Id INTEGER PRIMARY KEY,
                     CategoryName Text
@@ -110,6 +99,19 @@ public class DatabaseInitializer
                     Id INTEGER PRIMARY KEY,
                     BoardSpaceCategoryId INTEGER,
                     FOREIGN KEY (BoardSpaceCategoryId) REFERENCES BoardSpaceCategory(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS PLAYER(
+                    Id TEXT PRIMARY KEY,
+                    PlayerName TEXT,
+                    Active BOOLEAN DEFAULT true,
+                    Money INTEGER,
+                    BoardSpaceId Integer DEFAULT 1,
+                    FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
+                    IconId Integer NULL CHECK (IconId BETWEEN 1 AND 8),
+                    InCurrentGame BOOLEAN DEFAULT false,
+                    IsReadyToPlay BOOLEAN DEFAULT false,
+                    RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -131,6 +133,16 @@ public class DatabaseInitializer
                     FOREIGN KEY (PropertyId) REFERENCES Property(Id),
                     UpgradeNumber INTEGER CHECK (UpgradeNumber BETWEEN 0 AND 5),
                     RENT INTEGER
+                );
+
+                CREATE TABLE IF NOT EXISTS TURNORDER(
+                    Id INTEGER PRIMARY KEY,
+                    PlayerId text,
+                    FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
+                    GameId INTEGER,
+                    FOREIGN KEY (GameId) REFERENCES GAME(Id),
+                    PlayOrder INTEGER,
+                    HasPlayed BOOLEAN DEFAULT false
                 );
 
             ";

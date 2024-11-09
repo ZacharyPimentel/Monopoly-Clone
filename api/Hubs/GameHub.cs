@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 namespace SignalRWebpack.Hubs;
 
 class GameHub(
-    GameState<GameHub> gameState,IDbConnection db,
+    GameState<GameHub> gameState,
+    IDbConnection db,
     IPlayerRepository playerRepository,
     IGameRepository gameRepository
 ) : Hub{
@@ -20,8 +21,7 @@ class GameHub(
 
         var allPlayers = await playerRepository.GetAllAsync();
 
-        var getGame = "SELECT * FROM GAME";
-        var game = await db.QueryFirstOrDefaultAsync<Game>(getGame);
+        var game = await gameRepository.GetByIdAsync(1);
         await Clients.Caller.SendAsync("UpdateGameState", game);
         await Clients.All.SendAsync("UpdatePlayers", allPlayers);
         await Clients.All.SendAsync("UpdateLastDiceRoll",gameState.LastDiceRoll);
@@ -63,7 +63,7 @@ class GameHub(
         var newPlayer = await playerRepository.Create(new PlayerCreateParams
         {
             PlayerName = name,
-            IconId = iconId
+            IconId = iconId,
         });
 
         currentPlayer.PlayerId = newPlayer.Id;
@@ -99,6 +99,27 @@ class GameHub(
                 }
             );
 
+            //randomize and set the turn order
+            Random random = new();
+            var shuffledActivePlayers = activePlayers.OrderBy(x => random.Next()).ToArray();
+            foreach(var (player,index) in shuffledActivePlayers.Select( (value,i) => (value,i)))
+            {
+                var addTurnOrder = @"
+                    INSERT INTO TurnOrder (Id,PlayerId,GameId,PlayOrder)
+                    VALUES (@Id,@PlayerId, @GameId,@PlayOrder)
+                ";
+
+                var parameters = new TurnOrder
+                {
+                    Id = index + 1,
+                    PlayerId = player.Id,
+                    GameId = currentGame.Id,
+                    PlayOrder = index + 1
+                };
+
+                await db.ExecuteAsync(addTurnOrder,parameters);
+            }
+
             var updatedGame = await gameRepository.GetByIdAsync(1);
             var updatedPlayers = await playerRepository.GetAllAsync();
 
@@ -117,5 +138,40 @@ class GameHub(
     {
         gameState.SetLastDiceRoll(rolls);
         await Clients.All.SendAsync("UpdateLastDiceRoll",rolls);
+    }
+    public async Task EndTurn(int gameId)
+    {
+        SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+        Game currentGame = await gameRepository.GetByIdAsync(gameId);
+
+        var markPlayerAsPlayed = @"
+            UPDATE TurnOrder
+            SET 
+                HasPlayed = TRUE
+            WHERE
+                GameId = @GameId AND PlayerId = @PlayerId
+        ";
+        var parameters = new
+        {
+            currentSocketPlayer.PlayerId,
+            GameId = currentGame.Id,
+        };
+        await db.ExecuteAsync(markPlayerAsPlayed,parameters);
+
+        //check if everyone has taken their turn, reset if so
+        var notPlayedCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE");
+        if(notPlayedCount  == 0)
+        {
+            await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
+            await playerRepository.UpdateMany(
+                new PlayerWhereParams {InCurrentGame = true},
+                new PlayerUpdateParams { RollCount = 0}
+            );
+        }
+
+        var allPlayers = await playerRepository.GetAllAsync();
+        var updatedGame = await gameRepository.GetByIdAsync(gameId);
+        await Clients.All.SendAsync("UpdatePlayers",allPlayers);
+        await Clients.All.SendAsync("UpdateGameState",updatedGame);
     }
 }

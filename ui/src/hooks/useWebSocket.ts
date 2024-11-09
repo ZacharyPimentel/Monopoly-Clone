@@ -6,12 +6,16 @@ export const useWebSocket = () => {
     const gameState = useGameState();
     
     return {
+        //game events not tied to a table
         gameState:{
             setLastDiceRoll: (rolls:number[]) => {
                 gameState.ws.invoke("SetLastDiceRoll",rolls)
             },
             updateRules: (rule:Partial<Game>) => {
                 gameState.ws.invoke("UpdateRules",gameState.gameState?.id,rule)
+            },
+            endTurn: (gameId:number) => {
+                gameState.ws.invoke("endTurn",gameId);
             }
         },
         player:{

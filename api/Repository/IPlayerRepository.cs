@@ -1,6 +1,7 @@
 public class PlayerWhereParams
 {
     public bool? Active { get; set; }
+    public bool? InCurrentGame { get; set; }
 }
 public class PlayerUpdateParams
 {
@@ -10,6 +11,8 @@ public class PlayerUpdateParams
     public bool? IsReadyToPlay { get; set;}
     public bool? InCurrentGame { get; set;}
     public int? Money { get; set;}
+    public int? BoardSpaceId { get; set;}
+    public int? RollCount { get; set;}
 
 }
 
