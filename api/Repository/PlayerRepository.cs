@@ -72,6 +72,10 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.RollCount = updateParams.RollCount.Value;
         }
+        if(updateParams.Money.HasValue)
+        {
+            currentPlayer.Money = updateParams.Money.Value;
+        }
         
         var sql = @"
             UPDATE Player
@@ -81,7 +85,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
                 PlayerName = @PlayerName,
                 IsReadyToPlay = @IsReadyToPlay,
                 BoardSpaceId = @BoardSpaceId,
-                RollCount = @RollCount
+                RollCount = @RollCount,
+                Money = @Money
             WHERE Id = @Id
         ";
 
@@ -92,7 +97,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.PlayerName,
             currentPlayer.IsReadyToPlay,
             currentPlayer.BoardSpaceId,
-            currentPlayer.RollCount
+            currentPlayer.RollCount,
+            currentPlayer.Money
         };
 
         var result = await db.ExecuteAsync(sql,parameters);
