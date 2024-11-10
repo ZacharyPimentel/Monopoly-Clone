@@ -33,7 +33,7 @@ public class DatabaseInitializer
         var properties = JsonConvert.DeserializeObject<List<Property>>(propertyJsonData);
         foreach(var property in properties)
         {
-            db.Execute("INSERT INTO PROPERTY (ID, PurchasePrice,MortgageValue,BoardSpaceId,UpgradeCost,SetId) VALUES (@Id, @PurchasePrice,@MortgageValue,@BoardSpaceId,@UpgradeCost,@SetId)",property);
+            db.Execute("INSERT INTO PROPERTY (ID, PurchasePrice,MortgageValue,BoardSpaceId,UpgradeCost,SetNumber) VALUES (@Id, @PurchasePrice,@MortgageValue,@BoardSpaceId,@UpgradeCost,@SetNumber)",property);
         }
 
         //property rents
@@ -118,7 +118,7 @@ public class DatabaseInitializer
                     Id INTEGER PRIMARY KEY,
                     PlayerId TEXT NULL,
                     FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
-                    SetId INTEGER,
+                    SetNumber INTEGER,
                     PurchasePrice INTEGER,
                     MortgageValue INTEGER,
                     BoardSpaceId INTEGER,

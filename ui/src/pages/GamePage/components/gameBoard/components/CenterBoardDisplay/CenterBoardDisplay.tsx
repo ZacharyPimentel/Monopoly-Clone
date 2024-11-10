@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useGameState } from "../../../../../../stateProviders/GameStateProvider"
 import { CurrentTurn } from "./CurrentTurn/CurrentTurn";
 import { NotCurrentTurn } from "./NotCurrentTurn/NotCurrentTurn";
@@ -21,7 +20,6 @@ export const CenterBoardDisplay = () => {
                 ? <CurrentTurn/>
                 : <NotCurrentTurn/>
             }
-            
         </div>
     )
 }

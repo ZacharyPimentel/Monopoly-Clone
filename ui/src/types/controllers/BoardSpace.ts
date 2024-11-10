@@ -1,4 +1,7 @@
+import { Property } from "./Property"
+
 export type BoardSpace = {
     id:string
-    boardspacecategoryid:number
+    boardSpaceCategoryId:number,
+    property: Property | null
 }

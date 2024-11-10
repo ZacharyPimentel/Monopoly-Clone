@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
 import { DiceRoller } from "./DiceRoller/DiceRoller"
 import { RollButton } from "./RollButton"
@@ -13,7 +13,6 @@ export const CurrentTurn = () => {
         let allowed = true;
         //if player has rolled doubles 3 times, go to jail and no more rolling
         if(currentPlayer.rollCount > 3){
-            console.log('16',false)
             allowed = false;
         }
         if(!gameState.lastDiceRoll){
@@ -25,6 +24,15 @@ export const CurrentTurn = () => {
         }
         return allowed
     },[currentPlayer])
+
+    useEffect( () => {
+        //if null or 0
+        if(!currentPlayer?.rollCount)return
+
+        
+    },[])
+
+    console.log(gameState.boardSpaces[currentPlayer!.boardSpaceId])
     
     return (
         <div className='flex flex-col gap-[50px]'>

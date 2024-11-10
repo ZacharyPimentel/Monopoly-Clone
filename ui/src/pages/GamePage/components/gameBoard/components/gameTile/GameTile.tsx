@@ -17,7 +17,7 @@ export const GameTile:React.FC<{position:number}> = ({position}) => {
     const gameState = useGameState();
     const space = gameState.boardSpaces[position - 1];
 
-    switch (space?.boardspacecategoryid) {
+    switch (space.boardSpaceCategoryId) {
         case BoardSpaceCategory.Go:
             gameTileComponent = <StartTile/>
             break;

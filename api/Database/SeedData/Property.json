@@ -1,7 +1,7 @@
 [
     {
         "Id":1,
-        "SetId":1,
+        "SetNumber":1,
         "BoardSpaceId":2,
         "PurchasePrice":60,
         "MortgageValue":50,
@@ -9,10 +9,190 @@
     },
     {
         "Id":2,
-        "setId":1,
+        "setNumber":1,
         "BoardSpaceId":4,
         "PurchasePrice":60,
         "MortgageValue":50,
         "UpgradeCost": 50
+    },
+
+
+
+    {
+        "Id":3,
+        "setNumber":2,
+        "BoardSpaceId":7,
+        "PurchasePrice":100,
+        "MortgageValue":50,
+        "UpgradeCost": 50
+    },
+    {
+        "Id":4,
+        "setNumber":2,
+        "BoardSpaceId":9,
+        "PurchasePrice":100,
+        "MortgageValue":50,
+        "UpgradeCost": 50
+    },
+    {
+        "Id":5,
+        "setNumber":2,
+        "BoardSpaceId":10,
+        "PurchasePrice":120,
+        "MortgageValue":50,
+        "UpgradeCost": 50
+    },
+
+
+
+    {
+        "Id":6,
+        "setNumber":3,
+        "BoardSpaceId":12,
+        "PurchasePrice":140,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+    {
+        "Id":7,
+        "setNumber":3,
+        "BoardSpaceId":14,
+        "PurchasePrice":140,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+    {
+        "Id":8,
+        "setNumber":3,
+        "BoardSpaceId":15,
+        "PurchasePrice":160,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+
+
+    {
+        "Id":9,
+        "setNumber":4,
+        "BoardSpaceId":17,
+        "PurchasePrice":180,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+    {
+        "Id":10,
+        "setNumber":4,
+        "BoardSpaceId":19,
+        "PurchasePrice":180,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+    {
+        "Id":11,
+        "setNumber":4,
+        "BoardSpaceId":20,
+        "PurchasePrice":200,
+        "MortgageValue":100,
+        "UpgradeCost": 100
+    },
+
+
+
+    {
+        "Id":12,
+        "setNumber":5,
+        "BoardSpaceId":22,
+        "PurchasePrice":220,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+    {
+        "Id":13,
+        "setNumber":5,
+        "BoardSpaceId":24,
+        "PurchasePrice":220,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+    {
+        "Id":14,
+        "setNumber":5,
+        "BoardSpaceId":25,
+        "PurchasePrice":240,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+
+
+
+    {
+        "Id":15,
+        "setNumber":6,
+        "BoardSpaceId":27,
+        "PurchasePrice":260,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+    {
+        "Id":16,
+        "setNumber":6,
+        "BoardSpaceId":28,
+        "PurchasePrice":260,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+    {
+        "Id":17,
+        "setNumber":6,
+        "BoardSpaceId":30,
+        "PurchasePrice":280,
+        "MortgageValue":150,
+        "UpgradeCost": 150
+    },
+
+
+
+    {
+        "Id":18,
+        "setNumber":7,
+        "BoardSpaceId":32,
+        "PurchasePrice":300,
+        "MortgageValue":200,
+        "UpgradeCost": 200
+    },
+    {
+        "Id":19,
+        "setNumber":7,
+        "BoardSpaceId":33,
+        "PurchasePrice":300,
+        "MortgageValue":200,
+        "UpgradeCost": 200
+    },
+    {
+        "Id":20,
+        "setNumber":7,
+        "BoardSpaceId":35,
+        "PurchasePrice":320,
+        "MortgageValue":200,
+        "UpgradeCost": 200
+    },
+
+
+
+    {
+        "Id":21,
+        "setNumber":8,
+        "BoardSpaceId":38,
+        "PurchasePrice":300,
+        "MortgageValue":200,
+        "UpgradeCost": 200
+    },
+    {
+        "Id":22,
+        "setNumber":8,
+        "BoardSpaceId":40,
+        "PurchasePrice":320,
+        "MortgageValue":200,
+        "UpgradeCost": 200
     }
 ]
