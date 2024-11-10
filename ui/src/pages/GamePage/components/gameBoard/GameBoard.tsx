@@ -19,7 +19,7 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile position={2+index} /></div>
+                            <div key={index} className='flex-1'><GameTile sideClass={'tile-top'} position={2+index} /></div>
                         )
                     })}
 
@@ -36,7 +36,7 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile position={32+index} /></div>
+                            <div key={index} className='flex-1'><GameTile sideClass="tile-left" position={32+index} /></div>
                         )
                     })}
                 </div>
@@ -56,7 +56,7 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile position={12+index} /></div>
+                            <div key={index} className='flex-1'><GameTile sideClass="tile-right" position={12+index} /></div>
                         )
                     })}
                 </div>
@@ -73,7 +73,7 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile position={22+index} /></div>
+                            <div key={index} className='flex-1'><GameTile sideClass="tile-bottom" position={22+index} /></div>
                         )
                     })}
                 </div>

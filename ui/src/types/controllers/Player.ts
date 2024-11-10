@@ -20,4 +20,5 @@ export type PlayerUpdateParams = {
     isReadyToPlay:boolean
     boardSpaceId:number
     rollCount:number
+    money:number
 }

@@ -11,7 +11,7 @@ import { TaxTile } from "./components/TaxTile";
 import { UtilityTile } from "./components/UtilityTile";
 import { Vacation } from "./components/Vacation";
 
-export const GameTile:React.FC<{position:number}> = ({position}) => {
+export const GameTile:React.FC<{position:number, sideClass?:string}> = ({position,sideClass = ''}) => {
 
     let gameTileComponent = null;
     const gameState = useGameState();
@@ -37,16 +37,16 @@ export const GameTile:React.FC<{position:number}> = ({position}) => {
             gameTileComponent = <CommunityChestTile/>
             break
         case BoardSpaceCategory.Railroard:
-            gameTileComponent = <Railroad position={position}/>
+            gameTileComponent = <Railroad sideClass={sideClass} space={space}/>
             break
         case BoardSpaceCategory.Utility:
-            gameTileComponent = <UtilityTile/>
+            gameTileComponent = <UtilityTile sideClass={sideClass} space={space}/>
             break
         case BoardSpaceCategory.PayTaxes:
             gameTileComponent = <TaxTile/>
             break
         default:
-            gameTileComponent = <PropertyTile position={position}/>
+            gameTileComponent = <PropertyTile sideClass={sideClass} position={position}/>
             break;       
     }
 

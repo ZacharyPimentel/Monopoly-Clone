@@ -9,7 +9,8 @@ class GameHub(
     GameState<GameHub> gameState,
     IDbConnection db,
     IPlayerRepository playerRepository,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    IPropertyRepository propertyRepository
 ) : Hub{
 
     public async override Task<Task> OnConnectedAsync()
@@ -173,5 +174,26 @@ class GameHub(
         var updatedGame = await gameRepository.GetByIdAsync(gameId);
         await Clients.All.SendAsync("UpdatePlayers",allPlayers);
         await Clients.All.SendAsync("UpdateGameState",updatedGame);
+    }
+
+    public async Task UpdateProperty(int propertyId, PropertyUpdateParams updateParams)
+    {
+        await propertyRepository.Update(propertyId,updateParams);
+        
+        var sql = @"
+            SELECT bs.*, p.*
+            FROM BoardSpace as bs
+            LEFT JOIN Property AS p ON bs.Id = p.BoardSpaceId
+            ORDER BY bs.Id
+        ";
+        var boardSpaces = await db.QueryAsync<BoardSpace, Property, BoardSpace>(
+            sql,
+            (boardSpace, property) =>
+            {
+                boardSpace.Property = property; // Set the related Property object
+                return boardSpace;
+            }
+        );
+        await Clients.All.SendAsync("UpdateBoardSpaces",boardSpaces);
     }
 }

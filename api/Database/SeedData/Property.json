@@ -194,5 +194,59 @@
         "PurchasePrice":320,
         "MortgageValue":200,
         "UpgradeCost": 200
+    },
+
+
+
+    {
+        "Id":23,
+        "setNumber":1,
+        "BoardSpaceId":6,
+        "PurchasePrice":200,
+        "MortgageValue":100,
+        "UpgradeCost": 0
+    },
+    {
+        "Id":24,
+        "setNumber":2,
+        "BoardSpaceId":16,
+        "PurchasePrice":200,
+        "MortgageValue":100,
+        "UpgradeCost": 0
+    },
+    {
+        "Id":25,
+        "setNumber":3,
+        "BoardSpaceId":26,
+        "PurchasePrice":200,
+        "MortgageValue":100,
+        "UpgradeCost": 0
+    },
+    {
+        "Id":26,
+        "setNumber":4,
+        "BoardSpaceId":36,
+        "PurchasePrice":200,
+        "MortgageValue":100,
+        "UpgradeCost": 0
+    },
+
+
+
+    {
+        "Id":27,
+        "setNumber":2,
+        "BoardSpaceId":13,
+        "PurchasePrice":150,
+        "MortgageValue":75,
+        "UpgradeCost": 0
+    },
+    {
+        "Id":28,
+        "setNumber":3,
+        "BoardSpaceId":29,
+        "PurchasePrice":150,
+        "MortgageValue":75,
+        "UpgradeCost": 0
     }
 ]

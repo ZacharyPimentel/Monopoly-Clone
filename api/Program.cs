@@ -42,6 +42,7 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
 
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IGameRepository,GameRepository>();
+builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
     
 var app = builder.Build();
 

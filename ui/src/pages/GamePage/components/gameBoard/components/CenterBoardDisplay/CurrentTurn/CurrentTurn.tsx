@@ -3,11 +3,16 @@ import { useGameState } from "../../../../../../../stateProviders/GameStateProvi
 import { DiceRoller } from "./DiceRoller/DiceRoller"
 import { RollButton } from "./RollButton"
 import { EndTurn } from "./EndTurn";
+import { BoardSpaceCategory } from "../../../../../../../types/enums/BoardSpaceCategory";
+import { useLandedSpaceAction } from "../../../../../../../hooks/useLandedSpaceAction";
+import { PurchaseButton } from "./PurchaseButton";
 
 export const CurrentTurn = () => {
 
     const gameState = useGameState();
     const currentPlayer = gameState.players.find(player => player.id === gameState.currentSocketPlayer?.playerId)
+    const purchaseableProperty = useLandedSpaceAction(currentPlayer)
+    console.log('14',purchaseableProperty)
     const allowedToRoll = useMemo( () => {
         if(!currentPlayer) return false
         let allowed = true;
@@ -25,24 +30,19 @@ export const CurrentTurn = () => {
         return allowed
     },[currentPlayer])
 
-    useEffect( () => {
-        //if null or 0
-        if(!currentPlayer?.rollCount)return
-
-        
-    },[])
-
-    console.log(gameState.boardSpaces[currentPlayer!.boardSpaceId])
+    if(!currentPlayer)return null
     
     return (
         <div className='flex flex-col gap-[50px]'>
             <DiceRoller/>
+            {purchaseableProperty && currentPlayer && (
+                <PurchaseButton player={currentPlayer} property={purchaseableProperty}/>
+            )}
             {
                 allowedToRoll
                     ?   <RollButton/>
                     :   <EndTurn/>
             }
-                    
         </div>
     )
 }

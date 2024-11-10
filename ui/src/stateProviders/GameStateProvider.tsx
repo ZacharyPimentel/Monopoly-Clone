@@ -7,6 +7,7 @@ import { useGlobalDispatch } from './GlobalStateProvider';
 import { PlayerCreateModal } from '../globalComponents/GlobalModal/modalContent/PlayerCreateModal';
 import { Player } from '../types/controllers/Player';
 import { useApi } from '../hooks/useApi';
+import { BoardSpace } from '../types/controllers/BoardSpace';
 
 const GameStateContext = createContext<any | null>(null);
 const GameDispatchContext = createContext<(newState:Partial<GameState>) => void>(() => {});
@@ -57,6 +58,9 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
       gameState.ws.on("UpdateLastDiceRoll", (lastDiceRoll:number[]) => {
         updateGameState({lastDiceRoll})
       })
+      gameState.ws.on("UpdateBoardSpaces", (boardSpaces:BoardSpace[]) => {
+          updateGameState({boardSpaces})
+      });
   },[]);
 
   useEffect( () => {

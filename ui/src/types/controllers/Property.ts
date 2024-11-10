@@ -8,3 +8,8 @@ export type Property = {
     upgradeCount:number
     setNumber:number
 }
+
+export type PropertyUpdateParams = {
+    upgradeCount:number,
+    playerId:string
+}

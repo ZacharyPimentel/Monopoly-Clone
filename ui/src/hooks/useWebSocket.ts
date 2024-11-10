@@ -1,6 +1,7 @@
 import { useGameState } from "../stateProviders/GameStateProvider"
 import { Game } from "../types/controllers/Game";
 import { PlayerUpdateParams } from "../types/controllers/Player";
+import { PropertyUpdateParams } from "../types/controllers/Property";
 
 export const useWebSocket = () => {
     const gameState = useGameState();
@@ -21,6 +22,11 @@ export const useWebSocket = () => {
         player:{
             update: (playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
                 gameState.ws.invoke("UpdatePlayer",playerId,updateParams)
+            }
+        },
+        property:{
+            update:(propertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
+                gameState.ws.invoke("UpdateProperty",propertyId,updateParams)
             }
         }
     }
