@@ -111,7 +111,8 @@ public class DatabaseInitializer
                     IconId Integer NULL CHECK (IconId BETWEEN 1 AND 8),
                     InCurrentGame BOOLEAN DEFAULT false,
                     IsReadyToPlay BOOLEAN DEFAULT false,
-                    RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0
+                    RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
+                    TurnComplete BOOLEAN DEFAULT true
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(

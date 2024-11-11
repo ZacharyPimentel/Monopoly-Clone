@@ -13,6 +13,7 @@ public class PlayerUpdateParams
     public int? Money { get; set;}
     public int? BoardSpaceId { get; set;}
     public int? RollCount { get; set;}
+    public bool? TurnComplete { get; set;}
 
 }
 

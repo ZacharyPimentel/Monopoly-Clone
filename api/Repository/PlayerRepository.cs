@@ -76,6 +76,10 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.Money = updateParams.Money.Value;
         }
+        if(updateParams.TurnComplete.HasValue)
+        {
+            currentPlayer.TurnComplete = updateParams.TurnComplete.Value;
+        }
         
         var sql = @"
             UPDATE Player
@@ -86,7 +90,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
                 IsReadyToPlay = @IsReadyToPlay,
                 BoardSpaceId = @BoardSpaceId,
                 RollCount = @RollCount,
-                Money = @Money
+                Money = @Money,
+                TurnComplete = @TurnComplete
             WHERE Id = @Id
         ";
 
@@ -98,7 +103,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.IsReadyToPlay,
             currentPlayer.BoardSpaceId,
             currentPlayer.RollCount,
-            currentPlayer.Money
+            currentPlayer.Money,
+            currentPlayer.TurnComplete
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

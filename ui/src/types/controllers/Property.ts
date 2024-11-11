@@ -1,3 +1,5 @@
+import { PropertyRent } from "./PropertyRent"
+
 export type Property = {
     id:number
     playerId:string | null
@@ -7,6 +9,7 @@ export type Property = {
     upgradeCost:number
     upgradeCount:number
     setNumber:number
+    propertyRents:PropertyRent[]
 }
 
 export type PropertyUpdateParams = {

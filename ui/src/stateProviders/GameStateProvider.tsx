@@ -43,16 +43,13 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
       if(!gameState.ws)return
 
       gameState.ws.on("UpdateGameState", (gameState:Game) => {
-          console.log('gameState',gameState)
           updateGameState({gameState})
       });
 
       gameState.ws.on("UpdateCurrentPlayer", (currentSocketPlayer) => {
-        console.log('currentPlayer',currentSocketPlayer)
           updateGameState({currentSocketPlayer})
       });       
       gameState.ws.on("UpdatePlayers", (players:Player[]) => {
-        console.log("UpdateCurrentPlayers: ", players)
           updateGameState({players})
       });
       gameState.ws.on("UpdateLastDiceRoll", (lastDiceRoll:number[]) => {
@@ -74,6 +71,7 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
   useEffect( () => {
     (async () => {
       const boardSpaces = await api.boardSpace.getAll();
+      console.log('77',boardSpaces)
       updateGameState({boardSpaces})
     })()
   },[])

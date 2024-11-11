@@ -8,6 +8,7 @@ export type Player = {
     boardSpaceId:number
     money:number
     rollCount:number
+    turnComplete:boolean
 }
 
 export type PlayerWhereParams = {
@@ -21,4 +22,5 @@ export type PlayerUpdateParams = {
     boardSpaceId:number
     rollCount:number
     money:number
+    turnComplete:boolean
 }

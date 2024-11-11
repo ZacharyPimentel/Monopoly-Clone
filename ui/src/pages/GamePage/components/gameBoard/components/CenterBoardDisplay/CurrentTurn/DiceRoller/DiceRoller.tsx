@@ -29,8 +29,6 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         },1000)
     },[gameState.rolling,gameState.currentSocketPlayer,gameState.players])
 
-    console.log('last dice roll',gameState.lastDiceRoll)
-
     return (
         <div className='flex flex-col items-center gap-[50px]'>
             <div className='flex gap-[50px]'>

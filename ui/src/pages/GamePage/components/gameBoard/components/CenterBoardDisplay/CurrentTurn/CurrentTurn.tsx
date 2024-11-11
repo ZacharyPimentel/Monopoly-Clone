@@ -1,42 +1,42 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
 import { DiceRoller } from "./DiceRoller/DiceRoller"
 import { RollButton } from "./RollButton"
 import { EndTurn } from "./EndTurn";
-import { BoardSpaceCategory } from "../../../../../../../types/enums/BoardSpaceCategory";
-import { useLandedSpaceAction } from "../../../../../../../hooks/useLandedSpaceAction";
 import { PurchaseButton } from "./PurchaseButton";
+import { usePlayer } from "../../../../../../../hooks/usePlayer";
+import { useLandedOnSpace } from "../../../../../../../hooks/useLandedOnSpace";
 
 export const CurrentTurn = () => {
 
     const gameState = useGameState();
-    const currentPlayer = gameState.players.find(player => player.id === gameState.currentSocketPlayer?.playerId)
-    const purchaseableProperty = useLandedSpaceAction(currentPlayer)
-    console.log('14',purchaseableProperty)
+    const {player,currentBoardSpace} = usePlayer();
+
+    useLandedOnSpace();
+
     const allowedToRoll = useMemo( () => {
-        if(!currentPlayer) return false
+        if(!player)return false
         let allowed = true;
         //if player has rolled doubles 3 times, go to jail and no more rolling
-        if(currentPlayer.rollCount > 3){
+        if(player.rollCount > 3){
             allowed = false;
         }
         if(!gameState.lastDiceRoll){
             return allowed
         }
         //if player has not exceeded 3 rolls, but didn't roll doubles, not allowed to roll more
-        if(currentPlayer.rollCount < 3 && currentPlayer.rollCount !== 0 && (gameState.lastDiceRoll[0] !== gameState.lastDiceRoll[1])){
+        if(player.rollCount < 3 && player.rollCount !== 0 && (gameState.lastDiceRoll[0] !== gameState.lastDiceRoll[1])){
             allowed = false
         }
         return allowed
-    },[currentPlayer])
-
-    if(!currentPlayer)return null
+    },[player])
     
     return (
         <div className='flex flex-col gap-[50px]'>
             <DiceRoller/>
-            {purchaseableProperty && currentPlayer && (
-                <PurchaseButton player={currentPlayer} property={purchaseableProperty}/>
+            {/* Show purchase button if property has no player id (not owned) */}
+            {currentBoardSpace?.property && !currentBoardSpace?.property?.playerId && player.rollCount > 0 && (
+                <PurchaseButton player={player} property={currentBoardSpace.property}/>
             )}
             {
                 allowedToRoll

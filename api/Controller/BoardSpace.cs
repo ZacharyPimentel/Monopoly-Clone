@@ -11,19 +11,32 @@ public class BoardSpaceController(IDbConnection db) : ControllerBase {
     [HttpGet]
     public async Task<ActionResult<List<BoardSpace>>> GetAllBoardSpaces(){
         var sql = @"
-            SELECT bs.*, p.*
-            FROM BoardSpace as bs
-            LEFT JOIN Property AS p ON bs.Id = p.BoardSpaceId
-            ORDER BY bs.Id
+            SELECT * FROM BoardSpace;
+            SELECT * FROM Property;
+            SELECT * FROM PropertyRent;
         ";
-        var boardSpaces = await db.QueryAsync<BoardSpace, Property, BoardSpace>(
-            sql,
-            (boardSpace, property) =>
+        var multi = await db.QueryMultipleAsync(sql);
+        var boardSpaces = multi.Read<BoardSpace>().ToList();
+        var properties = multi.Read<Property>().ToList();
+        var propertyRents = multi.Read<PropertyRent>().ToList();
+        // Map properties to board spaces
+        foreach (var property in properties)
+        {
+            var boardSpace = boardSpaces.FirstOrDefault(bs => bs.Id == property.BoardSpaceId);
+            if (boardSpace != null)
+                boardSpace.Property = property;
+        }
+
+        // Map property rents to properties
+        foreach (var rent in propertyRents)
+        {
+            var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
+            if (property != null)
             {
-                boardSpace.Property = property; // Set the related Property object
-                return boardSpace;
+                property.PropertyRents.Add(rent);
             }
-        );
+        }
+
         return Ok(boardSpaces);
     }
 }

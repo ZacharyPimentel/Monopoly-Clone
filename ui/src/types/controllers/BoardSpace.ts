@@ -1,7 +1,7 @@
 import { Property } from "./Property"
 
 export type BoardSpace = {
-    id:string
+    id:number
     boardSpaceCategoryId:number,
     property: Property | null
 }

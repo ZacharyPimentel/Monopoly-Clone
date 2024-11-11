@@ -1,3 +1,4 @@
+import { usePlayer } from "../../../../../../hooks/usePlayer";
 import { useGameState } from "../../../../../../stateProviders/GameStateProvider"
 import { CurrentTurn } from "./CurrentTurn/CurrentTurn";
 import { NotCurrentTurn } from "./NotCurrentTurn/NotCurrentTurn";
@@ -5,6 +6,7 @@ import { NotCurrentTurn } from "./NotCurrentTurn/NotCurrentTurn";
 export const CenterBoardDisplay = () => {
 
     const gameState = useGameState();
+    const {isCurrentTurn} = usePlayer();
 
     if(gameState.gameState?.inLobby){
         return (
@@ -16,7 +18,7 @@ export const CenterBoardDisplay = () => {
 
     return (
         <div className='rounded flex justify-center items-center w-full h-full'>
-            {gameState.currentSocketPlayer?.playerId === gameState.gameState?.currentPlayerTurn
+            {isCurrentTurn
                 ? <CurrentTurn/>
                 : <NotCurrentTurn/>
             }
