@@ -10,6 +10,7 @@ public class Player
     public bool InCurrentGame { get; set;} = false;
     public int RollCount { get; set;} = 0;
     public bool TurnComplete { get; set;} = true;
+    public bool InJail { get; set;} = false;
     
     //Joined properties from PlayerIcon
     public required string IconUrl { get; set;}

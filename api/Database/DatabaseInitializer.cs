@@ -112,7 +112,8 @@ public class DatabaseInitializer
                     InCurrentGame BOOLEAN DEFAULT false,
                     IsReadyToPlay BOOLEAN DEFAULT false,
                     RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
-                    TurnComplete BOOLEAN DEFAULT true
+                    TurnComplete BOOLEAN DEFAULT true,
+                    InJail BOOLEAN DEFAULT false
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -125,7 +126,8 @@ public class DatabaseInitializer
                     BoardSpaceId INTEGER,
                     FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
                     UpgradeCost INTEGER,
-                    UpgradeCount INTEGER DEFAULT 0
+                    UpgradeCount INTEGER DEFAULT 0,
+                    Mortgaged BOOLEAN DEFAULT false
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTYRENT(

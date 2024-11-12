@@ -80,6 +80,10 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.TurnComplete = updateParams.TurnComplete.Value;
         }
+        if(updateParams.InJail.HasValue)
+        {
+            currentPlayer.InJail = updateParams.InJail.Value;
+        }
         
         var sql = @"
             UPDATE Player
@@ -91,7 +95,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
                 BoardSpaceId = @BoardSpaceId,
                 RollCount = @RollCount,
                 Money = @Money,
-                TurnComplete = @TurnComplete
+                TurnComplete = @TurnComplete,
+                InJail = @InJail
             WHERE Id = @Id
         ";
 
@@ -104,7 +109,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.BoardSpaceId,
             currentPlayer.RollCount,
             currentPlayer.Money,
-            currentPlayer.TurnComplete
+            currentPlayer.TurnComplete,
+            currentPlayer.InJail
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

@@ -2,12 +2,14 @@ import { useEffect } from "react"
 import { Die } from "./components/Die"
 import { useGameDispatch, useGameState } from "../../../../../../../../stateProviders/GameStateProvider";
 import { useWebSocket } from "../../../../../../../../hooks/useWebSocket";
+import { usePlayer } from "../../../../../../../../hooks/usePlayer";
 
 export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
 
     const gameState = useGameState();
     const gameDispatch = useGameDispatch();
     const webSocket = useWebSocket();
+    const {player} = usePlayer();
 
     useEffect( () => {
         if(!gameState.rolling || uiOnly)return
@@ -15,19 +17,35 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         var diceTwo  = Math.floor((Math.random() * 6) + 1);
         webSocket.gameState.setLastDiceRoll([diceOne,diceTwo]);
         setTimeout( () => {
-            const currentPlayer = gameState.players.find(player => player.id === gameState.currentSocketPlayer?.playerId)
-            if(currentPlayer){
-                let newBoardPosition = currentPlayer.boardSpaceId + diceOne + diceTwo;
-                if(newBoardPosition > 39) newBoardPosition = newBoardPosition % 40
-                if(newBoardPosition === 0) newBoardPosition = 1;
-                webSocket.player.update(currentPlayer.id,{
-                    boardSpaceId: newBoardPosition,
-                    rollCount: currentPlayer.rollCount + 1
-                })
+            //handle roll logic different if player is in jail
+            if(player.inJail){
+                if(diceOne === diceTwo){
+                    webSocket.player.update(player.id,{inJail:false,turnComplete:true})
+                }
+                return
             }
+
+            let newBoardPosition = player.boardSpaceId + diceOne + diceTwo;
+            let passedGo = false;
+            //handle setting correct position when going over GO
+            if(newBoardPosition > 39) {
+                newBoardPosition = newBoardPosition % 40
+                if (newBoardPosition > 0) passedGo = true;
+            }
+            if(newBoardPosition === 0) newBoardPosition = 1;
+
+            //update player
+            webSocket.player.update(player.id,{
+                boardSpaceId: newBoardPosition,
+                rollCount: player.rollCount + 1,
+                //add GO money if passed
+                ...(passedGo && {money:player.money + 200}),
+                //if 3rd roll and doubles, go to jail
+                ...(player.rollCount+1 === 3 && (diceOne === diceTwo) && {inJail:true})
+            })
             gameDispatch({rolling:false})
         },1000)
-    },[gameState.rolling,gameState.currentSocketPlayer,gameState.players])
+    },[gameState.rolling,gameState.currentSocketPlayer,gameState.players,player])
 
     return (
         <div className='flex flex-col items-center gap-[50px]'>

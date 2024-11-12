@@ -26,19 +26,25 @@ public class PropertyRepository(IDbConnection db): IPropertyRepository
         {
             currentProperty.UpgradeCount = updateParams.UpgradeCount.Value;
         }
+        if(updateParams.Mortgaged.HasValue)
+        {
+            currentProperty.Mortgaged = updateParams.Mortgaged.Value;
+        }
         
         var sql = @"
             UPDATE Property
             SET
                 PlayerId = @PlayerId,
-                UpgradeCount = @UpgradeCount
+                UpgradeCount = @UpgradeCount,
+                Mortgaged = @Mortgaged
             WHERE Id = @Id
         ";
 
         var parameters = new {
             currentProperty.Id,
             currentProperty.UpgradeCount,
-            currentProperty.PlayerId
+            currentProperty.PlayerId,
+            currentProperty.Mortgaged
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

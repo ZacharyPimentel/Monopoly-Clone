@@ -8,5 +8,6 @@ public class Property
     public required int UpgradeCost { get; set; }
     public required int UpgradeCount { get; set; } = 0;
     public required int BoardSpaceId { get; set; }
+    public required bool Mortgaged { get; set; } = false;
     public List<PropertyRent> PropertyRents { get; set; } = [];
 }

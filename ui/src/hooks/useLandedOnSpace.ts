@@ -10,20 +10,24 @@ export const useLandedOnSpace = () => {
     const websocket = useWebSocket();
     if(!player || player.turnComplete)return
 
+    //=====================
+    // Landed On Go
+    //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Go){
         websocket.player.update(player.id,{
             money:player.money + 200,
             turnComplete:true
         })
     }
+    //=====================
+    // Landed On Property
+    //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Property){
-        console.log('landed on property')
         //no automatic action if player owns the property, or if property is unowned
         if(currentBoardSpace.property?.playerId === player.id)return
         if(!currentBoardSpace.property?.playerId) return
         const paymentAmount = currentBoardSpace.property.propertyRents[currentBoardSpace.property.upgradeCount].rent
         //take money from player who lands on property
-        console.log('pay player')
         websocket.player.update(player.id,{
             money: player.money - paymentAmount,
             turnComplete:true
@@ -32,8 +36,10 @@ export const useLandedOnSpace = () => {
         const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
         websocket.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
     }
+    //=====================
+    // Landed On Railroad
+    //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Railroard){
-        console.log('landed on railroad')
         //no automatic action if player owns the property, or if property is unowned
         if(currentBoardSpace.property?.playerId === player.id)return
         if(!currentBoardSpace.property?.playerId) return
@@ -52,5 +58,14 @@ export const useLandedOnSpace = () => {
         //give money to property owner
         const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
         websocket.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
+    }
+    //=====================
+    // Landed On Go To Jail
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.GoToJail){
+        websocket.player.update(player.id,{
+            boardSpaceId:11,
+            inJail:true
+        })
     }
 }

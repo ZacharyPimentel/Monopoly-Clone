@@ -14,6 +14,7 @@ public class PlayerUpdateParams
     public int? BoardSpaceId { get; set;}
     public int? RollCount { get; set;}
     public bool? TurnComplete { get; set;}
+    public bool? InJail { get; set;}
 
 }
 

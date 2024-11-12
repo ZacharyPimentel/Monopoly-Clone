@@ -6,6 +6,7 @@ import { EndTurn } from "./EndTurn";
 import { PurchaseButton } from "./PurchaseButton";
 import { usePlayer } from "../../../../../../../hooks/usePlayer";
 import { useLandedOnSpace } from "../../../../../../../hooks/useLandedOnSpace";
+import { PayJailFee } from "./PayJailFee";
 
 export const CurrentTurn = () => {
 
@@ -30,6 +31,8 @@ export const CurrentTurn = () => {
         }
         return allowed
     },[player])
+
+    console.log(player)
     
     return (
         <div className='flex flex-col gap-[50px]'>
@@ -43,6 +46,9 @@ export const CurrentTurn = () => {
                     ?   <RollButton/>
                     :   <EndTurn/>
             }
+            {player?.inJail && player.rollCount === 0 && (
+                <PayJailFee/>
+            )}
         </div>
     )
 }
