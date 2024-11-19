@@ -115,7 +115,9 @@ public class MonopolyHub(
     public async Task GameCreate(GameCreateParams gameCreateParams)
     {
         var newGame = await gameRepository.Create(gameCreateParams);
-        await Clients.Caller.SendAsync("game:create",newGame.Id);
+        await SendToSelf("game:create",newGame.Id);
+        var games = await gameRepository.Search(new GameWhereParams{});
+        await SendToAll("game:updateAll",games);
     }
     public async Task GameJoin(string gameId)
     {
@@ -127,5 +129,20 @@ public class MonopolyHub(
         await SendToSelf("game:update",game);
         await SendToSelf("player:update",currentSocketPlayer);
         await SendToSelf("player:updateGroup",groupPlayers);
+    }
+    public async Task GameLeave(string gameId)
+    {
+        SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+        if(currentSocketPlayer.PlayerId != null && currentSocketPlayer.GameId != null)
+        {
+            await playerRepository.Update(currentSocketPlayer.PlayerId, new PlayerUpdateParams {Active = false});
+            var groupPlayers = await playerRepository.Search( new PlayerWhereParams {GameId = currentSocketPlayer.GameId});
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId,gameId);
+            await SendToGroup("player:updateGroup", groupPlayers);
+            currentSocketPlayer.GameId = null;
+            currentSocketPlayer.PlayerId = null;
+            var games = await gameRepository.Search(new GameWhereParams{});
+            await SendToAll("game:updateAll",games);
+        }
     }
 }

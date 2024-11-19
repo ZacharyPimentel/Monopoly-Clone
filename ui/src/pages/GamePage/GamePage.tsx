@@ -9,8 +9,8 @@ import { Game } from "../../types/controllers/Game";
 import { useApi } from "../../hooks/useApi";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
-import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
 import { useParams } from "react-router-dom";
+import { PlayerCreateModal } from "./modal/PlayerCreateModal";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -45,12 +45,12 @@ export const GamePage = () => {
             stopListen('game:update',gameUpdateCallback)
             stopListen('player:update',playerUpdateCallback)
             stopListen('player:updateGroup',playerUpdateAllCallback)
+            invoke.game.leave(gameId);
         }
     },[])
 
     useEffect( () => {
         if(!gameState.currentSocketPlayer || !gameState.gameState) return
-        console.log('53',gameState.currentSocketPlayer.playerId)
         if(!gameState.currentSocketPlayer.playerId){
           globalDispatch({modalOpen:true,modalContent:<PlayerCreateModal/>})
         }

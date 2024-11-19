@@ -2,9 +2,9 @@ import { useMemo, useState } from "react"
 import { useApi } from "../../../hooks/useApi"
 import { useGameState } from "../../../stateProviders/GameStateProvider";
 import { useGlobalDispatch } from "../../../stateProviders/GlobalStateProvider";
-import { FetchWrapper } from "../../FetchWrapper";
 import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
 import { useWebSocket } from "../../../hooks/useWebSocket";
+import { FetchWrapper } from "../../../globalComponents/FetchWrapper";
 
 export const PlayerCreateModal = () => {
 

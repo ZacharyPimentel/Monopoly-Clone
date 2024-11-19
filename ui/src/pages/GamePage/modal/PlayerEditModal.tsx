@@ -4,10 +4,10 @@ import { Player } from "../../../types/controllers/Player";
 import { useGameState } from "../../../stateProviders/GameStateProvider";
 import React from "react";
 import { useGlobalDispatch} from "../../../stateProviders/GlobalStateProvider";
-import { ActionButtons } from "../ActionButtons";
 import { useWebSocket } from "../../../hooks/useWebSocket";
-import { FetchWrapper } from "../../FetchWrapper";
 import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
+import { FetchWrapper } from "../../../globalComponents/FetchWrapper";
+import { ActionButtons } from "../../../globalComponents/GlobalModal/ActionButtons";
 
 export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
 

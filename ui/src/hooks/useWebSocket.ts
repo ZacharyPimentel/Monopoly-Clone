@@ -36,6 +36,9 @@ export const useWebSocket = () => {
                 },
                 join: (gameId:string) => {
                     globalState.ws.invoke('GameJoin',gameId)
+                },
+                leave: (gameId:string) => {
+                    globalState.ws.invoke('GameLeave',gameId);
                 }
             },
             player:{
