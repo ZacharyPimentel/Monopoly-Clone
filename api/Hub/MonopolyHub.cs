@@ -8,7 +8,8 @@ namespace SignalRWebpack.Hubs;
 public class MonopolyHub(
     GameState<MonopolyHub> gameState,
     IPlayerRepository playerRepository,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    IDbConnection db
 ) : Hub{
 
     //=======================================================
@@ -92,13 +93,64 @@ public class MonopolyHub(
     {
         await playerRepository.Update(playerId, playerUpdateParams);
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-        var groupPlayers = await playerRepository.Search(new PlayerWhereParams {
+        if(currentSocketPlayer.GameId == null)
+        {
+            throw new Exception("Player does not have a GameId when it should be there.");
+        }
+
+        Game currentGame = await gameRepository.GetByIdAsync(currentSocketPlayer.GameId);
+        var activeGroupPlayers = await playerRepository.Search( new PlayerWhereParams{
+            Active = true,
+            GameId = currentGame.Id
+        });
+
+        //if at least two players are all ready and the game is in lobby, start the game
+        if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
+        {
+            await gameRepository.Update(currentGame.Id, new GameUpdateParams{
+                InLobby = false,
+                GameStarted = true
+            });
+            await playerRepository.UpdateMany(
+                new PlayerWhereParams {Active = true},
+                new PlayerUpdateParams {
+                    InCurrentGame = true,
+                    IsReadyToPlay = false,
+                    Money = currentGame.StartingMoney
+                }
+            );
+
+            //randomize and set the turn order
+            Random random = new();
+            var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
+            foreach(var (player,index) in shuffledActivePlayers.Select( (value,i) => (value,i)))
+            {
+                var addTurnOrder = @"
+                    INSERT INTO TurnOrder (Id,PlayerId,GameId,PlayOrder)
+                    VALUES (@Id,@PlayerId, @GameId,@PlayOrder)
+                ";
+
+                var parameters = new TurnOrder
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PlayerId = player.Id,
+                    GameId = currentGame.Id,
+                    PlayOrder = index + 1
+                };
+
+                await db.ExecuteAsync(addTurnOrder,parameters);
+            } 
+            
+            var updatedGame = await gameRepository.GetByIdAsync(currentGame.Id);
+            await SendToGroup("game:update",updatedGame);
+        }
+        var updatedGroupPlayers = await playerRepository.Search(new PlayerWhereParams {
             GameId = currentSocketPlayer.GameId
         });
-        await SendToSelf("player:update",currentSocketPlayer);
-        await SendToGroup("player:updateGroup",groupPlayers);
-        //await gameService.CheckIfGameShouldStart();
+        
+        await SendToGroup("player:updateGroup",updatedGroupPlayers);
     }
+    
     //=======================================================
     // Game
     //=======================================================

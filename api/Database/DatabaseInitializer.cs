@@ -82,13 +82,11 @@ public class DatabaseInitializer
                     InLobby BOOLEAN DEFAULT true,
                     GameOver BOOLEAN DEFAULT false,
                     GameStarted BOOLEAN DEFAULT false,
-                    StartingMoney INTEGER DEFAULT 1500,
-                    DiceOneLastRoll INTEGER DEFAULT 1,
-                    DiceTwoLastRoll INTEGER DEFAULT 1
+                    StartingMoney INTEGER DEFAULT 1500
                 );
 
                 CREATE TABLE IF NOT EXISTS LASTDICEROLL(
-                    Id INTEGER PRIMARY KEY,
+                    Id SERIAL PRIMARY KEY,
                     GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES GAME(Id),
                     DiceOne INTEGER DEFAULT 1,
@@ -151,7 +149,7 @@ public class DatabaseInitializer
                 );
 
                 CREATE TABLE IF NOT EXISTS TURNORDER(
-                    Id INTEGER PRIMARY KEY,
+                    Id TEXT PRIMARY KEY,
                     PlayerId TEXT,
                     FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
                     GameId TEXT,

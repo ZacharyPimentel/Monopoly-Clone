@@ -13,13 +13,19 @@ public class GameRepository(IDbConnection db) : IGameRepository
             VALUES (@Id,@GameName)
         ";
 
-        var parameters = new 
+        var gameAddparameters = new 
         {
             Id = uuid,
             gameCreateParams.GameName,
         };
 
-        await db.ExecuteAsync(addNewGame,parameters);
+        await db.ExecuteAsync(addNewGame,gameAddparameters);
+
+        var addLastDiceRoll = @"
+            INSERT INTO LASTDICEROLL (GameId)
+            VALUES (@GameId)
+        ";
+        await db.ExecuteAsync(addLastDiceRoll, new {GameId = uuid});
 
         var newGame = await GetByIdAsync(uuid);
         return newGame;
@@ -28,7 +34,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
     {
         var sql = @"
         SELECT 
-            g.*, COUNT(p.Id) AS ActivePlayerCount 
+            g.*, COUNT(p.Id) AS ActivePlayerCount
             FROM Game g
             LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
             WHERE 1=1";
@@ -59,9 +65,10 @@ public class GameRepository(IDbConnection db) : IGameRepository
                 ORDER BY PlayOrder
                 LIMIT 1
             )
-            SELECT g.*, f.PlayerId AS CurrentPlayerTurn
+            SELECT g.*, f.PlayerId AS CurrentPlayerTurn, ldr.DiceOne, ldr.DiceTwo
             FROM Game as g
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
+            Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId
                 WHERE g.Id = @Id
         ";
         var game = await db.QuerySingleAsync<Game>(sql,new {Id = gameId});

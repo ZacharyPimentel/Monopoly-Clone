@@ -45,7 +45,7 @@ export const GamePage = () => {
             stopListen('game:update',gameUpdateCallback)
             stopListen('player:update',playerUpdateCallback)
             stopListen('player:updateGroup',playerUpdateAllCallback)
-            invoke.game.leave(gameId);
+            invoke.game.leave(gameId!);
         }
     },[])
 

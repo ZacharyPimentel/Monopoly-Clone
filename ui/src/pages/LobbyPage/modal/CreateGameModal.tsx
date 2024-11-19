@@ -1,8 +1,5 @@
-import { useMemo, useState } from "react"
-import { useApi } from "../../../hooks/useApi"
-import { useGameState } from "../../../stateProviders/GameStateProvider";
-import { useGlobalDispatch } from "../../../stateProviders/GlobalStateProvider";
-import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
+import { useState } from "react"
+
 import { ActionButtons } from "../../../globalComponents/GlobalModal/ActionButtons";
 import { useWebSocket } from "../../../hooks/useWebSocket";
 
