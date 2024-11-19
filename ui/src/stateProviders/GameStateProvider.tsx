@@ -18,7 +18,7 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     lastDiceRoll:null,
     rolling:false,
     boardSpaces:[],
-    gameId:''
+    gameId:'',
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)

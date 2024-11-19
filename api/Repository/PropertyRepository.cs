@@ -13,6 +13,10 @@ public class PropertyRepository(IDbConnection db): IPropertyRepository
         ";
         return await db.QuerySingleAsync<Property>(query, new { Id = id });
     }
+    public async Task<IEnumerable<Property>> GetAll()
+    {
+        return await db.QueryAsync<Property>("SELECT * FROM PROPERTY");
+    }
 
     public async Task<bool> Update(int id,PropertyUpdateParams updateParams)
     {

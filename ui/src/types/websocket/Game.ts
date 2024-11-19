@@ -8,3 +8,7 @@ export type LobbyGame = {
     gameName:string
     activePlayerCount:number
 }
+
+export type GameUpdateParams = {
+    startingMoney:number
+}

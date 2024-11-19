@@ -6,4 +6,6 @@ export type Game = {
     startingMoney:number
     currentPlayerTurn:string | null
     gameName:string
+    diceOne:number
+    diceTwo:number
 }

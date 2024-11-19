@@ -4,14 +4,14 @@ import { Property } from "../../../../../../../types/controllers/Property"
 
 export const PurchaseButton:React.FC<{property:Property,player:Player}> = ({property,player}) => {
     
-    const websocket = useWebSocket();
+    const {invoke} = useWebSocket();
 
     return (
         <button
             disabled={player.money < property.purchasePrice}
             onClick={() => {
-                websocket.property.update(property.id,{playerId:player.id})
-                websocket.player.update(player.id,{money:player.money - property.purchasePrice})
+                invoke.property.update(property.id,{playerId:player.id})
+                invoke.player.update(player.id,{money:player.money - property.purchasePrice})
             }}
             className='bg-white p-[5px]'
         >

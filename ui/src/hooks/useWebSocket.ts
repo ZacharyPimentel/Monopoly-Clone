@@ -3,6 +3,7 @@ import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PlayerUpdateParams } from "../types/controllers/Player";
 import { PropertyUpdateParams } from "../types/controllers/Property";
+import { GameUpdateParams } from "../types/websocket/Game";
 
 export const useWebSocket = () => {
     const globalState = useGlobalState();
@@ -39,6 +40,14 @@ export const useWebSocket = () => {
                 },
                 leave: (gameId:string) => {
                     globalState.ws.invoke('GameLeave',gameId);
+                },
+                update: (gameId:string,gameUpdateParams:GameUpdateParams) => {
+                    globalState.ws.invoke('GameUpdate',gameId,gameUpdateParams);
+                }
+            },
+            lastDiceRoll:{
+                update: (gameId:string,diceOne:number,diceTwo:number) => {
+                    globalState.ws.invoke('LastDiceRollUpdate',gameId,diceOne,diceTwo)
                 }
             },
             player:{
@@ -57,7 +66,7 @@ export const useWebSocket = () => {
             },
             property:{
                 update:(propertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
-                    globalState.ws.invoke("UpdateProperty",propertyId,updateParams)
+                    globalState.ws.invoke("PropertyUpdate",propertyId,updateParams)
                 }
             }
         },

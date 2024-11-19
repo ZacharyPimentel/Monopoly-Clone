@@ -7,6 +7,7 @@ public class PropertyUpdateParams
 
 public interface IPropertyRepository
 {
+    Task<IEnumerable<Property>> GetAll();
     Task<Property> GetByIdAsync(int propertyId);
     Task<bool> Update(int id,PropertyUpdateParams updateParams);
 }

@@ -9,6 +9,7 @@ public class MonopolyHub(
     GameState<MonopolyHub> gameState,
     IPlayerRepository playerRepository,
     IGameRepository gameRepository,
+    IPropertyRepository propertyRepository,
     IDbConnection db
 ) : Hub{
 
@@ -167,6 +168,23 @@ public class MonopolyHub(
     public async Task GameCreate(GameCreateParams gameCreateParams)
     {
         var newGame = await gameRepository.Create(gameCreateParams);
+        var properties = await propertyRepository.GetAll();
+
+        //create GameProperty entries
+        var gamePropertyInsert = @"
+            INSERT INTO GAMEPROPERTY (GameId,PropertyId)
+            VALUES (@GameId,@PropertyId)
+        ";
+        var gameProperties = new List<GameProperty>{};
+        foreach (var property in properties)
+        {
+            gameProperties.Add( new GameProperty {
+                GameId = newGame.Id,
+                PropertyId = property.Id
+            });
+        }
+        await db.ExecuteAsync(gamePropertyInsert,gameProperties);
+
         await SendToSelf("game:create",newGame.Id);
         var games = await gameRepository.Search(new GameWhereParams{});
         await SendToAll("game:updateAll",games);
@@ -196,5 +214,68 @@ public class MonopolyHub(
             var games = await gameRepository.Search(new GameWhereParams{});
             await SendToAll("game:updateAll",games);
         }
+    }
+    public async Task GameUpdate(string gameId,GameUpdateParams gameUpdateParams)
+    {
+            await gameRepository.Update(gameId,gameUpdateParams);
+            Game game = await gameRepository.GetByIdAsync(gameId);
+            await SendToGroup("game:Update",game);
+    }
+
+    //=======================================================
+    // Property
+    //=======================================================
+    public async Task PropertyUpdate(int propertyId, PropertyUpdateParams updateParams)
+    {
+        await propertyRepository.Update(propertyId,updateParams);
+        
+        var sql = @"
+            SELECT * FROM BoardSpace;
+            SELECT * FROM Property;
+            SELECT * FROM PropertyRent;
+        ";
+        
+        var multi = await db.QueryMultipleAsync(sql);
+        var boardSpaces = multi.Read<BoardSpace>().ToList();
+        var properties = multi.Read<Property>().ToList();
+        var propertyRents = multi.Read<PropertyRent>().ToList();
+        // Map properties to board spaces
+        foreach (var property in properties)
+        {
+            var boardSpace = boardSpaces.FirstOrDefault(bs => bs.Id == property.BoardSpaceId);
+            if (boardSpace != null)
+                boardSpace.Property = property;
+        }
+
+        // Map property rents to properties
+        foreach (var rent in propertyRents)
+        {
+            var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
+            property?.PropertyRents.Add(rent);
+        }
+        await Clients.All.SendAsync("UpdateBoardSpaces",boardSpaces);
+    }
+
+    //=======================================================
+    // Last Dice Roll
+    //=======================================================
+    public async Task LastDiceRollUpdate(string gameId,int diceOne, int diceTwo)
+    {
+        var sql = @"
+            UPDATE LASTDICEROLL
+            SET
+                DiceOne = @DiceOne,
+                DiceTwo = @DiceTwo
+            WHERE GameId = @GameId
+        ";
+
+        await db.ExecuteAsync(sql, new {
+            GameId = gameId,
+            DiceOne = diceOne,
+            DiceTwo = diceTwo
+        });
+
+        Game game = await gameRepository.GetByIdAsync(gameId);
+        await SendToGroup("game:update", game);
     }
 }

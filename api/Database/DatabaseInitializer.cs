@@ -128,8 +128,6 @@ public class DatabaseInitializer
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
                     Id INTEGER PRIMARY KEY,
-                    PlayerId TEXT NULL,
-                    FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
                     SetNumber INTEGER,
                     PurchasePrice INTEGER,
                     MortgageValue INTEGER,
@@ -158,6 +156,16 @@ public class DatabaseInitializer
                     HasPlayed BOOLEAN DEFAULT false
                 );
 
+                CREATE TABLE IF NOT EXISTS GAMEPROPERTY(
+                    Id SERIAL PRIMARY KEY,
+                    PlayerId TEXT,
+                    FOREIGN KEY (PlayerId) REFERENCES Player(Id),
+                    GameId TEXT,
+                    FOREIGN KEY (GameId) REFERENCES Game(Id),
+                    PropertyId INTEGER,
+                    FOREIGN KEY (PropertyId) REFERENCES Property(Id),
+                    UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0
+                )
             ";
             db.Execute(sql,transaction:transaction);
             transaction.Commit();

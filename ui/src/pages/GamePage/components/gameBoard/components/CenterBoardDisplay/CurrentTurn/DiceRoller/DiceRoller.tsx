@@ -8,19 +8,20 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
 
     const gameState = useGameState();
     const gameDispatch = useGameDispatch();
-    const webSocket = useWebSocket();
+    const {invoke} = useWebSocket();
     const {player} = usePlayer();
 
     useEffect( () => {
         if(!gameState.rolling || uiOnly)return
         var diceOne  = Math.floor((Math.random() * 6) + 1);
         var diceTwo  = Math.floor((Math.random() * 6) + 1);
-        webSocket.gameState.setLastDiceRoll([diceOne,diceTwo]);
+
+        invoke.lastDiceRoll.update(gameState.gameId,diceOne,diceTwo);
         setTimeout( () => {
             //handle roll logic different if player is in jail
             if(player.inJail){
                 if(diceOne === diceTwo){
-                    webSocket.player.update(player.id,{inJail:false,turnComplete:true})
+                    invoke.player.update(player.id,{inJail:false,turnComplete:true})
                 }
                 return
             }
@@ -35,7 +36,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             if(newBoardPosition === 0) newBoardPosition = 1;
 
             //update player
-            webSocket.player.update(player.id,{
+            invoke.player.update(player.id,{
                 boardSpaceId: newBoardPosition,
                 rollCount: player.rollCount + 1,
                 //add GO money if passed
@@ -50,8 +51,8 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
     return (
         <div className='flex flex-col items-center gap-[50px]'>
             <div className='flex gap-[50px]'>
-                <Die value={gameState.lastDiceRoll?.[0] || 1}/>
-                <Die value={gameState.lastDiceRoll?.[1] || 1}/>
+                <Die value={gameState.gameState?.diceOne || 1}/>
+                <Die value={gameState.gameState?.diceTwo || 1}/>
             </div>
         </div>
     )
