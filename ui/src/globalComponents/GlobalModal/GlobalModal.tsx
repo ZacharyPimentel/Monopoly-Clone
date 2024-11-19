@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef} from "react";
 import { useGlobalDispatch, useGlobalState } from "../../stateProviders/GlobalStateProvider";
+import { useLocation } from "react-router-dom";
 
 export const GlobalModal = () => {
     const globalModalRef = useRef<HTMLDialogElement | null>(null);
     const globalState = useGlobalState();
     const globalDispatch = useGlobalDispatch()
+    const location = useLocation();
 
     useEffect( () => {
         if(!globalModalRef.current)return;
@@ -15,6 +17,13 @@ export const GlobalModal = () => {
         }
     },[globalState.modalOpen])
 
+    //close the modal on route change
+    useEffect( () => {
+        return () => {
+            globalDispatch({modalOpen:false,modalContent:null})
+        }
+    },[location])
+    
     return (
         <dialog ref={globalModalRef} className='shadow-lg top-[50%] translate-y-[-50%] w-[75%] max-w-[600px] z-[10]'>
             <img className='absolute bottom-full top-[-70px] rotate-[-15deg] w-[100px]' src='/assets/totoro.png'/>

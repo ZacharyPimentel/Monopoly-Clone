@@ -29,7 +29,12 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
     }
     public async Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams)
     {
-        var sql = "SELECT * FROM Player WHERE 1=1"; // 1=1 is a common pattern to simplify dynamic WHERE clauses
+        var sql = @"
+            SELECT p.*, pi.iconurl 
+            FROM Player p
+            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
+            WHERE 1=1
+        ";
 
         var parameters = new DynamicParameters();
 
@@ -37,6 +42,11 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             sql += " AND Active = @IsActive";
             parameters.Add("IsActive", searchParams.Active.Value);
+        }
+        if(searchParams.GameId != null)
+        {
+            sql += " AND GameId = @GameId";
+            parameters.Add("GameId", searchParams.GameId);
         }
         
         sql += " ORDER BY Id";
@@ -178,8 +188,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         var uuid = Guid.NewGuid().ToString();
         
         var addNewPlayer = @"
-            INSERT INTO Player (Id,PlayerName,IconId)
-            VALUES (@Id,@PlayerName, @IconId)
+            INSERT INTO Player (Id,PlayerName,IconId,GameId)
+            VALUES (@Id, @PlayerName, @IconId, @GameId)
         ";
 
         var parameters = new 
@@ -187,6 +197,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             Id = uuid,
             createparams.PlayerName,
             createparams.IconId,
+            createparams.GameId
         };
 
         await db.ExecuteAsync(addNewPlayer,parameters);

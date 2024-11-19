@@ -1,10 +1,9 @@
-import { Fragment, useEffect, useState } from "react"
+import { useState } from "react"
 import { useApi } from "../../../hooks/useApi"
 import { Player } from "../../../types/controllers/Player";
-import { iconMappings } from "../../../helpers/IconMappings";
 import { useGameState } from "../../../stateProviders/GameStateProvider";
 import React from "react";
-import { useGlobalDispatch, useGlobalState } from "../../../stateProviders/GlobalStateProvider";
+import { useGlobalDispatch} from "../../../stateProviders/GlobalStateProvider";
 import { ActionButtons } from "../ActionButtons";
 import { useWebSocket } from "../../../hooks/useWebSocket";
 import { FetchWrapper } from "../../FetchWrapper";
@@ -18,6 +17,7 @@ export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
     const globalDispatch = useGlobalDispatch();
     const [selectedIconId,setSelectedIconId] = useState(player.iconId);
     const [name,setName] = useState(player.playerName);
+    const {invoke} = useWebSocket();
 
     return (
         <div className='flex flex-col gap-[20px]'>
@@ -51,7 +51,7 @@ export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
             </div>
             <ActionButtons 
                 confirmCallback={async() => {
-                    webSocket.player.update(player.id,{
+                    invoke.player.update(player.id,{
                         iconId:selectedIconId,
                         playerName: name
                     })

@@ -2,11 +2,11 @@ import { ReactNode } from "react"
 import { Game } from "../controllers/Game"
 import { Player } from "../controllers/Player"
 import { BoardSpace } from "../controllers/BoardSpace"
+import { SocketPlayer } from "../websocket/Player"
 
 export type GameState = {
-    ws: signalR.HubConnection
     players:Player[]
-    currentSocketPlayer: {playerId:string,socketId:string} | null
+    currentSocketPlayer: SocketPlayer | null
     modalOpen:boolean
     modalContent:ReactNode | null
     theme:Theme
@@ -15,6 +15,7 @@ export type GameState = {
     lastDiceRoll:number[] | null
     rolling:boolean
     boardSpaces:BoardSpace[]
+    gameId:string
 }
 
 export type Theme = {

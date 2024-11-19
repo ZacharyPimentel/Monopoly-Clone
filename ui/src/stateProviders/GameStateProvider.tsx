@@ -1,25 +1,13 @@
-import { createContext, useCallback, useContext,useEffect,useState } from 'react';
+import { createContext, useCallback, useContext,useState } from 'react';
 import { GameState } from '../types/stateProviders/GameState';
 import { RichUpTheme } from '../themes/RichUpTheme';
-import { Game } from '../types/controllers/Game';
-import { LoadingSpinner } from '../globalComponents/LoadingSpinner';
-import { useGlobalDispatch } from './GlobalStateProvider';
-import { PlayerCreateModal } from '../globalComponents/GlobalModal/modalContent/PlayerCreateModal';
-import { Player } from '../types/controllers/Player';
-import { useApi } from '../hooks/useApi';
-import { BoardSpace } from '../types/controllers/BoardSpace';
 
 const GameStateContext = createContext<any | null>(null);
 const GameDispatchContext = createContext<(newState:Partial<GameState>) => void>(() => {});
 
 export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
 
-  const globalDispatch = useGlobalDispatch();
-  const api = useApi()
-
   const initialGameState:GameState = {
-    //@ts-ignore
-    ws: window.socketConnection,
     players:[],
     currentPlayer:null,
     gameInProgress:false,
@@ -29,7 +17,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     currentSocketPlayer:null,
     lastDiceRoll:null,
     rolling:false,
-    boardSpaces:[]
+    boardSpaces:[],
+    gameId:''
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -38,48 +27,6 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
         return {...prevState, ...newGameState}
     })
   },[])
-
-  useEffect( () => {
-      if(!gameState.ws)return
-
-      gameState.ws.on("UpdateGameState", (gameState:Game) => {
-          updateGameState({gameState})
-      });
-
-      gameState.ws.on("UpdateCurrentPlayer", (currentSocketPlayer) => {
-          updateGameState({currentSocketPlayer})
-      });       
-      gameState.ws.on("UpdatePlayers", (players:Player[]) => {
-          updateGameState({players})
-      });
-      gameState.ws.on("UpdateLastDiceRoll", (lastDiceRoll:number[]) => {
-        updateGameState({lastDiceRoll})
-      })
-      gameState.ws.on("UpdateBoardSpaces", (boardSpaces:BoardSpace[]) => {
-          updateGameState({boardSpaces})
-      });
-  },[]);
-
-  useEffect( () => {
-    if(!gameState.currentSocketPlayer) return
-
-    if(!gameState.currentSocketPlayer.playerId){
-      globalDispatch({modalOpen:true,modalContent:<PlayerCreateModal/>})
-    }
-  },[gameState.currentSocketPlayer])
-
-  useEffect( () => {
-    (async () => {
-      const boardSpaces = await api.boardSpace.getAll();
-      console.log('77',boardSpaces)
-      updateGameState({boardSpaces})
-    })()
-  },[])
-
-  //only let people through once they've connected to the socket
-  if(!gameState || !gameState.currentSocketPlayer || !gameState.boardSpaces){
-    return <div className='flex justify-center items-center h-full w-full'><LoadingSpinner/></div>
-  }
 
   return (
     <GameStateContext.Provider value={gameState}>

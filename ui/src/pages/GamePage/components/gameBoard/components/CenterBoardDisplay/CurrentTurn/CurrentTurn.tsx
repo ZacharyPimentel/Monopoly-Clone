@@ -31,8 +31,6 @@ export const CurrentTurn = () => {
         }
         return allowed
     },[player])
-
-    console.log(player)
     
     return (
         <div className='flex flex-col gap-[50px]'>

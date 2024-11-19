@@ -38,6 +38,10 @@
     color:tomato;
 }
 
+.custom-breakpoint-container{
+    @apply px-[20px] md:px-[32px] max-w-[1300px] mx-auto
+}
+
 /*Styles for game tile text rotations*/
 .tile-top{
     flex-direction: column;

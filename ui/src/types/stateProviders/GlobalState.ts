@@ -1,4 +1,5 @@
 import { ReactNode } from "react"
+import { Game } from "../controllers/Game"
 
 export type GlobalState = {
     modalOpen:boolean
@@ -6,4 +7,7 @@ export type GlobalState = {
     toastOpen:boolean,
     toastStyle:'success' | 'info' | 'error',
     toastMessages:string[],
+    ws: signalR.HubConnection
+    availableGames:Game[]
+    socketConnected:boolean
 }

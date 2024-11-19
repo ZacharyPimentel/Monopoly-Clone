@@ -42,9 +42,7 @@ export const ActionButtons:React.FC<{
                 setLoading(false);
                 setSuccess(true);
                 setError(false);
-                setTimeout( () => {
-                    globalDispatch({modalOpen:false,modalContent:null})
-                },1000)
+                globalDispatch({modalOpen:false,modalContent:null})
             }).catch( (error: any) => {
                 console.log(error)
                 setLoading(false);

@@ -3,7 +3,52 @@ using Dapper;
 
 public class GameRepository(IDbConnection db) : IGameRepository
 {
-    public async Task<Game> GetByIdAsync( int gameId)
+    public async Task<Game> Create(GameCreateParams gameCreateParams)
+    {
+
+        var uuid = Guid.NewGuid().ToString();
+        
+        var addNewGame = @"
+            INSERT INTO GAME (Id,GameName)
+            VALUES (@Id,@GameName)
+        ";
+
+        var parameters = new 
+        {
+            Id = uuid,
+            gameCreateParams.GameName,
+        };
+
+        await db.ExecuteAsync(addNewGame,parameters);
+
+        var newGame = await GetByIdAsync(uuid);
+        return newGame;
+    }
+    public async Task<List<Game>> Search(GameWhereParams searchParams)
+    {
+        var sql = @"
+        SELECT 
+            g.*, COUNT(p.Id) AS ActivePlayerCount 
+            FROM Game g
+            LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
+            WHERE 1=1";
+
+        var parameters = new DynamicParameters();
+
+        if (searchParams.GameName != null)
+        {
+            parameters.Add(" AND g.GameName = @GameName", searchParams.GameName);
+        }
+        
+        sql += @"
+            GROUP BY g.Id
+            ORDER BY g.Id
+        ";
+
+        var games = await db.QueryAsync<Game>(sql, parameters);
+        return games.AsList();
+    }
+    public async Task<Game> GetByIdAsync( string gameId)
     {
         //get the current game, join the current player turn from TurnOrder
         var sql = @"
@@ -19,10 +64,10 @@ public class GameRepository(IDbConnection db) : IGameRepository
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
                 WHERE g.Id = @Id
         ";
-        var game = await db.QuerySingleAsync<Game>(sql,gameId);
+        var game = await db.QuerySingleAsync<Game>(sql,new {Id = gameId});
         return game;
     }
-    public async Task<bool> Update(int id,GameUpdateParams updateParams)
+    public async Task<bool> Update(string id,GameUpdateParams updateParams)
     {
         var currentGame = await GetByIdAsync(id) ?? throw new Exception("Game not found");
         

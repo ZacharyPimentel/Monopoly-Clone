@@ -77,22 +77,32 @@ public class DatabaseInitializer
             var sql = @"
 
                 CREATE TABLE IF NOT EXISTS GAME(
-                    Id Integer PRIMARY KEY,
+                    Id TEXT PRIMARY KEY,
+                    GameName TEXT UNIQUE,
                     InLobby BOOLEAN DEFAULT true,
                     GameOver BOOLEAN DEFAULT false,
                     GameStarted BOOLEAN DEFAULT false,
-                    StartingMoney Integer DEFAULT 1500
+                    StartingMoney INTEGER DEFAULT 1500,
+                    DiceOneLastRoll INTEGER DEFAULT 1,
+                    DiceTwoLastRoll INTEGER DEFAULT 1
                 );
-                INSERT INTO GAME (ID) values(1);
+
+                CREATE TABLE IF NOT EXISTS LASTDICEROLL(
+                    Id INTEGER PRIMARY KEY,
+                    GameId TEXT,
+                    FOREIGN KEY (GameId) REFERENCES GAME(Id),
+                    DiceOne INTEGER DEFAULT 1,
+                    DiceTwo INTEGER DEFAULT 1
+                );
 
                 CREATE TABLE IF NOT EXISTS PLAYERICON(
-                    Id Integer PRIMARY KEY,
-                    IconUrl text
+                    Id INTEGER PRIMARY KEY,
+                    IconUrl TEXT
                 );
 
                 CREATE TABLE IF NOT EXISTS BOARDSPACECATEGORY(
                     Id INTEGER PRIMARY KEY,
-                    CategoryName Text
+                    CategoryName TEXT
                 );
 
                 CREATE TABLE IF NOT EXISTS BOARDSPACE(
@@ -113,7 +123,9 @@ public class DatabaseInitializer
                     IsReadyToPlay BOOLEAN DEFAULT false,
                     RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
                     TurnComplete BOOLEAN DEFAULT true,
-                    InJail BOOLEAN DEFAULT false
+                    InJail BOOLEAN DEFAULT false,
+                    GameId TEXT,
+                    FOREIGN KEY (GameId) REFERENCES Game(Id)
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -140,9 +152,9 @@ public class DatabaseInitializer
 
                 CREATE TABLE IF NOT EXISTS TURNORDER(
                     Id INTEGER PRIMARY KEY,
-                    PlayerId text,
+                    PlayerId TEXT,
                     FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
-                    GameId INTEGER,
+                    GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES GAME(Id),
                     PlayOrder INTEGER,
                     HasPlayed BOOLEAN DEFAULT false

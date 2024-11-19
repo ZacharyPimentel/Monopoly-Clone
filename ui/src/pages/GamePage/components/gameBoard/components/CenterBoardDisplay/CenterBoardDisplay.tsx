@@ -6,7 +6,7 @@ import { NotCurrentTurn } from "./NotCurrentTurn/NotCurrentTurn";
 export const CenterBoardDisplay = () => {
 
     const gameState = useGameState();
-    const {isCurrentTurn} = usePlayer();
+    const {isCurrentTurn,player} = usePlayer();
 
     if(gameState.gameState?.inLobby){
         return (
@@ -18,7 +18,7 @@ export const CenterBoardDisplay = () => {
 
     return (
         <div className='rounded flex justify-center items-center w-full h-full'>
-            {isCurrentTurn
+            {player && isCurrentTurn
                 ? <CurrentTurn/>
                 : <NotCurrentTurn/>
             }

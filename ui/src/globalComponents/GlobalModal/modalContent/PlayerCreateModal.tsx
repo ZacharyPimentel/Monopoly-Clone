@@ -4,6 +4,7 @@ import { useGameState } from "../../../stateProviders/GameStateProvider";
 import { useGlobalDispatch } from "../../../stateProviders/GlobalStateProvider";
 import { FetchWrapper } from "../../FetchWrapper";
 import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
+import { useWebSocket } from "../../../hooks/useWebSocket";
 
 export const PlayerCreateModal = () => {
 
@@ -13,6 +14,9 @@ export const PlayerCreateModal = () => {
     const [selectedInactivePlayerId,setSelectedInactivePlayerId] = useState('');
     const [selectedIconId,setSelectedIconId] = useState(0)
     const [name,setName] = useState('');
+    const {invoke} = useWebSocket();
+
+    console.log(gameState.players)
 
     const inactivePlayers = useMemo( () => 
         gameState.players.filter((player) => !player.active)
@@ -36,7 +40,7 @@ export const PlayerCreateModal = () => {
                             </button>
                             <button 
                                 onClick={() => {
-                                    gameState.ws.invoke('Reconnectplayer',player.id);
+                                    invoke.player.reconnect(player.id);
                                     globalDispatch({modalContent:null,modalOpen:false})
                                 }}
                                 className='bg-totorodarkgreen text-white w-fit p-[10px] min-w-[100px] rounded disabled:bg-[grey]'>
@@ -78,7 +82,7 @@ export const PlayerCreateModal = () => {
             </div>
             <button
                 onClick={() => {
-                    gameState.ws.invoke("AddNewPlayer",name,selectedIconId);
+                    invoke.player.create(name,selectedIconId,gameState.gameId);
                     globalDispatch({modalOpen:false,modalContent:null})
                 }}
                 disabled={name === '' || selectedIconId === 0} 

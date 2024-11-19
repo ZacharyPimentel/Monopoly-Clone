@@ -2,6 +2,7 @@ public class PlayerWhereParams
 {
     public bool? Active { get; set; }
     public bool? InCurrentGame { get; set; }
+    public string? GameId { get; set; }
 }
 public class PlayerUpdateParams
 {
@@ -22,6 +23,7 @@ public class PlayerCreateParams
 {
     public required string PlayerName { get; set;}
     public required int IconId { get; set;}
+    public required string GameId { get; set;}
 }
 
 public interface IPlayerRepository

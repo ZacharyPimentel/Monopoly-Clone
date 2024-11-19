@@ -1,33 +1,69 @@
 import { useGameState } from "../stateProviders/GameStateProvider"
+import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PlayerUpdateParams } from "../types/controllers/Player";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 
 export const useWebSocket = () => {
+    const globalState = useGlobalState();
     const gameState = useGameState();
-    
     return {
-        //game events not tied to a table
-        gameState:{
-            setLastDiceRoll: (rolls:number[]) => {
-                gameState.ws.invoke("SetLastDiceRoll",rolls)
+        invoke:{
+            //game events not tied to a table
+            gameState:{
+                setLastDiceRoll: (rolls:number[]) => {
+                    globalState.ws.invoke("SetLastDiceRoll",rolls)
+                },
+                updateRules: (rule:Partial<Game>) => {
+                    globalState.ws.invoke("UpdateRules",gameState.gameState?.id,rule)
+                },
+                endTurn: (gameId:number) => {
+                    globalState.ws.invoke("endTurn",gameId);
+                }
             },
-            updateRules: (rule:Partial<Game>) => {
-                gameState.ws.invoke("UpdateRules",gameState.gameState?.id,rule)
+            game:{
+                getAll: () => {
+                    globalState.ws.invoke('GameGetAll');
+                },
+                getById: (gameId:string) => {
+                    globalState.ws.invoke('GameGetById',gameId)
+                },
+                getLobbies: () => {
+                    globalState.ws.invoke("GameGetLobbies");
+                },
+                create: (gameName:string) => {
+                    globalState.ws.invoke('GameCreate',{gameName});
+                },
+                join: (gameId:string) => {
+                    globalState.ws.invoke('GameJoin',gameId)
+                }
             },
-            endTurn: (gameId:number) => {
-                gameState.ws.invoke("endTurn",gameId);
+            player:{
+                getAll: () => {
+                    globalState.ws.invoke("PlayerGetAll")
+                },
+                update: (playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
+                    globalState.ws.invoke("PlayerUpdate",playerId,updateParams)
+                },
+                reconnect: (playerId:string) => {
+                    globalState.ws.invoke('PlayerReconnect',playerId)
+                },
+                create:(playerName:string,iconId:number,gameId:string) => {
+                    globalState.ws.invoke('PlayerCreate',{playerName,iconId,gameId})
+                }
+            },
+            property:{
+                update:(propertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
+                    globalState.ws.invoke("UpdateProperty",propertyId,updateParams)
+                }
             }
         },
-        player:{
-            update: (playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
-                gameState.ws.invoke("UpdatePlayer",playerId,updateParams)
-            }
+        listen: (eventName:string, callback:(data:any) => void) => {
+            globalState.ws.on(eventName,callback)
         },
-        property:{
-            update:(propertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
-                gameState.ws.invoke("UpdateProperty",propertyId,updateParams)
-            }
+        stopListen: (eventName:string, callback:(data:any) => void) => {
+            globalState.ws.off(eventName,callback)
         }
+
     }
 }

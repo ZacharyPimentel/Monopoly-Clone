@@ -40,10 +40,11 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
     );
 }
 
+//add repositories for db calls
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IGameRepository,GameRepository>();
 builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
-    
+
 var app = builder.Build();
 
 //initialize all the tables for the app if needed
@@ -62,7 +63,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 //app.UseAuthorization();
-app.MapHub<GameHub>("/monopoly");
+app.MapHub<MonopolyHub>("/monopoly");
 app.MapControllers();
 app.UseCors("CorsPolicy");
 app.Run();

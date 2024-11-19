@@ -1,5 +1,7 @@
-import { createContext, useCallback, useContext,useState } from 'react';
+import { createContext, useCallback, useContext,useEffect,useState } from 'react';
 import { GlobalState } from '../types/stateProviders/GlobalState';
+import { LoadingSpinner } from '../globalComponents/LoadingSpinner';
+import * as signalR from '@microsoft/signalr';
 
 const GlobalStateContext = createContext<any | null>(null);
 const GlobalDispatchContext = createContext<(newState:Partial<GlobalState>) => void>(() => {});
@@ -14,17 +16,39 @@ export const GlobalStateProvider:React.FC<{children:React.ReactNode}> = ({ child
     toastOpen:false,
     toastStyle:'success',
     toastMessages:[],
+    //socket connection
+    //@ts-ignore
+    ws: window.socketConnection,
+    socketConnected:false,
+    availableGames:[]
   }
 
-  const [gameState, setGameState] = useState<GlobalState>(initialGlobalState)
-  const updateGlobalState = useCallback((newGameState:Partial<GlobalState>) => {
-    setGameState( (prevState) => {
-        return {...prevState, ...newGameState}
+  const [globalState, setglobalState] = useState<GlobalState>(initialGlobalState)
+  const updateGlobalState = useCallback((newglobalState:Partial<GlobalState>) => {
+    setglobalState( (prevState) => {
+        return {...prevState, ...newglobalState}
     })
   },[])
 
+  //set up the web socket connection
+  useEffect( () => {
+    const connection = new signalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5014/monopoly",{
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets
+    })
+    .build();
+    connection.start()
+      .then( () => {
+        updateGlobalState({ws:connection})
+      })
+  },[])
+
+  //wait for the socket connection to establish before loading the app
+  if(!globalState.ws)return <div className='flex w-full h-full justify-center items-center'><LoadingSpinner/></div>
+
   return (
-    <GlobalStateContext.Provider value={gameState}>
+    <GlobalStateContext.Provider value={globalState}>
       <GlobalDispatchContext.Provider value={updateGlobalState}>
         {children}
       </GlobalDispatchContext.Provider>
