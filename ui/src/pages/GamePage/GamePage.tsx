@@ -11,6 +11,7 @@ import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "./modal/PlayerCreateModal";
+import { BoardSpace } from "../../types/controllers/BoardSpace";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -25,11 +26,13 @@ export const GamePage = () => {
 
         const playerUpdateCallback = (currentSocketPlayer:SocketPlayer) => gameDispatch({currentSocketPlayer})
         const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
-        const gameUpdateCallback = (game:Game) => gameDispatch({gameState:game})
+        const gameUpdateCallback = (game:Game) => gameDispatch({game})
+        const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
 
         listen('game:update',gameUpdateCallback)
         listen('player:update',playerUpdateCallback)
         listen('player:updateGroup',playerUpdateAllCallback)
+        listen('boardSpace:update', boardSpaceUpdateCallback)
 
         invoke.game.join(gameId!);
 
@@ -45,12 +48,13 @@ export const GamePage = () => {
             stopListen('game:update',gameUpdateCallback)
             stopListen('player:update',playerUpdateCallback)
             stopListen('player:updateGroup',playerUpdateAllCallback)
+            stopListen('boardSpace:update', boardSpaceUpdateCallback)
             invoke.game.leave(gameId!);
         }
     },[])
 
     useEffect( () => {
-        if(!gameState.currentSocketPlayer || !gameState.gameState) return
+        if(!gameState.currentSocketPlayer || !gameState.game) return
         if(!gameState.currentSocketPlayer.playerId){
           globalDispatch({modalOpen:true,modalContent:<PlayerCreateModal/>})
         }

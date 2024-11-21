@@ -14,8 +14,8 @@ export const Rules = () => {
                 <li className='flex gap-[20px]'>
                     <p>Starting Money:</p>
                     <select 
-                        disabled={gameState.currentSocketPlayer?.playerId && !gameState.gameState?.gameStarted ? false : true} 
-                        value={gameState.gameState?.startingMoney} 
+                        disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
+                        value={gameState.game?.startingMoney} 
                         onChange={(e) => invoke.game.update(gameState.gameId,{startingMoney:parseInt(e.target.value)})}
                     >
                         {startingMoneyOptions.map(option => {

@@ -134,8 +134,7 @@ public class DatabaseInitializer
                     BoardSpaceId INTEGER,
                     FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
                     UpgradeCost INTEGER,
-                    UpgradeCount INTEGER DEFAULT 0,
-                    Mortgaged BOOLEAN DEFAULT false
+                    UpgradeCount INTEGER DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTYRENT(
@@ -164,7 +163,8 @@ public class DatabaseInitializer
                     FOREIGN KEY (GameId) REFERENCES Game(Id),
                     PropertyId INTEGER,
                     FOREIGN KEY (PropertyId) REFERENCES Property(Id),
-                    UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0
+                    UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0,
+                    Mortgaged BOOLEAN DEFAULT false
                 )
             ";
             db.Execute(sql,transaction:transaction);

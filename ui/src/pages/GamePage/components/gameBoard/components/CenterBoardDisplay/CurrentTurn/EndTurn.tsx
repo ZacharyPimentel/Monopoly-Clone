@@ -3,14 +3,14 @@ import { useGameState } from "../../../../../../../stateProviders/GameStateProvi
 
 export const EndTurn = () => {
     
-    const websocket = useWebSocket();
+    const {invoke} = useWebSocket();
     const gameState = useGameState()
 
     return (
         <button
             onClick={() => {
-                if(!gameState.gameState)return
-                websocket.gameState.endTurn(gameState.gameState.id)
+                if(!gameState.game)return
+                invoke.game.endTurn();
             }}
             className='bg-white p-[5px]'
         >

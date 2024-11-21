@@ -10,9 +10,11 @@ export type Property = {
     upgradeCount:number
     setNumber:number
     propertyRents:PropertyRent[]
+    mortgaged:boolean
 }
 
 export type PropertyUpdateParams = {
     upgradeCount:number,
     playerId:string
+    mortgaged:boolean
 }

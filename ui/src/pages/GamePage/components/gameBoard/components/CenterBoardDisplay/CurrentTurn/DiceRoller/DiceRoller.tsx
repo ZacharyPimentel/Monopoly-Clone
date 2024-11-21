@@ -51,8 +51,8 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
     return (
         <div className='flex flex-col items-center gap-[50px]'>
             <div className='flex gap-[50px]'>
-                <Die value={gameState.gameState?.diceOne || 1}/>
-                <Die value={gameState.gameState?.diceTwo || 1}/>
+                <Die value={gameState.game?.diceOne || 1}/>
+                <Die value={gameState.game?.diceTwo || 1}/>
             </div>
         </div>
     )

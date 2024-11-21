@@ -13,9 +13,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     gameInProgress:false,
     theme: RichUpTheme,
     boardRotation:90,
-    gameState:null,
+    game:null,
     currentSocketPlayer:null,
-    lastDiceRoll:null,
     rolling:false,
     boardSpaces:[],
     gameId:'',
@@ -27,6 +26,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
         return {...prevState, ...newGameState}
     })
   },[])
+
+  console.log(gameState.boardSpaces)
 
   return (
     <GameStateContext.Provider value={gameState}>

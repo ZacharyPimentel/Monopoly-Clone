@@ -10,6 +10,7 @@ public class MonopolyHub(
     IPlayerRepository playerRepository,
     IGameRepository gameRepository,
     IPropertyRepository propertyRepository,
+    IGamePropertyRepository gamePropertyRepository,
     IDbConnection db
 ) : Hub{
 
@@ -199,6 +200,7 @@ public class MonopolyHub(
         await SendToSelf("game:update",game);
         await SendToSelf("player:update",currentSocketPlayer);
         await SendToSelf("player:updateGroup",groupPlayers);
+        await BoardSpaceGetAll(gameId);
     }
     public async Task GameLeave(string gameId)
     {
@@ -221,21 +223,68 @@ public class MonopolyHub(
             Game game = await gameRepository.GetByIdAsync(gameId);
             await SendToGroup("game:Update",game);
     }
-
-    //=======================================================
-    // Property
-    //=======================================================
-    public async Task PropertyUpdate(int propertyId, PropertyUpdateParams updateParams)
+    public async Task GameEndTurn()
     {
-        await propertyRepository.Update(propertyId,updateParams);
-        
+        SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+
+        if(currentSocketPlayer.PlayerId == null || currentSocketPlayer.GameId == null)
+        {
+            throw new Exception("Socket player is missing data, PlayerId or GameId");
+        }
+
+        var gameId = currentSocketPlayer.GameId;
+        Game currentGame = await gameRepository.GetByIdAsync(gameId);
+
+        var markPlayerAsPlayed = @"
+            UPDATE TurnOrder
+            SET 
+                HasPlayed = TRUE
+            WHERE
+                GameId = @GameId AND PlayerId = @PlayerId
+        ";
+        var parameters = new
+        {
+            currentSocketPlayer.PlayerId,
+            GameId = currentGame.Id,
+        };
+        await db.ExecuteAsync(markPlayerAsPlayed,parameters);
+
+        //check if everyone has taken their turn, reset if so
+        var notPlayedCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE");
+        if(notPlayedCount  == 0)
+        {
+            await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
+            await playerRepository.UpdateMany(
+                new PlayerWhereParams {InCurrentGame = true},
+                new PlayerUpdateParams { RollCount = 0}
+            );
+        }
+
+        await playerRepository.Update(currentSocketPlayer.PlayerId, new PlayerUpdateParams{TurnComplete = false});
+
+        var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
+        var updatedGame = await gameRepository.GetByIdAsync(gameId);
+        await SendToGroup("player:updateGroup",groupPlayers);
+        await SendToGroup("game:update",updatedGame);
+    }
+    public async Task BoardSpaceGetAll(string gameId)
+    {
         var sql = @"
             SELECT * FROM BoardSpace;
-            SELECT * FROM Property;
+            SELECT 
+                p.*, 
+                gp.Id AS GamePropertyId, 
+                gp.PlayerId, 
+                gp.UpgradeCount, 
+                gp.Mortgaged, 
+                gp.GameId
+            FROM Property p
+            LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
+            WHERE gp.GameId = @GameId;
             SELECT * FROM PropertyRent;
         ";
-        
-        var multi = await db.QueryMultipleAsync(sql);
+
+        var multi = await db.QueryMultipleAsync(sql, new {GameId = gameId});
         var boardSpaces = multi.Read<BoardSpace>().ToList();
         var properties = multi.Read<Property>().ToList();
         var propertyRents = multi.Read<PropertyRent>().ToList();
@@ -253,7 +302,54 @@ public class MonopolyHub(
             var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
             property?.PropertyRents.Add(rent);
         }
-        await Clients.All.SendAsync("UpdateBoardSpaces",boardSpaces);
+
+        await SendToSelf("boardSpace:update",boardSpaces);
+    }
+
+    //=======================================================
+    // Property
+    //=======================================================
+    public async Task GamePropertyUpdate(int gamePropertyId, GamePropertyUpdateParams updateParams)
+    {
+        await gamePropertyRepository.Update(gamePropertyId,updateParams);
+        GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
+        
+        var sql = @"
+            SELECT * FROM BoardSpace;
+            SELECT 
+                p.*,
+                gp.Id AS GamePropertyId, 
+                gp.PlayerId, 
+                gp.UpgradeCount, 
+                gp.Mortgaged, 
+                gp.GameId
+            FROM Property p
+            LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
+            WHERE gp.GameId = @GameId
+            ;
+            SELECT * FROM PropertyRent;
+        ";
+
+        var multi = await db.QueryMultipleAsync(sql, new { gameProperty.GameId});
+        var boardSpaces = multi.Read<BoardSpace>().ToList();
+        var properties = multi.Read<Property>().ToList();
+        var propertyRents = multi.Read<PropertyRent>().ToList();
+        // Map properties to board spaces
+        foreach (var property in properties)
+        {
+            var boardSpace = boardSpaces.FirstOrDefault(bs => bs.Id == property.BoardSpaceId);
+            if (boardSpace != null)
+                boardSpace.Property = property;
+        }
+
+        // Map property rents to properties
+        foreach (var rent in propertyRents)
+        {
+            var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
+            property?.PropertyRents.Add(rent);
+        }
+
+        await SendToGroup("boardSpace:update",boardSpaces);
     }
 
     //=======================================================

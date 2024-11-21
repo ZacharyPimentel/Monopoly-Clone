@@ -16,7 +16,7 @@ export const PlayerList = () => {
                     {gameState.players.map( (player) => {
                         const isCurrentPlayer = player.id === gameState.currentSocketPlayer?.playerId;
                         return (
-                            gameState.gameState?.gameStarted 
+                            gameState.game?.gameStarted 
                                 ? <PlayerInGameListitem player={player} key={player.id}/>
                                 : isCurrentPlayer
                                     ? <CurrentPlayerInLobbyListItem key={player.id} player={player}/>

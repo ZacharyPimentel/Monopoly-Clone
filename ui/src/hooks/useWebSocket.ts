@@ -16,7 +16,7 @@ export const useWebSocket = () => {
                     globalState.ws.invoke("SetLastDiceRoll",rolls)
                 },
                 updateRules: (rule:Partial<Game>) => {
-                    globalState.ws.invoke("UpdateRules",gameState.gameState?.id,rule)
+                    globalState.ws.invoke("UpdateRules",gameState.game?.id,rule)
                 },
                 endTurn: (gameId:number) => {
                     globalState.ws.invoke("endTurn",gameId);
@@ -43,6 +43,9 @@ export const useWebSocket = () => {
                 },
                 update: (gameId:string,gameUpdateParams:GameUpdateParams) => {
                     globalState.ws.invoke('GameUpdate',gameId,gameUpdateParams);
+                },
+                endTurn: () => {
+                    globalState.ws.invoke('GameEndTurn');
                 }
             },
             lastDiceRoll:{
@@ -64,9 +67,9 @@ export const useWebSocket = () => {
                     globalState.ws.invoke('PlayerCreate',{playerName,iconId,gameId})
                 }
             },
-            property:{
-                update:(propertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
-                    globalState.ws.invoke("PropertyUpdate",propertyId,updateParams)
+            gameProperty:{
+                update:(gamePropertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
+                    globalState.ws.invoke("GamePropertyUpdate",gamePropertyId,updateParams)
                 }
             }
         },

@@ -8,7 +8,7 @@ export const CenterBoardDisplay = () => {
     const gameState = useGameState();
     const {isCurrentTurn,player} = usePlayer();
 
-    if(gameState.gameState?.inLobby){
+    if(gameState.game?.inLobby){
         return (
             <div className='rounded flex justify-center items-center w-full h-full'>
                 <p className='text-white font-bold'>Waiting to start the game until all players are ready.</p>

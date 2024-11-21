@@ -5,4 +5,5 @@ public class GameProperty
     public required string GameId { get; set; }
     public required int PropertyId { get; set; }
     public int UpgradeCount { get; set; } = 0;
+    public bool Mortgaged {get; set; } = false;
 }

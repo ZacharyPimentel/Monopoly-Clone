@@ -10,7 +10,7 @@ export const PurchaseButton:React.FC<{property:Property,player:Player}> = ({prop
         <button
             disabled={player.money < property.purchasePrice}
             onClick={() => {
-                invoke.property.update(property.id,{playerId:player.id})
+                invoke.gameProperty.update(property.id,{playerId:player.id})
                 invoke.player.update(player.id,{money:player.money - property.purchasePrice})
             }}
             className='bg-white p-[5px]'

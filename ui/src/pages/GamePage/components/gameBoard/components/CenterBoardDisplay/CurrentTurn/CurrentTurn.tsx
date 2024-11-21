@@ -12,6 +12,7 @@ export const CurrentTurn = () => {
 
     const gameState = useGameState();
     const {player,currentBoardSpace} = usePlayer();
+    console.log(player)
 
     useLandedOnSpace();
 
@@ -22,15 +23,15 @@ export const CurrentTurn = () => {
         if(player.rollCount > 3){
             allowed = false;
         }
-        if(!gameState.lastDiceRoll){
-            return allowed
-        }
         //if player has not exceeded 3 rolls, but didn't roll doubles, not allowed to roll more
-        if(player.rollCount < 3 && player.rollCount !== 0 && (gameState.lastDiceRoll[0] !== gameState.lastDiceRoll[1])){
+        if(player.rollCount < 3 && player.rollCount !== 0 && (gameState.game?.diceOne !== gameState.game?.diceTwo)){
             allowed = false
         }
         return allowed
     },[player])
+
+    console.log(gameState.game)
+    console.log(allowedToRoll)
     
     return (
         <div className='flex flex-col gap-[50px]'>

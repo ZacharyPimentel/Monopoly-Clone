@@ -4,8 +4,7 @@ import { DiceRoller } from "../CurrentTurn/DiceRoller/DiceRoller"
 export const NotCurrentTurn = () => {
 
     const gameState = useGameState();
-
-    const currentTurnPlayer = gameState.players.find( (player) => player.id === gameState.gameState?.currentPlayerTurn)
+    const currentTurnPlayer = gameState.players.find( (player) => player.id === gameState.game?.currentPlayerTurn)
 
     return (
         <div className='flex flex-col gap-[50px]'>
