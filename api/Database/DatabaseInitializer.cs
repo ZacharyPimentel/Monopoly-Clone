@@ -28,6 +28,17 @@ public class DatabaseInitializer
             db.Execute("INSERT INTO BOARDSPACE (ID, BoardSpaceCategoryId) VALUES (@Id, @BoardSpaceCategoryId)",boardSpace);
         }
 
+        //theme
+        db.Execute("INSERT INTO THEME (ID,ThemeName) values (@Id,@ThemeName)", new {Id = 1, ThemeName = "Monopoly"});
+
+        //board space theme
+        var boardSpaceThemeJsonData = File.ReadAllText("./Database/SeedData/MonopolyTheme.json");
+        var boardSpaceTheme = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData);
+        foreach(var boardSpace in boardSpaceTheme)
+        {
+            db.Execute("INSERT INTO BOARDSPACETHEME (ID, ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@Id, @ThemeId,@BoardSpaceId,@BoardSpaceName)",boardSpace);
+        }
+
         //properties
         var propertyJsonData = File.ReadAllText("./Database/SeedData/Property.json");
         var properties = JsonConvert.DeserializeObject<List<Property>>(propertyJsonData);
@@ -76,13 +87,22 @@ public class DatabaseInitializer
         {
             var sql = @"
 
+                CREATE TABLE IF NOT EXISTS THEME(
+                    Id INTEGER PRIMARY KEY,
+                    ThemeName TEXT,
+                    PrimaryColor TEXT,
+                    SecondaryColor TEXT
+                );
+
                 CREATE TABLE IF NOT EXISTS GAME(
                     Id TEXT PRIMARY KEY,
                     GameName TEXT UNIQUE,
                     InLobby BOOLEAN DEFAULT true,
                     GameOver BOOLEAN DEFAULT false,
                     GameStarted BOOLEAN DEFAULT false,
-                    StartingMoney INTEGER DEFAULT 1500
+                    StartingMoney INTEGER DEFAULT 1500,
+                    ThemeId INTEGER DEFAULT 1,
+                    FOREIGN KEY (ThemeId) REFERENCES THEME(Id)
                 );
 
                 CREATE TABLE IF NOT EXISTS LASTDICEROLL(
@@ -107,6 +127,15 @@ public class DatabaseInitializer
                     Id INTEGER PRIMARY KEY,
                     BoardSpaceCategoryId INTEGER,
                     FOREIGN KEY (BoardSpaceCategoryId) REFERENCES BoardSpaceCategory(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS BOARDSPACETHEME(
+                    ID Integer PRIMARY KEY,
+                    ThemeId INTEGER,
+                    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+                    BoardSpaceId INTEGER,
+                    FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
+                    BoardSpaceName Text
                 );
 
                 CREATE TABLE IF NOT EXISTS PLAYER(

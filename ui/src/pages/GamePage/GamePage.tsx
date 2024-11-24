@@ -57,8 +57,6 @@ export const GamePage = () => {
         }
     },[])
 
-    console.log(gameState.gameLogs)
-
     useEffect( () => {
         if(!gameState.currentSocketPlayer || !gameState.game) return
         if(!gameState.currentSocketPlayer.playerId){

@@ -1,11 +1,8 @@
 namespace api.hub
 {
     using System.Data;
-    using System.Data.Common;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
-    using Serilog;
-
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
         IPlayerRepository playerRepository,
@@ -285,8 +282,14 @@ namespace api.hub
         }
         public async Task BoardSpaceGetAll(string gameId)
         {
+            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new {GameId = gameId});
+            
             var sql = @"
-                SELECT * FROM BoardSpace;
+                SELECT bs.*, bst.BoardSpaceName
+                FROM BoardSpace bs
+                LEFT JOIN BoardSpaceTheme bst ON bs.Id = bst.BoardSpaceId
+                WHERE ThemeId = @ThemeId;
+
                 SELECT 
                     p.*, 
                     gp.Id AS GamePropertyId, 
@@ -297,10 +300,11 @@ namespace api.hub
                 FROM Property p
                 LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
                 WHERE gp.GameId = @GameId;
+
                 SELECT * FROM PropertyRent;
             ";
 
-            var multi = await db.QueryMultipleAsync(sql, new {GameId = gameId});
+            var multi = await db.QueryMultipleAsync(sql, new { GameId = gameId, ThemeId = game.ThemeId });
             var boardSpaces = multi.Read<BoardSpace>().ToList();
             var properties = multi.Read<Property>().ToList();
             var propertyRents = multi.Read<PropertyRent>().ToList();
