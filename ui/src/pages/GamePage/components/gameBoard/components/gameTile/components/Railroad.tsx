@@ -16,7 +16,7 @@ export const Railroad:React.FC<{space:BoardSpace,sideClass:string}> = ({space,si
                 : <p className='text-center bg-[#eaeaea]'>${property.purchasePrice}</p>
 
             }
-            <p className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]'>Railroad</p>
+            <p className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-[12px]'>{space.boardSpaceName}</p>
         </button>
     )
 }

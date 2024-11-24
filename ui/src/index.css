@@ -63,7 +63,7 @@
     transform:rotate(90deg)
 }
 .tile-right p{
-    writing-mode: vertical-lr;
+    writing-mode: vertical-rl;
 }
 .tile-right p:first-child{
     @apply py-[5px]

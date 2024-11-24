@@ -16,7 +16,9 @@ export const UtilityTile:React.FC<{space:BoardSpace,sideClass:string}> = ({space
                 : <p className='text-center bg-[#eaeaea]'>${property.purchasePrice}</p>
 
             }
-            <p className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]'>Utility</p>
+            <p className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-[12px]'>
+                {space.boardSpaceName}
+            </p>
         </button>
     )
 }

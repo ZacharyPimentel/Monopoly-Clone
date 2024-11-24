@@ -16,26 +16,27 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
     let gameTileComponent = null;
     const gameState = useGameState();
     const space = gameState.boardSpaces[position - 1];
+    console.log(space)
     if(!space)return null
 
     switch (space.boardSpaceCategoryId) {
         case BoardSpaceCategory.Go:
-            gameTileComponent = <StartTile/>
+            gameTileComponent = <StartTile space={space}/>
             break;
         case BoardSpaceCategory.Jail:
-            gameTileComponent = <Jail/>
+            gameTileComponent = <Jail space={space}/>
             break
         case BoardSpaceCategory.FreeParking:
-            gameTileComponent = <Vacation/>
+            gameTileComponent = <Vacation space={space}/>
             break;
         case BoardSpaceCategory.GoToJail:
-            gameTileComponent = <GoToJail/>
+            gameTileComponent = <GoToJail space={space}/>
             break
         case BoardSpaceCategory.Chance:
-            gameTileComponent = <ChanceTile/>
+            gameTileComponent = <ChanceTile space={space}/>
             break
         case BoardSpaceCategory.CommunityChest:
-            gameTileComponent = <CommunityChestTile/>
+            gameTileComponent = <CommunityChestTile space={space}/>
             break
         case BoardSpaceCategory.Railroard:
             gameTileComponent = <Railroad sideClass={sideClass} space={space}/>
@@ -44,7 +45,7 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
             gameTileComponent = <UtilityTile sideClass={sideClass} space={space}/>
             break
         case BoardSpaceCategory.PayTaxes:
-            gameTileComponent = <TaxTile/>
+            gameTileComponent = <TaxTile space={space}/>
             break
         default:
             gameTileComponent = <PropertyTile sideClass={sideClass} position={position}/>
