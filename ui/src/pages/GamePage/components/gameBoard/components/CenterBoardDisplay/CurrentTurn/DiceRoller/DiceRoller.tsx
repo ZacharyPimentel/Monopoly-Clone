@@ -3,13 +3,14 @@ import { Die } from "./components/Die"
 import { useGameDispatch, useGameState } from "../../../../../../../../stateProviders/GameStateProvider";
 import { useWebSocket } from "../../../../../../../../hooks/useWebSocket";
 import { usePlayer } from "../../../../../../../../hooks/usePlayer";
+import { BoardSpaceCategory } from "../../../../../../../../types/enums/BoardSpaceCategory";
 
 export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
 
     const gameState = useGameState();
     const gameDispatch = useGameDispatch();
     const {invoke} = useWebSocket();
-    const {player} = usePlayer();
+    const {player,currentBoardSpace} = usePlayer();
 
     useEffect( () => {
         if(!gameState.rolling || uiOnly)return
@@ -22,9 +23,46 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             if(player.inJail){
                 if(diceOne === diceTwo){
                     invoke.player.update(player.id,{inJail:false,turnComplete:true})
+                    invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
                 }
                 return
             }
+
+            if(player.rollingForUtilities){
+                const ownerUtilities = gameState.boardSpaces.filter( (space) => {
+                    space.boardSpaceCategoryId === BoardSpaceCategory.Utility &&
+                    space.property?.playerId === currentBoardSpace.property?.playerId
+                });
+                let amountToPay = 0
+                if(ownerUtilities.length === 1){
+                    amountToPay = (diceOne + diceTwo) * 4;
+                }else if(ownerUtilities.length === 2){
+                    amountToPay = (diceOne + diceTwo) * 10;
+                }
+                invoke.player.update(player.id,{
+                    turnComplete:true,
+                    money: player.money - amountToPay,
+                    rollingForUtilities:false
+                })
+                const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
+                invoke.player.update(propertyOwner.id,{money:propertyOwner.money + amountToPay})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} paid ${propertyOwner.playerName} $${amountToPay}.`)
+                return
+            }
+
+            //if doubles was rolled 3 times, go straight to jail
+            if(player.rollCount + 1 === 3){
+                invoke.player.update(player.id,{
+                    inJail:true,
+                    boardSpaceId: gameState.boardSpaces[BoardSpaceCategory.Jail].id,
+                    turnComplete:true
+                })
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
+                gameDispatch({rolling:false})
+                return
+            }
+
+            //move normally otherwise
 
             let newBoardPosition = player.boardSpaceId + diceOne + diceTwo;
             let passedGo = false;
@@ -41,8 +79,6 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                 rollCount: player.rollCount + 1,
                 //add GO money if passed
                 ...(passedGo && {money:player.money + 200}),
-                //if 3rd roll and doubles, go to jail
-                ...(player.rollCount+1 === 3 && (diceOne === diceTwo) && {inJail:true})
             })
             gameDispatch({rolling:false})
         },1000)

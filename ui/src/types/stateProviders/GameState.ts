@@ -3,6 +3,7 @@ import { Game } from "../controllers/Game"
 import { Player } from "../controllers/Player"
 import { BoardSpace } from "../controllers/BoardSpace"
 import { SocketPlayer } from "../websocket/Player"
+import { GameLog } from "../websocket/GameLog"
 
 export type GameState = {
     players:Player[]
@@ -16,6 +17,7 @@ export type GameState = {
     rolling:boolean
     boardSpaces:BoardSpace[]
     gameId:string
+    gameLogs:GameLog[]
 }
 
 export type Theme = {

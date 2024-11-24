@@ -12,6 +12,7 @@ import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "./modal/PlayerCreateModal";
 import { BoardSpace } from "../../types/controllers/BoardSpace";
+import { GameLog } from "../../types/websocket/GameLog";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -28,11 +29,13 @@ export const GamePage = () => {
         const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
         const gameUpdateCallback = (game:Game) => gameDispatch({game})
         const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
+        const logUpdateCallback = (gameLogs:GameLog[]) => gameDispatch({gameLogs})
 
         listen('game:update',gameUpdateCallback)
         listen('player:update',playerUpdateCallback)
         listen('player:updateGroup',playerUpdateAllCallback)
         listen('boardSpace:update', boardSpaceUpdateCallback)
+        listen('gameLog:update',logUpdateCallback);
 
         invoke.game.join(gameId!);
 
@@ -49,9 +52,12 @@ export const GamePage = () => {
             stopListen('player:update',playerUpdateCallback)
             stopListen('player:updateGroup',playerUpdateAllCallback)
             stopListen('boardSpace:update', boardSpaceUpdateCallback)
+            stopListen('gameLog:update',logUpdateCallback);
             invoke.game.leave(gameId!);
         }
     },[])
+
+    console.log(gameState.gameLogs)
 
     useEffect( () => {
         if(!gameState.currentSocketPlayer || !gameState.game) return

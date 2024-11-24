@@ -7,17 +7,18 @@ export const useLandedOnSpace = () => {
 
     const {player,currentBoardSpace} = usePlayer();
     const gameState = useGameState();
-    const websocket = useWebSocket();
+    const {invoke} = useWebSocket();
     if(!player || player.turnComplete)return
 
     //=====================
     // Landed On Go
     //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Go){
-        websocket.player.update(player.id,{
-            money:player.money + 200,
+        invoke.player.update(player.id,{
+            money:player.money + 100,
             turnComplete:true
         })
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} made $300 for landing on GO.`)
     }
     //=====================
     // Landed On Property
@@ -28,13 +29,14 @@ export const useLandedOnSpace = () => {
         if(!currentBoardSpace.property?.playerId) return
         const paymentAmount = currentBoardSpace.property.propertyRents[currentBoardSpace.property.upgradeCount].rent
         //take money from player who lands on property
-        websocket.player.update(player.id,{
+        invoke.player.update(player.id,{
             money: player.money - paymentAmount,
             turnComplete:true
         })
         //give money to property owner
         const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
-        websocket.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
+        invoke.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} paid ${propertyOwner.playerName} $${paymentAmount}.`)
     }
     //=====================
     // Landed On Railroad
@@ -51,21 +53,54 @@ export const useLandedOnSpace = () => {
         let paymentAmount = 25 * (2^(ownerRailroads.length - 1));
         
         //take money from player who lands on property
-        websocket.player.update(player.id,{
+        invoke.player.update(player.id,{
             money: player.money - paymentAmount,
             turnComplete:true
         })
         //give money to property owner
         const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
-        websocket.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
+        invoke.player.update(propertyOwner.id,{money:propertyOwner.money + paymentAmount})
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} paid ${propertyOwner.playerName} $${paymentAmount}.`)
     }
     //=====================
     // Landed On Go To Jail
     //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.GoToJail){
-        websocket.player.update(player.id,{
-            boardSpaceId:11,
-            inJail:true
+        invoke.player.update(player.id,{
+            boardSpaceId: gameState.boardSpaces[BoardSpaceCategory.Jail].id,
+            inJail:true,
+            turnComplete:true
         })
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
+
+    }
+    //=====================
+    // Landed On Utility
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Utility){
+        //no automatic action if player owns the property, or if property is unowned
+        if(currentBoardSpace.property?.playerId === player.id)return
+        if(!currentBoardSpace.property?.playerId) return
+        invoke.player.update(player.id,{rollingForUtilities:true})
+    }
+    //=====================
+    // Landed On Tax
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.PayTaxes){
+        let paymentAmount = 0;
+        //income tax, 10%
+        if(currentBoardSpace.id === 5){
+            paymentAmount = player.money * 0.9
+        }
+        //luxury tax, $75
+        else{
+            paymentAmount = player.money - 75
+        }
+        
+        invoke.player.update(player.id,{
+            money:paymentAmount,
+            turnComplete:true
+        })
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} paid $${paymentAmount} in taxes.`)
     }
 }

@@ -12,6 +12,7 @@ public class Player
     public bool TurnComplete { get; set;} = true;
     public bool InJail { get; set;} = false;
     public required string GameId { get; set;}
+    public bool RollingForUtilities { get; set;} = false;
     
     //Joined properties from PlayerIcon
     public required string IconUrl { get; set;}

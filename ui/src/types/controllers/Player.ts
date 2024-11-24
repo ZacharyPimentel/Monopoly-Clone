@@ -10,6 +10,7 @@ export type Player = {
     rollCount:number
     turnComplete:boolean
     inJail:boolean
+    rollingForUtilities:boolean
 }
 
 export type PlayerWhereParams = {
@@ -25,4 +26,5 @@ export type PlayerUpdateParams = {
     money:number
     turnComplete:boolean
     inJail:boolean
+    rollingForUtilities:boolean
 }

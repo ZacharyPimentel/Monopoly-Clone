@@ -123,7 +123,8 @@ public class DatabaseInitializer
                     TurnComplete BOOLEAN DEFAULT true,
                     InJail BOOLEAN DEFAULT false,
                     GameId TEXT,
-                    FOREIGN KEY (GameId) REFERENCES Game(Id)
+                    FOREIGN KEY (GameId) REFERENCES Game(Id),
+                    RollingForUtilities BOOLEAN DEFAULT false
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -165,7 +166,15 @@ public class DatabaseInitializer
                     FOREIGN KEY (PropertyId) REFERENCES Property(Id),
                     UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0,
                     Mortgaged BOOLEAN DEFAULT false
-                )
+                );
+
+                CREATE TABLE IF NOT EXISTS GAMELOG(
+                    Id SERIAL PRIMARY KEY,
+                    GameId TEXT NOT NULL,
+                    FOREIGN KEY (GameId) REFERENCES Game(Id),
+                    Message TEXT NOT NULL,
+                    CreatedAt TIMESTAMP NOT NULL
+                );
             ";
             db.Execute(sql,transaction:transaction);
             transaction.Commit();

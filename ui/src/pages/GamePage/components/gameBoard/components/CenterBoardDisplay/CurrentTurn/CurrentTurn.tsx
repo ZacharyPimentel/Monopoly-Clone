@@ -12,7 +12,6 @@ export const CurrentTurn = () => {
 
     const gameState = useGameState();
     const {player,currentBoardSpace} = usePlayer();
-    console.log(player)
 
     useLandedOnSpace();
 
@@ -29,9 +28,6 @@ export const CurrentTurn = () => {
         }
         return allowed
     },[player])
-
-    console.log(gameState.game)
-    console.log(allowedToRoll)
     
     return (
         <div className='flex flex-col gap-[50px]'>

@@ -16,6 +16,7 @@ public class PlayerUpdateParams
     public int? RollCount { get; set;}
     public bool? TurnComplete { get; set;}
     public bool? InJail { get; set;}
+    public bool? RollingForUtilities { get; set;}
 
 }
 

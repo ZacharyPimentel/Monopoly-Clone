@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
-using SignalRWebpack.Hubs;
 
 public class GameState<T>() where T : Hub
 {

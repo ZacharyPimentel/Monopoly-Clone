@@ -1,9 +1,7 @@
 using System.Data;
-using SignalRWebpack.Hubs;
+using api.hub;
 using Microsoft.Data.Sqlite;
 using Npgsql;
-using System.Reflection;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +43,7 @@ builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IGameRepository,GameRepository>();
 builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
 builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
+builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
 
 var app = builder.Build();
 

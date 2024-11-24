@@ -48,6 +48,11 @@ export const useWebSocket = () => {
                     globalState.ws.invoke('GameEndTurn');
                 }
             },
+            gameLog:{
+                create: (gameId:string,message:string) => {
+                    globalState.ws.invoke('GameLogCreate',gameId,message)
+                }
+            },
             lastDiceRoll:{
                 update: (gameId:string,diceOne:number,diceTwo:number) => {
                     globalState.ws.invoke('LastDiceRollUpdate',gameId,diceOne,diceTwo)
