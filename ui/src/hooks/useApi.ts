@@ -1,6 +1,7 @@
 import { BoardSpace } from "../types/controllers/BoardSpace";
 import { Player, PlayerWhereParams } from "../types/controllers/Player";
 import { PlayerIcon } from "../types/controllers/PlayerIcon";
+import { Theme } from "../types/controllers/Theme";
 import { useHttp } from "./useHttp";
 
 export const useApi = () => {
@@ -20,6 +21,11 @@ export const useApi = () => {
         playerIcon:{
             getAll: async():Promise<PlayerIcon[]> => {
                 return await request.get(`${apiUrl}/playerIcon`);
+            }
+        },
+        theme:{
+            getAll: async():Promise<Theme[]> => {
+                return await request.get(`${apiUrl}/theme`);
             }
         }
     }

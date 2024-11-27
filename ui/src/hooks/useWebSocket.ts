@@ -32,8 +32,8 @@ export const useWebSocket = () => {
                 getLobbies: () => {
                     globalState.ws.invoke("GameGetLobbies");
                 },
-                create: (gameName:string) => {
-                    globalState.ws.invoke('GameCreate',{gameName});
+                create: (gameName:string,themeId:number) => {
+                    globalState.ws.invoke('GameCreate',{gameName,themeId});
                 },
                 join: (gameId:string) => {
                     globalState.ws.invoke('GameJoin',gameId)

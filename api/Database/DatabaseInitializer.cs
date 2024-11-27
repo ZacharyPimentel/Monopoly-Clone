@@ -101,7 +101,7 @@ public class DatabaseInitializer
                     GameOver BOOLEAN DEFAULT false,
                     GameStarted BOOLEAN DEFAULT false,
                     StartingMoney INTEGER DEFAULT 1500,
-                    ThemeId INTEGER DEFAULT 1,
+                    ThemeId INTEGER NOT NULL,
                     FOREIGN KEY (ThemeId) REFERENCES THEME(Id)
                 );
 

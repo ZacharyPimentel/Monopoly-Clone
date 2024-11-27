@@ -1,6 +1,7 @@
 public class GameCreateParams
 {
     public required string GameName { get; set; }
+    public required int ThemeId { get; set; }
 }
 
 public class GameUpdateParams
@@ -19,7 +20,7 @@ public class GameWhereParams
 public interface IGameRepository
 {
     Task<Game> Create(GameCreateParams gameCreateParams);
-    Task<Game?> GetByIdAsync(string id);
+    Task<Game> GetByIdAsync(string id);
     Task<List<Game>> Search(GameWhereParams gameWhereParams);
     Task<bool> Update(string id,GameUpdateParams updateParams);
 }

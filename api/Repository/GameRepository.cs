@@ -9,14 +9,15 @@ public class GameRepository(IDbConnection db) : IGameRepository
         var uuid = Guid.NewGuid().ToString();
         
         var addNewGame = @"
-            INSERT INTO GAME (Id,GameName)
-            VALUES (@Id,@GameName)
+            INSERT INTO GAME (Id,GameName,ThemeId)
+            VALUES (@Id,@GameName,@ThemeId)
         ";
 
         var gameAddparameters = new 
         {
             Id = uuid,
             gameCreateParams.GameName,
+            gameCreateParams.ThemeId
         };
 
         await db.ExecuteAsync(addNewGame,gameAddparameters);
@@ -54,7 +55,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
         var games = await db.QueryAsync<Game>(sql, parameters);
         return games.AsList();
     }
-    public async Task<Game?> GetByIdAsync( string gameId)
+    public async Task<Game> GetByIdAsync( string gameId)
     {
         //get the current game, join the current player turn from TurnOrder
         var sql = @"
