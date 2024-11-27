@@ -16,7 +16,6 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
     let gameTileComponent = null;
     const gameState = useGameState();
     const space = gameState.boardSpaces[position - 1];
-    console.log(space)
     if(!space)return null
 
     switch (space.boardSpaceCategoryId) {

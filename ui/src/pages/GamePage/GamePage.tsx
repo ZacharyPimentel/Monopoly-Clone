@@ -6,10 +6,9 @@ import { useWebSocket } from "../../hooks/useWebSocket";
 import { SocketPlayer } from "../../types/websocket/Player";
 import { Player } from "../../types/controllers/Player";
 import { Game } from "../../types/controllers/Game";
-import { useApi } from "../../hooks/useApi";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PlayerCreateModal } from "./modal/PlayerCreateModal";
 import { BoardSpace } from "../../types/controllers/BoardSpace";
 import { GameLog } from "../../types/websocket/GameLog";
@@ -18,16 +17,22 @@ export const GamePage = () => {
     const gameDispatch = useGameDispatch();
     const globalDispatch = useGlobalDispatch()
     const gameState = useGameState();
-    const api = useApi();
     const {listen,invoke,stopListen} = useWebSocket()
     const {gameId} = useParams();
+    const navigate = useNavigate();
 
     //updates the socket group on the server to receive game events
     useEffect( () => {
 
         const playerUpdateCallback = (currentSocketPlayer:SocketPlayer) => gameDispatch({currentSocketPlayer})
         const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
-        const gameUpdateCallback = (game:Game) => gameDispatch({game})
+        const gameUpdateCallback = (game:Game | null) => {
+            if(!game){
+                navigate('/lobby')
+                return
+            }
+            gameDispatch({game, gameId:game.id})
+        }
         const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
         const logUpdateCallback = (gameLogs:GameLog[]) => gameDispatch({gameLogs})
 
@@ -38,14 +43,6 @@ export const GamePage = () => {
         listen('gameLog:update',logUpdateCallback);
 
         invoke.game.join(gameId!);
-
-        api.boardSpace.getAll()
-        .then(boardSpaces => {
-            gameDispatch({
-                boardSpaces,
-                gameId
-            })
-        })
 
         return () => {
             stopListen('game:update',gameUpdateCallback)

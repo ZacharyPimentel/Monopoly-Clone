@@ -28,8 +28,6 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     })
   },[])
 
-  console.log(gameState.boardSpaces)
-
   return (
     <GameStateContext.Provider value={gameState}>
       <GameDispatchContext.Provider value={updateGameState}>

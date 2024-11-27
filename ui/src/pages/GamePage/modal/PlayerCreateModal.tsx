@@ -16,8 +16,6 @@ export const PlayerCreateModal = () => {
     const [name,setName] = useState('');
     const {invoke} = useWebSocket();
 
-    console.log(gameState.players)
-
     const inactivePlayers = useMemo( () => 
         gameState.players.filter((player) => !player.active)
     ,[gameState.players])
@@ -82,7 +80,7 @@ export const PlayerCreateModal = () => {
             </div>
             <button
                 onClick={() => {
-                    invoke.player.create(name,selectedIconId,gameState.gameId);
+                    invoke.player.create(name,selectedIconId,gameState.game!.id);
                     globalDispatch({modalOpen:false,modalContent:null})
                 }}
                 disabled={name === '' || selectedIconId === 0} 

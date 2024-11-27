@@ -16,7 +16,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         if(!gameState.rolling || uiOnly)return
         var diceOne  = Math.floor((Math.random() * 6) + 1);
         var diceTwo  = Math.floor((Math.random() * 6) + 1);
-
+        
         invoke.lastDiceRoll.update(gameState.gameId,diceOne,diceTwo);
         setTimeout( () => {
             //handle roll logic different if player is in jail

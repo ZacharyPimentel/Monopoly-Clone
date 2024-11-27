@@ -41,7 +41,7 @@ namespace api.hub
         //=======================================================
         // Methods for message delivery (self, group, or all)
         //=======================================================
-        private async Task SendToSelf(string eventName, object data)
+        private async Task SendToSelf(string eventName, object? data)
         {
             await Clients.Caller.SendAsync(eventName,data);
         }
@@ -206,7 +206,12 @@ namespace api.hub
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             currentSocketPlayer.GameId = gameId;
             await Groups.AddToGroupAsync(Context.ConnectionId,gameId);
-            Game game = await gameRepository.GetByIdAsync(gameId);
+            Game? game = await gameRepository.GetByIdAsync(gameId);
+            if(game == null)
+            {
+                await SendToSelf("game:update",game);
+                return;
+            }
             var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             await SendToSelf("game:update",game);
@@ -333,11 +338,16 @@ namespace api.hub
         {
             await gamePropertyRepository.Update(gamePropertyId,updateParams);
             GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
+            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new {gameProperty.GameId});
             
             var sql = @"
-                SELECT * FROM BoardSpace;
+                SELECT bs.*, bst.BoardSpaceName
+                FROM BoardSpace bs
+                LEFT JOIN BoardSpaceTheme bst ON bs.Id = bst.BoardSpaceId
+                WHERE ThemeId = @ThemeId;
+
                 SELECT 
-                    p.*,
+                    p.*, 
                     gp.Id AS GamePropertyId, 
                     gp.PlayerId, 
                     gp.UpgradeCount, 
@@ -345,12 +355,12 @@ namespace api.hub
                     gp.GameId
                 FROM Property p
                 LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
-                WHERE gp.GameId = @GameId
-                ;
+                WHERE gp.GameId = @GameId;
+
                 SELECT * FROM PropertyRent;
             ";
 
-            var multi = await db.QueryMultipleAsync(sql, new { gameProperty.GameId});
+            var multi = await db.QueryMultipleAsync(sql, new { gameProperty.GameId, game.ThemeId });
             var boardSpaces = multi.Read<BoardSpace>().ToList();
             var properties = multi.Read<Property>().ToList();
             var propertyRents = multi.Read<PropertyRent>().ToList();
@@ -368,7 +378,6 @@ namespace api.hub
                 var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
                 property?.PropertyRents.Add(rent);
             }
-
             await SendToGroup("boardSpace:update",boardSpaces);
         }
 

@@ -54,7 +54,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
         var games = await db.QueryAsync<Game>(sql, parameters);
         return games.AsList();
     }
-    public async Task<Game> GetByIdAsync( string gameId)
+    public async Task<Game?> GetByIdAsync( string gameId)
     {
         //get the current game, join the current player turn from TurnOrder
         var sql = @"
@@ -71,7 +71,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
             Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId
                 WHERE g.Id = @Id
         ";
-        var game = await db.QuerySingleAsync<Game>(sql,new {Id = gameId});
+        var game = await db.QuerySingleOrDefaultAsync<Game>(sql,new {Id = gameId});
         return game;
     }
     public async Task<bool> Update(string id,GameUpdateParams updateParams)

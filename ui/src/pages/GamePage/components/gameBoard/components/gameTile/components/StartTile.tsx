@@ -1,7 +1,6 @@
 import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace"
 
 export const StartTile:React.FC<{space:BoardSpace}> = ({space}) => {
-    console.log(space)
     return (
         <div className='flex flex-col items-center justify-center h-full shadow-lg border bg-totorolightgreen border-totorodarkgreen rounded-[5px]'>
             <p className='font-totoro text-[2rem]'>{space.boardSpaceName}</p>

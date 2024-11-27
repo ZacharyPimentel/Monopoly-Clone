@@ -66,6 +66,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 {property.propertyRents.map( (propertyRent,index) => {
                     return (
                         <div 
+                            key={propertyRent.id}
                             style={{fontWeight:property.upgradeCount === index ? 'bold' : 'normal'}} 
                             className='flex justify-between'
                         >
