@@ -29,9 +29,9 @@ export const OwnedProperties = () => {
                     .map( (space) => {
                         if(!space.property)return null
                         return (
-                            <li className='flex items-center gap-[20px]'>
+                            <li key={space.property.id} className='flex items-center gap-[20px]'>
                                 <div className={`h-[30px] w-[30px] rounded-[50%] ${propertyColor(space.property)}`}></div>
-                                <p>{space.property.id}</p>
+                                <p>{space.boardSpaceName}</p>
                             </li>
                         )
                     })}

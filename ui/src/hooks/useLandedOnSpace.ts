@@ -8,7 +8,7 @@ export const useLandedOnSpace = () => {
     const {player,currentBoardSpace} = usePlayer();
     const gameState = useGameState();
     const {invoke} = useWebSocket();
-    if(!player || player.turnComplete)return
+    if(!player || player.turnComplete || player.rollCount === 0 || gameState.rolling)return
 
     //=====================
     // Landed On Go
@@ -18,7 +18,7 @@ export const useLandedOnSpace = () => {
             money:player.money + 100,
             turnComplete:true
         })
-        invoke.gameLog.create(gameState.gameId,`${player.playerName} made $300 for landing on GO.`)
+        invoke.gameLog.create(gameState.gameId,`${player.playerName} made an extra $100 for landing on GO.`)
     }
     //=====================
     // Landed On Property
@@ -43,14 +43,15 @@ export const useLandedOnSpace = () => {
     //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Railroard){
         //no automatic action if player owns the property, or if property is unowned
-        if(currentBoardSpace.property?.playerId === player.id)return
+        if(currentBoardSpace.property?.playerId === player.id)
         if(!currentBoardSpace.property?.playerId) return
-        const ownerRailroads = gameState.boardSpaces.filter( (space) => {
+
+        const ownerRailroads = gameState.boardSpaces.filter( (space) => 
             space.boardSpaceCategoryId === BoardSpaceCategory.Railroard &&
             space.property?.playerId === currentBoardSpace.property?.playerId
-        });
+        );
         //calculate based on number of railroads the cost (25,50,100,or 200)
-        let paymentAmount = 25 * (2^(ownerRailroads.length - 1));
+        let paymentAmount = ownerRailroads.length > 0 ? 25 * Math.pow(2, ownerRailroads.length - 1) : 0;
         
         //take money from player who lands on property
         invoke.player.update(player.id,{
@@ -67,12 +68,11 @@ export const useLandedOnSpace = () => {
     //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.GoToJail){
         invoke.player.update(player.id,{
-            boardSpaceId: gameState.boardSpaces[BoardSpaceCategory.Jail].id,
+            boardSpaceId: 11, //id for jail
             inJail:true,
             turnComplete:true
         })
         invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
-
     }
     //=====================
     // Landed On Utility
@@ -90,17 +90,42 @@ export const useLandedOnSpace = () => {
         let paymentAmount = 0;
         //income tax, 10%
         if(currentBoardSpace.id === 5){
-            paymentAmount = player.money * 0.9
+            paymentAmount = Math.round(player.money * 0.1)
         }
         //luxury tax, $75
         else{
-            paymentAmount = player.money - 75
+            paymentAmount = 75
         }
         
         invoke.player.update(player.id,{
-            money:paymentAmount,
+            money: player.money - paymentAmount,
             turnComplete:true
         })
         invoke.gameLog.create(gameState.gameId,`${player.playerName} paid $${paymentAmount} in taxes.`)
     }
+    //=====================
+    // Landed On Free Parking
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.FreeParking){
+        invoke.player.update(player.id,{turnComplete:true})
+    }
+    //=====================
+    // Landed On Chance
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance){
+        invoke.player.update(player.id,{turnComplete:true})
+    }
+    //=====================
+    // Landed On Free Parking
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.CommunityChest){
+        invoke.player.update(player.id,{turnComplete:true})
+    }
+    //=====================
+    // Landed On Jail
+    //=====================
+    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Jail){
+        invoke.player.update(player.id,{turnComplete:true})
+    }
+
 }

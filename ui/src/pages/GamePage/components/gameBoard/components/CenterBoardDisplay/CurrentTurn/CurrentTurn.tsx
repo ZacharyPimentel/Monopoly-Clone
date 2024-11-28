@@ -19,7 +19,7 @@ export const CurrentTurn = () => {
         if(!player)return false
         let allowed = true;
         //if player has rolled doubles 3 times, go to jail and no more rolling
-        if(player.rollCount > 3){
+        if(player.rollCount >= 3){
             allowed = false;
         }
         //if player has not exceeded 3 rolls, but didn't roll doubles, not allowed to roll more
@@ -34,7 +34,7 @@ export const CurrentTurn = () => {
             <DiceRoller/>
             {/* Show purchase button if property has no player id (not owned) */}
             {currentBoardSpace?.property && !currentBoardSpace?.property?.playerId && player.rollCount > 0 && (
-                <PurchaseButton player={player} property={currentBoardSpace.property}/>
+                <PurchaseButton player={player} property={currentBoardSpace.property} spaceName={currentBoardSpace.boardSpaceName}/>
             )}
             {
                 allowedToRoll

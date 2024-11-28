@@ -51,10 +51,10 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             }
 
             //if doubles was rolled 3 times, go straight to jail
-            if(player.rollCount + 1 === 3){
+            if(player.rollCount === 3){
                 invoke.player.update(player.id,{
                     inJail:true,
-                    boardSpaceId: gameState.boardSpaces[BoardSpaceCategory.Jail].id,
+                    boardSpaceId: 11, // 11 is the space for jail
                     turnComplete:true
                 })
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
@@ -80,6 +80,9 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                 //add GO money if passed
                 ...(passedGo && {money:player.money + 200}),
             })
+            if(passedGo){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} made $200 for passing go.`)
+            }
             gameDispatch({rolling:false})
         },1000)
     },[gameState.rolling,gameState.currentSocketPlayer,gameState.players,player])
