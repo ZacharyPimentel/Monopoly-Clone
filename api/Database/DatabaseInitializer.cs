@@ -149,7 +149,7 @@ public class DatabaseInitializer
                     InCurrentGame BOOLEAN DEFAULT false,
                     IsReadyToPlay BOOLEAN DEFAULT false,
                     RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
-                    TurnComplete BOOLEAN DEFAULT true,
+                    TurnComplete BOOLEAN DEFAULT false,
                     InJail BOOLEAN DEFAULT false,
                     GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES Game(Id),

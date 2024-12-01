@@ -2,12 +2,16 @@ import { usePlayer } from "./usePlayer"
 import { BoardSpaceCategory } from "../types/enums/BoardSpaceCategory";
 import { useWebSocket } from "./useWebSocket";
 import { useGameState } from "../stateProviders/GameStateProvider";
+import { useEffect, useState } from "react";
 
 export const useLandedOnSpace = () => {
 
     const {player,currentBoardSpace} = usePlayer();
     const gameState = useGameState();
     const {invoke} = useWebSocket();
+    const [lastBoardSpace,setLastBoardSpace] = useState(currentBoardSpace)
+
+    if(currentBoardSpace === lastBoardSpace) return
     if(!player || player.turnComplete || player.rollCount === 0 || gameState.rolling)return
 
     //=====================
@@ -26,7 +30,8 @@ export const useLandedOnSpace = () => {
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Property){
         //no automatic action if player owns the property, or if property is unowned
         if(currentBoardSpace.property?.playerId === player.id)return
-        if(!currentBoardSpace.property?.playerId) return
+        if(!currentBoardSpace.property?.playerId)return
+        
         const paymentAmount = currentBoardSpace.property.propertyRents[currentBoardSpace.property.upgradeCount].rent
         //take money from player who lands on property
         invoke.player.update(player.id,{
@@ -43,7 +48,7 @@ export const useLandedOnSpace = () => {
     //=====================
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Railroard){
         //no automatic action if player owns the property, or if property is unowned
-        if(currentBoardSpace.property?.playerId === player.id)
+        if(currentBoardSpace.property?.playerId === player.id)return
         if(!currentBoardSpace.property?.playerId) return
 
         const ownerRailroads = gameState.boardSpaces.filter( (space) => 
@@ -127,5 +132,5 @@ export const useLandedOnSpace = () => {
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Jail){
         invoke.player.update(player.id,{turnComplete:true})
     }
-
+    setLastBoardSpace(currentBoardSpace)
 }
