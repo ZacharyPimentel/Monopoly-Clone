@@ -4,15 +4,15 @@ import { useWebSocket } from "../../../../../../../hooks/useWebSocket"
 export const PayJailFee:React.FC = () => {
     
     const {player} = usePlayer();
-    const websocket = useWebSocket();
+    const {invoke} = useWebSocket();
 
     return (
         <button
             onClick={() => {
-                websocket.player.update(player.id,{
+                invoke.player.update(player.id,{
                     money:player.money - 50,
                     inJail:false,
-                    turnComplete:true
+                    rollCount:0
                 })
             }}
             className='bg-white p-[5px]'

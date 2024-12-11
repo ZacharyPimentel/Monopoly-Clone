@@ -1,0 +1,10 @@
+[
+    {
+        "Id": 1,
+        "CardTypeName": "Chance"
+    },
+    {
+        "Id": 2,
+        "CardTypeName": "Community Chest"
+    }
+]

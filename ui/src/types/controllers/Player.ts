@@ -11,6 +11,7 @@ export type Player = {
     turnComplete:boolean
     inJail:boolean
     rollingForUtilities:boolean
+    jailTurnCount:number
 }
 
 export type PlayerWhereParams = {
@@ -27,4 +28,5 @@ export type PlayerUpdateParams = {
     turnComplete:boolean
     inJail:boolean
     rollingForUtilities:boolean
+    jailTurnCount:number
 }

@@ -75,7 +75,8 @@ export const useLandedOnSpace = () => {
         invoke.player.update(player.id,{
             boardSpaceId: 11, //id for jail
             inJail:true,
-            turnComplete:true
+            turnComplete:true,
+            rollCount:1
         })
         invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
     }
@@ -86,6 +87,7 @@ export const useLandedOnSpace = () => {
         //no automatic action if player owns the property, or if property is unowned
         if(currentBoardSpace.property?.playerId === player.id)return
         if(!currentBoardSpace.property?.playerId) return
+        console.log('update player to roll for utils')
         invoke.player.update(player.id,{rollingForUtilities:true})
     }
     //=====================

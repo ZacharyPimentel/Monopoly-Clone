@@ -28,11 +28,11 @@ public class DatabaseInitializer
             db.Execute("INSERT INTO BOARDSPACE (ID, BoardSpaceCategoryId) VALUES (@Id, @BoardSpaceCategoryId)",boardSpace);
         }
 
-        //theme
+        //themes
         db.Execute("INSERT INTO THEME (ID,ThemeName) values (@Id,@ThemeName)", new {Id = 1, ThemeName = "Monopoly"});
 
-        //board space theme
-        var boardSpaceThemeJsonData = File.ReadAllText("./Database/SeedData/MonopolyTheme.json");
+        //board space themes
+        var boardSpaceThemeJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/BoardSpaceTheme.json");
         var boardSpaceTheme = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData);
         foreach(var boardSpace in boardSpaceTheme)
         {
@@ -61,6 +61,30 @@ public class DatabaseInitializer
         foreach(var icon in playerIcons)
         {
             db.Execute("INSERT INTO PLAYERICON (ID, IconUrl) VALUES (@Id, @IconUrl)",icon);
+        }
+
+        //Card Actions
+        var cardActionJsonData = File.ReadAllText("./Database/SeedData/CardAction.json");
+        var cardActions = JsonConvert.DeserializeObject<List<CardAction>>(cardActionJsonData);
+        foreach(var action in cardActions)
+        {
+            db.Execute("INSERT INTO CARDACTION (ID, CardActionName) VALUES (@Id, @CardActionName)",action);
+        }
+
+        //Card Types
+        var cardTypeJsonData = File.ReadAllText("./Database/SeedData/CardType.json");
+        var cardTypes = JsonConvert.DeserializeObject<List<CardType>>(cardTypeJsonData);
+        foreach(var type in cardTypes)
+        {
+            db.Execute("INSERT INTO CARDTYPE (ID, CardTypeName) VALUES (@Id, @CardTypeName)",type);
+        }
+
+        //Cards
+        var cardJsonData = File.ReadAllText("./Database/SeedData/Card.json");
+        var cards = JsonConvert.DeserializeObject<List<Card>>(cardJsonData);
+        foreach(var card in cards)
+        {
+            db.Execute("INSERT INTO CARD (ID, AdvanceToSpaceId,Amount,CardTypeId,CardActionId) VALUES (@Id, @AdvanceToSpaceId,@Amount,@CardTypeId,@CardActionId)",card);
         }
 
     }
@@ -153,7 +177,8 @@ public class DatabaseInitializer
                     InJail BOOLEAN DEFAULT false,
                     GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES Game(Id),
-                    RollingForUtilities BOOLEAN DEFAULT false
+                    RollingForUtilities BOOLEAN DEFAULT false,
+                    JailTurnCount INTEGER DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -203,6 +228,27 @@ public class DatabaseInitializer
                     FOREIGN KEY (GameId) REFERENCES Game(Id),
                     Message TEXT NOT NULL,
                     CreatedAt TIMESTAMP NOT NULL
+                );
+                
+                CREATE TABLE IF NOT EXISTS CARDACTION(
+                    Id INTEGER PRIMARY KEY,
+                    CardActionName TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS CARDTYPE(
+                    Id INTEGER PRIMARY KEY,
+                    CardTypeName TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS CARD(
+                    Id INTEGER PRIMARY KEY,
+                    CardActionId INTEGER,
+                    FOREIGN KEY (CardActionId) REFERENCES CARDACTION(Id),
+                    Amount INTEGER,
+                    AdvanceToSpaceId INTEGER,
+                    FOREIGN KEY (AdvanceToSpaceId) REFERENCES BoardSpace(Id),
+                    CardTypeId INTEGER,
+                    FOREIGN KEY (CardTypeId) REFERENCES CARDTYPE(Id)
                 );
             ";
             db.Execute(sql,transaction:transaction);

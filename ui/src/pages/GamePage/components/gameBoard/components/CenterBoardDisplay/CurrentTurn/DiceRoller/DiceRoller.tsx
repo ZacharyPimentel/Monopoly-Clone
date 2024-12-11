@@ -21,10 +21,35 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         setTimeout( () => {
             //handle roll logic different if player is in jail
             if(player.inJail){
+                console.log('jail player roll: ', diceOne, diceTwo)
+                //escape jail
                 if(diceOne === diceTwo){
-                    invoke.player.update(player.id,{inJail:false,turnComplete:true})
+                    console.log('player rolled doubles')
+                    invoke.player.update(player.id,{
+                        inJail:false,
+                        rollCount:0,
+                    })
                     invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
+                }else{
+                    //logic for rolling out of jail
+                    console.log('current jail turn count: ', player.jailTurnCount)
+                    const newJailTurnCount = player.jailTurnCount + 1;
+                    if(newJailTurnCount === 3){
+                        console.log('player is freed from jail, rolled 3 times without doubles')
+                        invoke.player.update(player.id,{
+                            inJail:false,
+                            rollCount:1,
+                            turnComplete:true
+                        })
+                        invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
+                    }else{
+                        const newJailTurnCount = player.jailTurnCount + 1;
+                        console.log('player still in jail!')
+                        invoke.player.update(player.id,{turnComplete:true,rollCount:1,jailTurnCount:newJailTurnCount})
+                        invoke.gameLog.create(gameState.gameId,`${player.playerName} is still in jail (${newJailTurnCount}/3)`)
+                    }
                 }
+                gameDispatch({rolling:false})
                 return
             }
 
@@ -47,6 +72,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                 const propertyOwner = gameState.players.find( (player) => player.id === currentBoardSpace.property?.playerId)!
                 invoke.player.update(propertyOwner.id,{money:propertyOwner.money + amountToPay})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} paid ${propertyOwner.playerName} $${amountToPay}.`)
+                gameDispatch({rolling:false})
                 return
             }
 
@@ -63,7 +89,6 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             }
 
             //move normally otherwise
-
             let newBoardPosition = player.boardSpaceId + diceOne + diceTwo;
             let passedGo = false;
             //handle setting correct position when going over GO

@@ -17,6 +17,11 @@ export const CurrentTurn = () => {
 
     const allowedToRoll = useMemo( () => {
         if(!player)return false
+        if(player.rollCount === 1 && player.inJail)return false
+
+        //allowed to roll if rolling for utilities flag is on
+        if(player.rollingForUtilities)return true
+
         let allowed = true;
         //if player has rolled doubles 3 times, go to jail and no more rolling
         if(player.rollCount >= 3){
