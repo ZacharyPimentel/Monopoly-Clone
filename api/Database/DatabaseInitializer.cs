@@ -87,6 +87,14 @@ public class DatabaseInitializer
             db.Execute("INSERT INTO CARD (ID, AdvanceToSpaceId,Amount,CardTypeId,CardActionId) VALUES (@Id, @AdvanceToSpaceId,@Amount,@CardTypeId,@CardActionId)",card);
         }
 
+        //theme cards
+        var themeCardJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeCard.json");
+        var themeCards = JsonConvert.DeserializeObject<List<ThemeCard>>(themeCardJsonData);
+        foreach(var themeCard in themeCards)
+        {
+            db.Execute("INSERT INTO THEMECARD (CardId,ThemeId,CardDescription) VALUES (@CardId, @ThemeId,@CardDescription)",themeCard);
+        }
+
     }
     private static void DropAllTables(IDbConnection db)
     {
@@ -250,8 +258,25 @@ public class DatabaseInitializer
                     CardTypeId INTEGER,
                     FOREIGN KEY (CardTypeId) REFERENCES CARDTYPE(Id)
                 );
+
+                CREATE TABLE IF NOT EXISTS THEMECARD(
+                    ID Serial PRIMARY KEY,
+                    CardId INTEGER,
+                    FOREIGN KEY (CardId) REFERENCES Card(Id),
+                    ThemeId INTEGER,
+                    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+                    CardDescription TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS GAMECARD(
+                    ID Serial PRIMARY KEY,
+                    CardId INTEGER,
+                    FOREIGN KEY (CardId) REFERENCES Card(Id),
+                    GameId TEXT,
+                    FOREIGN KEY (GameId) REFERENCES Game(Id),
+                );
             ";
-            db.Execute(sql,transaction:transaction);
+            db.Execute(sql,transaction);
             transaction.Commit();
         }
         catch

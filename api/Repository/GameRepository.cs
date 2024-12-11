@@ -8,25 +8,35 @@ public class GameRepository(IDbConnection db) : IGameRepository
 
         var uuid = Guid.NewGuid().ToString();
         
+        //create game
         var addNewGame = @"
             INSERT INTO GAME (Id,GameName,ThemeId)
             VALUES (@Id,@GameName,@ThemeId)
         ";
-
         var gameAddparameters = new 
         {
             Id = uuid,
             gameCreateParams.GameName,
             gameCreateParams.ThemeId
         };
-
         await db.ExecuteAsync(addNewGame,gameAddparameters);
 
+        //create entry in last dice roll for new game
         var addLastDiceRoll = @"
             INSERT INTO LASTDICEROLL (GameId)
             VALUES (@GameId)
         ";
         await db.ExecuteAsync(addLastDiceRoll, new {GameId = uuid});
+
+        //populate the card decks for the game
+        var cardSql = @"
+            INSERT INTO GAMECARD (CardId,GameId)
+            SELECT 
+                Card.Id AS CardId, 
+                @GameId AS GameId
+            FROM Card
+        ";
+        await db.ExecuteAsync(cardSql, new {GameId = uuid, gameCreateParams.ThemeId});
 
         var newGame = await GetByIdAsync(uuid);
         return newGame;

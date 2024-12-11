@@ -21,10 +21,8 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         setTimeout( () => {
             //handle roll logic different if player is in jail
             if(player.inJail){
-                console.log('jail player roll: ', diceOne, diceTwo)
                 //escape jail
                 if(diceOne === diceTwo){
-                    console.log('player rolled doubles')
                     invoke.player.update(player.id,{
                         inJail:false,
                         rollCount:0,
@@ -32,10 +30,8 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                     invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
                 }else{
                     //logic for rolling out of jail
-                    console.log('current jail turn count: ', player.jailTurnCount)
                     const newJailTurnCount = player.jailTurnCount + 1;
                     if(newJailTurnCount === 3){
-                        console.log('player is freed from jail, rolled 3 times without doubles')
                         invoke.player.update(player.id,{
                             inJail:false,
                             rollCount:1,
@@ -44,7 +40,6 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                         invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
                     }else{
                         const newJailTurnCount = player.jailTurnCount + 1;
-                        console.log('player still in jail!')
                         invoke.player.update(player.id,{turnComplete:true,rollCount:1,jailTurnCount:newJailTurnCount})
                         invoke.gameLog.create(gameState.gameId,`${player.playerName} is still in jail (${newJailTurnCount}/3)`)
                     }
