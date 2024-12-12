@@ -182,15 +182,12 @@ export const useLandedOnSpace = () => {
             }
             //get out of jail free
             if(card.card.cardActionId === CardActionId.GetOutOfJailFree){
+                invoke.player.update(player.id,{getOutOfJailFreeCards:player.getOutOfJailFreeCards + 1})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} got a Get Out Of Jail Free card.`)
             }
             //Pay houses and hotel fees
             if(card.card.cardActionId === CardActionId.PayHouseHotel){
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} had to pay money for their houses and hotels.`)
-            }
-            //get out of jail free
-            if(card.card.cardActionId === CardActionId.GetOutOfJailFree){
-                invoke.gameLog.create(gameState.gameId,`${player.playerName} got a Get Out Of Jail Free card.`)
             }
             //get money from players
             if(card.card.cardActionId === CardActionId.ReceiveFromPlayers){

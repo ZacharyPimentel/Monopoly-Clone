@@ -12,6 +12,7 @@ export type Player = {
     inJail:boolean
     rollingForUtilities:boolean
     jailTurnCount:number
+    getOutOfJailFreeCards:number
 }
 
 export type PlayerWhereParams = {
@@ -29,4 +30,5 @@ export type PlayerUpdateParams = {
     inJail:boolean
     rollingForUtilities:boolean
     jailTurnCount:number
+    getOutOfJailFreeCards:number
 }

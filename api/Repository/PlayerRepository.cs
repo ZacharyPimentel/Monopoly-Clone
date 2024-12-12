@@ -102,6 +102,10 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         {
             currentPlayer.JailTurnCount = updateParams.JailTurnCount.Value;
         }
+        if(updateParams.GetOutOfJailFreeCards.HasValue)
+        {
+            currentPlayer.GetOutOfJailFreeCards = updateParams.GetOutOfJailFreeCards.Value;
+        }
         
         var sql = @"
             UPDATE Player
@@ -116,7 +120,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
                 TurnComplete = @TurnComplete,
                 InJail = @InJail,
                 RollingForUtilities = @RollingForUtilities,
-                JailTurnCount = @JailTurnCount
+                JailTurnCount = @JailTurnCount,
+                GetOutOfJailFreeCards = @GetOutOfJailFreeCards
             WHERE Id = @Id
         ";
 
@@ -132,7 +137,8 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             currentPlayer.TurnComplete,
             currentPlayer.InJail,
             currentPlayer.RollingForUtilities,
-            currentPlayer.JailTurnCount
+            currentPlayer.JailTurnCount,
+            currentPlayer.GetOutOfJailFreeCards
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

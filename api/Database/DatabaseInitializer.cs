@@ -186,7 +186,8 @@ public class DatabaseInitializer
                     GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES Game(Id),
                     RollingForUtilities BOOLEAN DEFAULT false,
-                    JailTurnCount INTEGER DEFAULT 0
+                    JailTurnCount INTEGER DEFAULT 0,
+                    GetOutOfJailFreeCards INTEGER DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS PROPERTY(

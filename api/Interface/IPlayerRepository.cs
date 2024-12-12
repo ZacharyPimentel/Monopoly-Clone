@@ -18,7 +18,7 @@ public class PlayerUpdateParams
     public bool? InJail { get; set;}
     public bool? RollingForUtilities { get; set;}
     public int? JailTurnCount { get; set;}
-
+    public int? GetOutOfJailFreeCards { get; set;}
 }
 
 public class PlayerCreateParams
