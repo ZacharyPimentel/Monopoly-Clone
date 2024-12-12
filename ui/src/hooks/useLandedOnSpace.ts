@@ -2,12 +2,17 @@ import { usePlayer } from "./usePlayer"
 import { BoardSpaceCategory } from "../types/enums/BoardSpaceCategory";
 import { useWebSocket } from "./useWebSocket";
 import { useGameState } from "../stateProviders/GameStateProvider";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useApi } from "./useApi";
+import { CardTypeId } from "../types/enums/CardTypeId";
+import { GameCard } from "../types/controllers/GameCard";
+import { CardActionId } from "../types/enums/CardActionId";
 
 export const useLandedOnSpace = () => {
 
     const {player,currentBoardSpace} = usePlayer();
     const gameState = useGameState();
+    const api = useApi();
     const {invoke} = useWebSocket();
     const [lastBoardSpace,setLastBoardSpace] = useState(currentBoardSpace)
 
@@ -116,17 +121,107 @@ export const useLandedOnSpace = () => {
     if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.FreeParking){
         invoke.player.update(player.id,{turnComplete:true})
     }
-    //=====================
-    // Landed On Chance
-    //=====================
-    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance){
-        invoke.player.update(player.id,{turnComplete:true})
-    }
-    //=====================
-    // Landed On Free Parking
-    //=====================
-    if(currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.CommunityChest){
-        invoke.player.update(player.id,{turnComplete:true})
+    //=====================================
+    // Landed On Chance Or Community Chest
+    //=====================================
+    if(
+        currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance || 
+        currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.CommunityChest
+    ){
+        invoke.player.update(player.id,{turnComplete:true});
+        //pull a card and handle it
+        (async() => {
+            const cardType = currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance ?  CardTypeId.Chance :  CardTypeId.CommunityChest
+            const card:GameCard = await api.gameCard.getOne(gameState.gameId, cardType)
+            console.log(card.cardDescription)
+
+            //Pay bank
+            if(card.card.cardActionId === CardActionId.PayBank){
+                const payAmount = card.card.amount || 0;
+                invoke.player.update(player.id,{money: player.money - payAmount})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} lost $${payAmount}.`)
+            }
+            //Get from bank
+            if(card.card.cardActionId === CardActionId.ReceiveFrombank){
+                const amount = card.card.amount || 0;
+                invoke.player.update(player.id,{money: player.money + amount})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} received $${amount}.`)
+            }
+            //advance to space
+            if(card.card.cardActionId === CardActionId.AdvanceToSpace){
+                const space = gameState.boardSpaces.find((space) => space.id === card.card.advanceToSpaceId)
+                if(!space){
+                    console.error('No space found in useLandedOnSpace chance/community chest handler advance to space')
+                    return
+                }
+                invoke.player.update(player.id,{boardSpaceId:space.id})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} has advanced to ${space.boardSpaceName}.`)
+            }
+            //back 3 spaces
+            if(card.card.cardActionId === CardActionId.BackThreeSpaces){
+                let newSpaceId = player.boardSpaceId - 3;
+                if (newSpaceId <= 0){
+                    newSpaceId = 40 - Math.abs(newSpaceId)
+                }
+                const space = gameState.boardSpaces.find((space) => space.id === newSpaceId)
+                if(!space){
+                    console.error('No space found in useLandedOnSpace chance/community chest handler back three spaces')
+                    return
+                }
+                invoke.player.update(player.id,{boardSpaceId:space.id})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} went back three spaces to to ${space.boardSpaceName}.`)
+            }
+            //straight to jail
+            if(card.card.cardActionId === CardActionId.GoToJail){
+                invoke.player.update(player.id,{
+                    boardSpaceId:11,
+                    inJail:true,
+                    rollCount:1
+                })
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
+            }
+            //get out of jail free
+            if(card.card.cardActionId === CardActionId.GetOutOfJailFree){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} got a Get Out Of Jail Free card.`)
+            }
+            //Pay houses and hotel fees
+            if(card.card.cardActionId === CardActionId.PayHouseHotel){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} had to pay money for their houses and hotels.`)
+            }
+            //get out of jail free
+            if(card.card.cardActionId === CardActionId.GetOutOfJailFree){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} got a Get Out Of Jail Free card.`)
+            }
+            //get money from players
+            if(card.card.cardActionId === CardActionId.ReceiveFromPlayers){
+                const amount = card.card.amount || 0
+                gameState.players.forEach( (gamePlayer) => {
+                    if(gamePlayer.id === player.id)return
+                    invoke.player.update(gamePlayer.id,{money:gamePlayer.money - amount})
+                })
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} took $${amount} from everyone.`)
+            }
+            //Advance to nearest railroad
+            if(card.card.cardActionId === CardActionId.AdvanceToRailroad){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} went to the nearest railroad.`)
+            }
+            //Advance to nearest utility
+            if(card.card.cardActionId === CardActionId.AdvanceToUtility){
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} went to the nearest utility.`)
+            }
+            //pay players
+            if(card.card.cardActionId === CardActionId.PayPlayers){
+                const amount = card.card.amount || 0
+                let playerMoney = player.money
+                gameState.players.forEach( (gamePlayer) => {
+                    if(gamePlayer.id === player.id)return
+                    playerMoney -= amount;
+                    invoke.player.update(gamePlayer.id,{money:gamePlayer.money + amount})
+                })
+                invoke.player.update(player.id,{money:playerMoney})
+                invoke.gameLog.create(gameState.gameId,`${player.playerName} paid $${amount} to everyone.`)
+            }
+        })()
     }
     //=====================
     // Landed On Jail
