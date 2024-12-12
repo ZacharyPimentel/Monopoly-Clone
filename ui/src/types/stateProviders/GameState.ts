@@ -18,6 +18,7 @@ export type GameState = {
     boardSpaces:BoardSpace[]
     gameId:string
     gameLogs:GameLog[]
+    cardToastMessage:string
 }
 
 export type Theme = {
