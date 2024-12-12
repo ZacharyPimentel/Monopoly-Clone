@@ -30,6 +30,12 @@ export const useApi = () => {
             getAll: async():Promise<Theme[]> => {
                 return await request.get(`${apiUrl}/theme`);
             }
+        },
+        gameCard:{
+            getOne: async(gameId:string,cardTypeId:number) => {
+                console.log(gameId,cardTypeId)
+                return await request.get(`${apiUrl}/gameCard/getone`,{gameId,cardTypeId})
+            }
         }
     }
 }

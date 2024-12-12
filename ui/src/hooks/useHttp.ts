@@ -26,7 +26,12 @@ export const useHttp = () => {
                 Object.keys(queryParams).forEach( (key) =>{
                     urlObject.searchParams.append(key,queryParams[key].toString())
                 })
-                const response = await fetch(urlObject.toString(),{method:'GET'})
+                const response = await fetch(urlObject.toString(),{
+                    method:'GET',
+                    headers:{
+                        "Content-Type":"application/json"
+                    }
+                })
                 if(response.status !== 200) return undefined
                 const json = await response.json();
                 return json;

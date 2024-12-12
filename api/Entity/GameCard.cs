@@ -2,6 +2,9 @@ public class GameCard
 {
     public int Id { get; set; }
     public int CardId { get; set; }
-    public int GameId { get; set; }
-    public required string CardDescription { get; set; }
+    public required string GameId { get; set; }
+
+    //joined fields
+    public Card? Card { get; set; }
+    public string? CardDescription { get; set; }
 }

@@ -273,7 +273,7 @@ public class DatabaseInitializer
                     CardId INTEGER,
                     FOREIGN KEY (CardId) REFERENCES Card(Id),
                     GameId TEXT,
-                    FOREIGN KEY (GameId) REFERENCES Game(Id),
+                    FOREIGN KEY (GameId) REFERENCES Game(Id)
                 );
             ";
             db.Execute(sql,transaction);
