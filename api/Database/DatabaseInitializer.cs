@@ -134,7 +134,8 @@ public class DatabaseInitializer
                     GameStarted BOOLEAN DEFAULT false,
                     StartingMoney INTEGER DEFAULT 1500,
                     ThemeId INTEGER NOT NULL,
-                    FOREIGN KEY (ThemeId) REFERENCES THEME(Id)
+                    FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
+                    FullSetDoublePropertyRent BOOLEAN DEFAULT false
                 );
 
                 CREATE TABLE IF NOT EXISTS LASTDICEROLL(

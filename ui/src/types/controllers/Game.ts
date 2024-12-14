@@ -4,6 +4,7 @@ export type Game = {
     gameOver:boolean
     gameStarted:boolean
     startingMoney:number
+    fullSetDoublePropertyRent:boolean
     currentPlayerTurn:string | null
     gameName:string
     diceOne:number

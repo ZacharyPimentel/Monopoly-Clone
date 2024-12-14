@@ -105,6 +105,10 @@ public class GameRepository(IDbConnection db) : IGameRepository
         {
             currentGame.StartingMoney = updateParams.StartingMoney.Value;
         }
+        if(updateParams.FullSetDoublePropertyRent.HasValue)
+        {
+            currentGame.FullSetDoublePropertyRent = updateParams.FullSetDoublePropertyRent.Value;
+        }
         
         var sql = @"
             UPDATE Game
@@ -112,7 +116,8 @@ public class GameRepository(IDbConnection db) : IGameRepository
                 InLobby = @Inlobby,
                 GameStarted = @GameStarted,
                 GameOver = @GameOver,
-                StartingMoney = @StartingMoney
+                StartingMoney = @StartingMoney,
+                FullSetDoublePropertyRent = @FullSetDoublePropertyRent
             WHERE Id = @Id
         ";
 
@@ -122,6 +127,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
             currentGame.GameStarted,
             currentGame.GameOver,
             currentGame.StartingMoney,
+            currentGame.FullSetDoublePropertyRent
         };
 
         var result = await db.ExecuteAsync(sql,parameters);

@@ -7,6 +7,7 @@ public class Game
     public bool GameStarted { get; set; }
     public int StartingMoney { get; set; }
     public int ThemeId { get; set; }
+    public bool FullSetDoublePropertyRent { get; set; }
 
     //Join for PlayerId on TurnOrder with GameId
     public string? CurrentPlayerTurn { get; set; }

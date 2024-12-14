@@ -55,7 +55,8 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
         <div className={`flex hover:scale-[1.05] hover:z-[1] w-full h-full duration-[0.3s] relative`}>
             <div className='absolute w-full h-full group'>
                 <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-5px] z-[1]`}>
-                    {space.boardSpaceCategoryId !== BoardSpaceCategory.Jail && gameState.players.map((player) => {
+                    {space.boardSpaceCategoryId !== BoardSpaceCategory.Jail && 
+                        gameState.players.filter((player) => player.inCurrentGame).map((player) => {
                         if(player.boardSpaceId !== position)return null
                         return (
                             <img key={player.id} className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' src={player.iconUrl}/>

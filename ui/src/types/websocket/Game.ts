@@ -10,5 +10,6 @@ export type LobbyGame = {
 }
 
 export type GameUpdateParams = {
-    startingMoney:number
+    startingMoney?:number
+    fullSetDoublePropertyRent?:boolean
 }
