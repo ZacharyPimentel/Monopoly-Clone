@@ -4,6 +4,7 @@ import { useGameDispatch, useGameState } from "../../../../../../../../stateProv
 import { useWebSocket } from "../../../../../../../../hooks/useWebSocket";
 import { usePlayer } from "../../../../../../../../hooks/usePlayer";
 import { BoardSpaceCategory } from "../../../../../../../../types/enums/BoardSpaceCategory";
+import { useGameMasterState } from "../../../../../../../../stateProviders/GameMasterStateProvider";
 
 export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
 
@@ -11,6 +12,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
     const gameDispatch = useGameDispatch();
     const {invoke} = useWebSocket();
     const {player,currentBoardSpace} = usePlayer();
+    const {forceLandedSpace} = useGameMasterState()
 
     useEffect( () => {
         if(!gameState.rolling || uiOnly)return
@@ -95,7 +97,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
 
             //update player
             invoke.player.update(player.id,{
-                boardSpaceId: newBoardPosition,
+                boardSpaceId: forceLandedSpace || newBoardPosition,
                 rollCount: player.rollCount + 1,
                 //add GO money if passed
                 ...(passedGo && {money:player.money + 200}),

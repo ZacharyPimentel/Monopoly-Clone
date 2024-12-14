@@ -4,6 +4,7 @@ import { GamePage } from "./pages/GamePage/GamePage"
 import { GlobalModal } from "./globalComponents/GlobalModal/GlobalModal"
 import { GlobalStateProvider } from "./stateProviders/GlobalStateProvider"
 import { LobbyPage } from "./pages/LobbyPage/LobbyPage"
+import { GameMasterStateProvider } from "./stateProviders/GameMasterStateProvider"
 
 export const App = () => {
   return (
@@ -11,16 +12,18 @@ export const App = () => {
       <Route path='/*' element={
         <GlobalStateProvider>
           <GameStateProvider>
+            <GameMasterStateProvider>
             <GlobalModal/>
-            <Routes>
-              <Route path='lobby' element={<>
-                <LobbyPage/>
-              </>}/>
-              <Route path='game/:gameId' element={
-                <GamePage/>
-              }/>
-              <Route path='*' element={<Navigate to='lobby'/>}/>
-            </Routes>
+              <Routes>
+                <Route path='lobby' element={<>
+                  <LobbyPage/>
+                </>}/>
+                <Route path='game/:gameId' element={
+                  <GamePage/>
+                }/>
+                <Route path='*' element={<Navigate to='lobby'/>}/>
+              </Routes>
+            </GameMasterStateProvider>
           </GameStateProvider>
         </GlobalStateProvider>
       }>
