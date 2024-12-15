@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 [Route("/monopoly/gamecard")]
 public class GameCardController(IDbConnection db) : ControllerBase {
 
+    //Handles the logic of keeping a deck in sync while returning a Card in the end
     [HttpGet("getone")]
-    public async Task<ActionResult<GameCard>> GetOne(string gameId, int cardTypeId){
+    public async Task<ActionResult<Card>> GetOne(string gameId, int cardTypeId){
 
         var cardGetSql = @"
             SELECT 
@@ -26,7 +27,7 @@ public class GameCardController(IDbConnection db) : ControllerBase {
             cardGetSql,
             (gameCard,card,themeCard) => {
                 gameCard.Card = card;
-                gameCard.CardDescription = themeCard.CardDescription;
+                gameCard.Card.CardDescription = themeCard.CardDescription;
                 return gameCard;
             },
             new { CardTypeId = cardTypeId, GameId = gameId},
@@ -68,6 +69,6 @@ public class GameCardController(IDbConnection db) : ControllerBase {
         ";
         await db.ExecuteAsync(deleteSql, new { Id = singleGameCard.Id});
 
-        return Ok(singleGameCard);
+        return Ok(singleGameCard.Card);
     }
 }

@@ -5,4 +5,6 @@ public class Card
     public int? Amount { get; set; }
     public int CardTypeId { get; set; }
     public required int CardActionId { get; set; }
+    //joined fields
+    public required string CardDescription { get; set; }
 }

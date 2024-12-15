@@ -11,16 +11,32 @@ export const GameMasterMenu = () => {
         
         <div className='fixed bottom-[20px] right-[50px] z-[10]'>
             {menuOpen && (
-                <div className='absolute bg-white bottom-full right-0 min-w-[100px] min-h-[100px] p-[10px] flex flex-col gap-[30px]'>
+                <div className='absolute bg-white bottom-full right-0 min-w-[100px] min-h-[100px] p-[10px] flex flex-col gap-[20px]'>
                     <label>
                         <p>Force Landed On Space</p>
                         <input
+                            value={gameMasterState.forceLandedSpace}
                             className='border border-black rounded' 
                             onChange={(e) => {
                                 if(e.target.value){
                                     gameMasterDispatch({forceLandedSpace:parseInt(e.target.value)})
                                 }else{
                                     gameMasterDispatch({forceLandedSpace:0})
+                                }
+                            }} 
+                            type='number'
+                        />
+                    </label>
+                    <label>
+                        <p>Force Next Chance Card Id</p>
+                        <input
+                            value={gameMasterState.forceNextCardId}
+                            className='border border-black rounded' 
+                            onChange={(e) => {
+                                if(e.target.value){
+                                    gameMasterDispatch({forceNextCardId:parseInt(e.target.value)})
+                                }else{
+                                    gameMasterDispatch({forceNextCardId:0})
                                 }
                             }} 
                             type='number'

@@ -5,8 +5,9 @@ import { useGameDispatch, useGameState } from "../stateProviders/GameStateProvid
 import { useState } from "react";
 import { useApi } from "./useApi";
 import { CardTypeId } from "../types/enums/CardTypeId";
-import { GameCard } from "../types/controllers/GameCard";
 import { CardActionId } from "../types/enums/CardActionId";
+import { Card } from "../types/controllers/Card";
+import { useGameMasterState } from "../stateProviders/GameMasterStateProvider";
 
 export const useLandedOnSpace = () => {
 
@@ -16,6 +17,7 @@ export const useLandedOnSpace = () => {
     const {invoke} = useWebSocket();
     const [lastBoardSpace,setLastBoardSpace] = useState(currentBoardSpace)
     const gameDispatch = useGameDispatch();
+    const {forceNextCardId} = useGameMasterState()
 
     if(currentBoardSpace === lastBoardSpace) return
     if(!player || player.turnComplete || player.rollCount === 0 || gameState.rolling)return
@@ -132,32 +134,52 @@ export const useLandedOnSpace = () => {
         //pull a card and handle it
         (async() => {
             const cardType = currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance ?  CardTypeId.Chance :  CardTypeId.CommunityChest
-            const card:GameCard = await api.gameCard.getOne(gameState.gameId, cardType);
+            let card:Card;
+            if(forceNextCardId){
+                card = await api.card.find(forceNextCardId);
+            }else{
+                card = await api.gameCard.getOne(gameState.gameId, cardType);
+            }
 
             //Pay bank
-            if(card.card.cardActionId === CardActionId.PayBank){
-                const payAmount = card.card.amount || 0;
+            if(card.cardActionId === CardActionId.PayBank){
+                const payAmount = card.amount || 0;
                 invoke.player.update(player.id,{money: player.money - payAmount,turnComplete:true})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} lost $${payAmount}.`)
             }
             //Get from bank
-            if(card.card.cardActionId === CardActionId.ReceiveFrombank){
-                const amount = card.card.amount || 0;
+            if(card.cardActionId === CardActionId.ReceiveFrombank){
+                const amount = card.amount || 0;
                 invoke.player.update(player.id,{money: player.money + amount,turnComplete:true})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} received $${amount}.`)
             }
             //advance to space
-            if(card.card.cardActionId === CardActionId.AdvanceToSpace){
-                const space = gameState.boardSpaces.find((space) => space.id === card.card.advanceToSpaceId)
+            if(card.cardActionId === CardActionId.AdvanceToSpace){
+                const space = gameState.boardSpaces.find((space) => space.id === card.advanceToSpaceId)
                 if(!space){
                     console.error('No space found in useLandedOnSpace chance/community chest handler advance to space')
                     return
                 }
-                invoke.player.update(player.id,{boardSpaceId:space.id})
+                //logic for if advancing player makes them pass go
+                let newBoardPosition = player.boardSpaceId + player.boardSpaceId
+                let passedGo = false;
+                //handle setting correct position when going over GO
+                if(newBoardPosition > 39) {
+                    newBoardPosition = newBoardPosition % 40
+                    if (newBoardPosition > 0) passedGo = true;
+                }
+                if(newBoardPosition === 0) newBoardPosition = 1;
+                invoke.player.update(player.id,{
+                    boardSpaceId:space.id,
+                    ...(passedGo && {money:player.money + 200})
+                })
+                if(passedGo){
+                    invoke.gameLog.create(gameState.gameId,`${player.playerName} made $200 for passing go.`)
+                }
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} has advanced to ${space.boardSpaceName}.`)
             }
             //back 3 spaces
-            if(card.card.cardActionId === CardActionId.BackThreeSpaces){
+            if(card.cardActionId === CardActionId.BackThreeSpaces){
                 let newSpaceId = player.boardSpaceId - 3;
                 if (newSpaceId <= 0){
                     newSpaceId = 40 - Math.abs(newSpaceId)
@@ -171,7 +193,7 @@ export const useLandedOnSpace = () => {
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went back three spaces to ${space.boardSpaceName}.`)
             }
             //straight to jail
-            if(card.card.cardActionId === CardActionId.GoToJail){
+            if(card.cardActionId === CardActionId.GoToJail){
                 invoke.player.update(player.id,{
                     boardSpaceId:11,
                     inJail:true,
@@ -181,18 +203,18 @@ export const useLandedOnSpace = () => {
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
             }
             //get out of jail free
-            if(card.card.cardActionId === CardActionId.GetOutOfJailFree){
+            if(card.cardActionId === CardActionId.GetOutOfJailFree){
                 invoke.player.update(player.id,{getOutOfJailFreeCards:player.getOutOfJailFreeCards + 1,turnComplete:true})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} got a Get Out Of Jail Free card.`)
             }
             //Pay houses and hotel fees
-            if(card.card.cardActionId === CardActionId.PayHouseHotel){
+            if(card.cardActionId === CardActionId.PayHouseHotel){
                 invoke.player.update(player.id,{turnComplete:true})
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} had to pay money for their houses and hotels.`)
             }
             //get money from players
-            if(card.card.cardActionId === CardActionId.ReceiveFromPlayers){
-                const amount = card.card.amount || 0
+            if(card.cardActionId === CardActionId.ReceiveFromPlayers){
+                const amount = card.amount || 0
                 invoke.player.update(player.id,{turnComplete:true})
                 gameState.players.forEach( (gamePlayer) => {
                     if(gamePlayer.id === player.id)return
@@ -201,7 +223,7 @@ export const useLandedOnSpace = () => {
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} took $${amount} from everyone.`)
             }
             //Advance to nearest railroad
-            if(card.card.cardActionId === CardActionId.AdvanceToRailroad){
+            if(card.cardActionId === CardActionId.AdvanceToRailroad){
                 const railroads = gameState.boardSpaces.filter( (space) => space.boardSpaceCategoryId === BoardSpaceCategory.Railroard)
                 const closestRailroads = railroads.filter( (railroad) => railroad.id >= player.boardSpaceId)
                 let closestRailroad;
@@ -218,7 +240,7 @@ export const useLandedOnSpace = () => {
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went to the nearest railroad.`)
             }
             //Advance to nearest utility
-            if(card.card.cardActionId === CardActionId.AdvanceToUtility){
+            if(card.cardActionId === CardActionId.AdvanceToUtility){
                 const utilities = gameState.boardSpaces.filter( (space) => space.boardSpaceCategoryId === BoardSpaceCategory.Utility)
                 const closestUtilities = utilities.filter( (utility) => utility.id >= player.boardSpaceId)
                 let closestUtility;
@@ -235,8 +257,8 @@ export const useLandedOnSpace = () => {
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went to the nearest utility.`)
             }
             //pay players
-            if(card.card.cardActionId === CardActionId.PayPlayers){
-                const amount = card.card.amount || 0
+            if(card.cardActionId === CardActionId.PayPlayers){
+                const amount = card.amount || 0
                 let playerMoney = player.money
                 invoke.player.update(player.id,{turnComplete:true})
                 gameState.players.forEach( (gamePlayer) => {

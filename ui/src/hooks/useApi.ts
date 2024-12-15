@@ -1,4 +1,5 @@
 import { BoardSpace } from "../types/controllers/BoardSpace";
+import { Card } from "../types/controllers/Card";
 import { Player, PlayerUpdateParams, PlayerWhereParams } from "../types/controllers/Player";
 import { PlayerIcon } from "../types/controllers/PlayerIcon";
 import { Theme } from "../types/controllers/Theme";
@@ -31,9 +32,13 @@ export const useApi = () => {
                 return await request.get(`${apiUrl}/theme`);
             }
         },
+        card:{
+            find: async(cardId:number):Promise<Card> => {
+                return await request.get(`${apiUrl}/card/${cardId}`)
+            }
+        },
         gameCard:{
             getOne: async(gameId:string,cardTypeId:number) => {
-                console.log(gameId,cardTypeId)
                 return await request.get(`${apiUrl}/gameCard/getone`,{gameId,cardTypeId})
             }
         }

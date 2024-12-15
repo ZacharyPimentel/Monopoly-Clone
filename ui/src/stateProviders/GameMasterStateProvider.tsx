@@ -7,7 +7,8 @@ const GameMasterDispatchContext = createContext<(newState:Partial<GameMasterStat
 export const GameMasterStateProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
 
   const initialGameMasterState:GameMasterState = {
-    forceLandedSpace:0
+    forceLandedSpace:0,
+    forceNextCardId:0
   }
 
   const [gameMasterState, setGameMasterState] = useState<GameMasterState>(initialGameMasterState)
