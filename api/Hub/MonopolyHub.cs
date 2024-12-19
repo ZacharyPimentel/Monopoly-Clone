@@ -413,6 +413,13 @@ namespace api.hub
             Game game = await gameRepository.GetByIdAsync(gameId);
             await SendToGroup("game:update", game);
         }
+        //=======================================================
+        // Trade
+        //=======================================================
+        public async Task TradeCreate()
+        {
+            
+        }
     }
 }
 

@@ -1,9 +1,9 @@
 using System.Data;
 using Dapper;
 
-public class ThemeRepository(IDbConnection db)
+public class ThemeRepository(IDbConnection db) : IThemeRepository
 {
-    async Task<List<BoardSpace>> GetBoardSpaces(int themeId)
+    public async Task<List<BoardSpace>> GetBoardSpaces(int themeId)
     {
         var sql = @"
             SELECT bs.* FROM BOARDSPACE, bst.BoardSpaceName, bst.ThemeId
@@ -13,5 +13,12 @@ public class ThemeRepository(IDbConnection db)
 
         var boardSpaces = await db.QueryAsync<BoardSpace>(sql, new {ThemeId = themeId});
         return boardSpaces.ToList();
+    }
+    public async Task<List<Theme>> GetAll()
+    {
+        var sql = "SELECT Id, ThemeName FROM Theme";
+        var themes = await db.QueryAsync<Theme>(sql);
+        Console.WriteLine(themes.ToList());
+        return themes.ToList();
     }
 }

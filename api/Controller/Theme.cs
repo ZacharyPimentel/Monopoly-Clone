@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/monopoly/theme")]
-public class ThemeController(IDbConnection db) : ControllerBase {
+public class ThemeController(IThemeRepository themeRepository, ICacheService cacheService) : ControllerBase {
 
     [HttpGet]
-    public async Task<ActionResult<List<Theme>>> GetAllThemes(){
-        var sql = "SELECT Id, ThemeName FROM Theme";
-        var themes = await db.QueryAsync<Theme>(sql);
+    public async Task<ActionResult<List<Theme>>> GetAll(){
+        var themes = await cacheService.CachedResponse(themeRepository.GetAll);
         return Ok(themes);
     }
 }

@@ -277,6 +277,24 @@ public class DatabaseInitializer
                     GameId TEXT,
                     FOREIGN KEY (GameId) REFERENCES Game(Id)
                 );
+
+                CREATE TABLE IF NOT EXISTS TRADE(
+                    ID Serial PRIMARY KEY,
+                    FromPlayerId TEXT,
+                    FOREIGN KEY (FromPlayerId) REFERENCES Player(Id),
+                    ToPlayerId TEXT,
+                    FOREIGN KEY (ToPlayerId) REFERENCES Player(Id),
+                    Money INTEGER DEFAULT 0,
+                    GetOutOfJailFreeCards INTEGER DEFAULT 0
+                );
+
+                CREATE TABLE IF NOT EXISTS TRADEPROPERTY(
+                    ID Serial PRIMARY KEY,
+                    GamePropertyId INTEGER,
+                    FOREIGN KEY (GamePropertyId) REFERENCES GameProperty(Id),
+                    TradeId INTEGER,
+                    FOREIGN KEY (TradeId) REFERENCES Trade(Id)
+                );
             ";
             db.Execute(sql,transaction);
             transaction.Commit();

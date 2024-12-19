@@ -18,7 +18,7 @@ export const OptionSelectMenu:React.FC<{
     useEffect( () => {
         (async () => {
             const result = await apiCall()
-            console.log('21')
+            if(!result)return
             setSelectOptions(result)
             setLoading(false)
         })()

@@ -52,6 +52,11 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         sql += " ORDER BY Id";
 
         var players = await db.QueryAsync<Player>(sql, parameters);
+
+        if(searchParams.ExcludeId != null)
+        {
+            return players.Where(p => p.Id != searchParams.ExcludeId).AsList();
+        }
         return players.AsList();
     }
     public async Task<bool> Update(string playerId , PlayerUpdateParams updateParams)

@@ -20,9 +20,10 @@ builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>{
 }));
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 
 //if no db connection string
 if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnection"))){
@@ -44,8 +45,13 @@ builder.Services.AddScoped<IGameRepository,GameRepository>();
 builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
 builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
 builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
+builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
+
+//services
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 var app = builder.Build();
+
 
 //initialize all the tables for the app if needed
 using (var scope = app.Services.CreateScope())
@@ -63,6 +69,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 //app.UseAuthorization();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.MapHub<MonopolyHub>("/monopoly");
 app.MapControllers();
 app.UseCors("CorsPolicy");

@@ -3,6 +3,7 @@ public class PlayerWhereParams
     public bool? Active { get; set; }
     public bool? InCurrentGame { get; set; }
     public string? GameId { get; set; }
+    public string? ExcludeId { get; set; }
 }
 public class PlayerUpdateParams
 {

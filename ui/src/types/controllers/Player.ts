@@ -17,7 +17,9 @@ export type Player = {
 }
 
 export type PlayerWhereParams = {
-    isActive:boolean,
+    isActive?:boolean,
+    excludeId?:string
+    inCurrentGame:boolean
 }
 
 export type PlayerUpdateParams = {

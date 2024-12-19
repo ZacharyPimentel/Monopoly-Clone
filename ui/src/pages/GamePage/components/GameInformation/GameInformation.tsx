@@ -1,5 +1,5 @@
 import { GameStatus } from "./components/GameStatus"
-import { Trades } from "./components/Trades"
+import { Trades } from "./components/Trades/Trades"
 import { Rules } from "./components/Rules"
 import { OwnedProperties } from "./components/OwnedProperties"
 import { PlayerList } from "./components/PlayerList/PlayerList"

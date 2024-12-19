@@ -16,6 +16,7 @@ export const useApi = () => {
         },
         player:{
             search: async(whereParams:Partial<PlayerWhereParams>):Promise<Player[]> => {
+                console.log('19',whereParams)
                 return await request.get(`${apiUrl}/player`,whereParams)
             },
             update: async(playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
