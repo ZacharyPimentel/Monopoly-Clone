@@ -147,3 +147,7 @@
 .show-2 {
     transform: rotateY(180deg);
 }
+
+dialog{
+    transition: opacity 0.3s ease, scale 0.3s ease;
+}

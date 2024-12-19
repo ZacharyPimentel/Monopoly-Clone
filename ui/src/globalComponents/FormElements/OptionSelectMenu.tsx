@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 
 export const OptionSelectMenu:React.FC<{
-    apiCall: () => Promise<any[]>,
+    apiCall?: () => Promise<any[]>,
+    options?: any[]
     setStateCallback:(newValue:string) => void
     displayKey:string,
     defaultValue?:string
@@ -9,13 +10,14 @@ export const OptionSelectMenu:React.FC<{
         display:string
         value:string
     }[]
-}> = ({apiCall,setStateCallback,displayKey,defaultValue,additionalOptions}) => {
+}> = ({apiCall,options=[],setStateCallback,displayKey,defaultValue,additionalOptions}) => {
 
-    const [selectOptions,setSelectOptions] = useState<any[]>([])
-    const [loading,setLoading] = useState(true)
+    const [selectOptions,setSelectOptions] = useState<any[]>(options)
+    const [loading,setLoading] = useState(apiCall ? true : false);
     const [value,setValue] = useState(defaultValue || '');
 
     useEffect( () => {
+        if(!apiCall)return;
         (async () => {
             const result = await apiCall()
             if(!result)return
