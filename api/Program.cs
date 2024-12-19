@@ -48,7 +48,7 @@ builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 
 //services
-builder.Services.AddScoped<ICacheService, CacheService>();
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 var app = builder.Build();
 

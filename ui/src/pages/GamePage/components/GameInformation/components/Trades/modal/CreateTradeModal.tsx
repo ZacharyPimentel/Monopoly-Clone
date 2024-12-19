@@ -12,9 +12,6 @@ export const CreateTradeModal = () => {
     const [tradingPlayerId,setTradingPlayerId] = useState('');
     const api = useApi();
 
-    console.log(player?.id)
-    console.log('10',gameState.players)
-
     return (
         <div className='flex flex-col gap-[20px]'>
             <p>Create a Trade</p>

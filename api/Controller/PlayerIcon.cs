@@ -6,13 +6,13 @@ using System.Data.SqlClient; // or System.Data.SqlClient
 
 [ApiController]
 [Route("/monopoly/playerIcon")]
-public class PlayerIconController(IDbConnection db) : ControllerBase {
+public class PlayerIconController(IDbConnection db, ICacheService cacheService) : ControllerBase {
 
     [HttpGet]
     public async Task<ActionResult<List<Player>>> GetAll()
     {
         var sql = "SELECT * FROM PlayerIcon";
-        var playerIcons = await db.QueryAsync<PlayerIcon>(sql);
+        var playerIcons = await cacheService.CachedResponse(() => db.QueryAsync<PlayerIcon>(sql));
         return Ok(playerIcons.AsList());
     }
 }

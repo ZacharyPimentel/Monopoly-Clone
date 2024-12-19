@@ -9,7 +9,6 @@ public class PlayerController(IDbConnection db,IPlayerRepository playerRepositor
     [HttpGet]
     public async Task<ActionResult<Card>> Search([FromQuery]PlayerWhereParams whereParams){
 
-        Console.WriteLine(whereParams);
         var players = await playerRepository.Search(whereParams);
         
         return Ok(players);
