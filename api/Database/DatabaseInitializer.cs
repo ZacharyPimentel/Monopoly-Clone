@@ -47,6 +47,15 @@ public class DatabaseInitializer
             db.Execute("INSERT INTO PROPERTY (ID, PurchasePrice,MortgageValue,BoardSpaceId,UpgradeCost,SetNumber) VALUES (@Id, @PurchasePrice,@MortgageValue,@BoardSpaceId,@UpgradeCost,@SetNumber)",property);
         }
 
+        //theme property
+        var themePropertyJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeProperty.json");
+        var themeProperties = JsonConvert.DeserializeObject<List<ThemeProperty>>(themePropertyJsonData);
+        
+        foreach(var themeProperty in themeProperties)
+        {
+            db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,SetNumber,Color) VALUES (@ThemeId,@PropertyId,@SetNumber,@Color)",themeProperty);
+        }
+
         //property rents
         var propertyRentJsonData = File.ReadAllText("./Database/SeedData/PropertyRent.json");
         var propertyRents = JsonConvert.DeserializeObject<List<PropertyRent>>(propertyRentJsonData);
@@ -210,6 +219,16 @@ public class DatabaseInitializer
                     RENT INTEGER
                 );
 
+                CREATE TABLE IF NOT EXISTS THEMEPROPERTY(
+                    Id SERIAL PRIMARY KEY,
+                    ThemeId INTEGER,
+                    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+                    PropertyId INTEGER,
+                    FOREIGN KEY (PropertyId) REFERENCES Property(Id),
+                    SetNumber INTEGER CHECK (SetNumber BETWEEN 1 AND 8),
+                    Color TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS TURNORDER(
                     Id TEXT PRIMARY KEY,
                     PlayerId TEXT,
@@ -280,11 +299,15 @@ public class DatabaseInitializer
 
                 CREATE TABLE IF NOT EXISTS TRADE(
                     ID Serial PRIMARY KEY,
-                    FromPlayerId TEXT,
-                    FOREIGN KEY (FromPlayerId) REFERENCES Player(Id),
-                    ToPlayerId TEXT,
-                    FOREIGN KEY (ToPlayerId) REFERENCES Player(Id),
-                    Money INTEGER DEFAULT 0,
+                    GameId text,
+                    FOREIGN KEY (GameId) REFERENCES Game(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS PLAYERTRADE(
+                    ID Serial PRIMARY KEY,
+                    TradeId INTEGER,
+                    FOREIGN KEY (TradeId) REFERENCES Trade(Id),
+                    Money Integer DEFAULT 0,
                     GetOutOfJailFreeCards INTEGER DEFAULT 0
                 );
 
@@ -292,8 +315,8 @@ public class DatabaseInitializer
                     ID Serial PRIMARY KEY,
                     GamePropertyId INTEGER,
                     FOREIGN KEY (GamePropertyId) REFERENCES GameProperty(Id),
-                    TradeId INTEGER,
-                    FOREIGN KEY (TradeId) REFERENCES Trade(Id)
+                    PlayerTradeId INTEGER,
+                    FOREIGN KEY (PlayerTradeId) REFERENCES PlayerTrade(Id)
                 );
             ";
             db.Execute(sql,transaction);

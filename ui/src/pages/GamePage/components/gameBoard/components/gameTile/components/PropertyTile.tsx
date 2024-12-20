@@ -11,35 +11,27 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
 
     const propertyStyles = useMemo( () => {
         if(property.setNumber === 1) return({
-            color: 'bg-monopolyBrown',
             position: 'absolute top-[100%] left-[50%] translate-x-[-50%]'
         })
         if(property.setNumber === 2) return({
-            color: 'bg-monopolyLightBlue',
             position: 'absolute top-[100%] left-[50%] translate-x-[-50%]'
         })
         if(property.setNumber === 3) return({
-            color: 'bg-monopolyPink',
             position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
         if(property.setNumber === 4) return({
-            color: 'bg-monopolyOrange',
             position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
         if(property.setNumber === 5) return({
-            color: 'bg-monopolyRed',
             position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'
         })
         if(property.setNumber === 6) return({
-            color: 'bg-monopolyYellow',
             position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'
         })
         if(property.setNumber === 7) return({
-            color: 'bg-monopolyGreen',
             position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
         if(property.setNumber === 8) return({
-            color: 'bg-monopolyBlue',
             position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
     },[property])
@@ -55,7 +47,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 <p className='p-[5px] text-[12px] leading-tight'>
                     {gameState.boardSpaces[position - 1].boardSpaceName}
                 </p>
-                <span className={`flex ${propertyStyles?.color}`}></span>
+                <span style={{backgroundColor:property.color}} className='flex'></span>
             </button>
             <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
                 <p className='mb-[5px]'>{gameState.boardSpaces[position - 1].boardSpaceName}</p>

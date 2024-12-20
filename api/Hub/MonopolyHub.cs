@@ -301,15 +301,19 @@ namespace api.hub
                     gp.PlayerId, 
                     gp.UpgradeCount, 
                     gp.Mortgaged, 
-                    gp.GameId
+                    gp.GameId,
+                    tp.ThemeId,
+                    tp.PropertyId,
+                    tp.SetNumber,
+                    tp.Color
                 FROM Property p
-                LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
-                WHERE gp.GameId = @GameId;
+                JOIN GameProperty gp ON p.Id = gp.PropertyId AND gp.GameId = @GameId
+                LEFT JOIN ThemeProperty tp ON p.Id = tp.PropertyId AND tp.ThemeId = @ThemeId;
 
                 SELECT * FROM PropertyRent;
             ";
 
-            var multi = await db.QueryMultipleAsync(sql, new { GameId = gameId, ThemeId = game.ThemeId });
+            var multi = await db.QueryMultipleAsync(sql, new { GameId = gameId, game.ThemeId });
             var boardSpaces = multi.Read<BoardSpace>().ToList();
             var properties = multi.Read<Property>().ToList();
             var propertyRents = multi.Read<PropertyRent>().ToList();
@@ -352,10 +356,14 @@ namespace api.hub
                     gp.PlayerId, 
                     gp.UpgradeCount, 
                     gp.Mortgaged, 
-                    gp.GameId
+                    gp.GameId,
+                    tp.ThemeId,
+                    tp.PropertyId,
+                    tp.SetNumber,
+                    tp.Color
                 FROM Property p
-                LEFT JOIN GameProperty gp ON p.Id = gp.PropertyId
-                WHERE gp.GameId = @GameId;
+                JOIN GameProperty gp ON p.Id = gp.PropertyId AND gp.GameId = @GameId
+                LEFT JOIN ThemeProperty tp ON p.Id = tp.PropertyId AND tp.ThemeId = @ThemeId;
 
                 SELECT * FROM PropertyRent;
             ";

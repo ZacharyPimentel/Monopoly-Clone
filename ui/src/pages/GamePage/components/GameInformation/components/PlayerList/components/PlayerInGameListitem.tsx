@@ -14,7 +14,7 @@ export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
         <li style={{opacity:player.active ? '1' : '0.5'}} key={player.id} className='flex flex-col gap-[20px]'>
             <div className={`flex items-center gap-[20px] border-l-2 pl-[5px] ${player.id === gameState.game?.currentPlayerTurn ? 'border-white' : 'border-transparent'}`}>
                 <img className='w-[30px] h-[30px]' src={player.iconUrl}/>
-                <p className='mr-auto'>{player.playerName}</p>
+                <p className='mr-auto'>{player.playerName} {player.id === currentPlayer.player?.id && '(You)'}</p>
                 {currentPlayer.player?.id && currentPlayer.player?.id !== player.id && (
                     <button onClick={() => globalDispatch({
                         modalOpen:true,

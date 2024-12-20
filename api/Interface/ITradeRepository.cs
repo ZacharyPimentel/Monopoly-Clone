@@ -1,25 +1,16 @@
 
+using System.Runtime.CompilerServices;
+
 public class TradeCreateParams
 {
-    public required string FromPlayerId;
-    public required string ToPlayerId;
-    public int? Money;
-    public int? GetOutOfJailFreeCards;
-    public required string GameId;
-    public List<int> GamePropertyIds = [];
-}
-public class TradeUpdateParams
-{
-    public required string FromPlayerId;
-    public required string ToPlayerId;
-    public int? Money;
-    public int? GetOutOfJailFreeCards;
-    public List<int> GamePropertyIds = [];
+    public required PlayerTradeCreateParams PlayerOne { get; set; }
+    public required PlayerTradeCreateParams PlayerTwo { get; set;}
+    public required string GameId { get; set; }
 }
 
 public interface ITradeRepository
 {
-    Task<Trade> Create(TradeCreateParams createParams);
+    void Create(TradeCreateParams createParams);
     // Task<bool> Delete(int tradeId);
     // Task<Trade> Update(TradeUpdateParams updateParams);
 }

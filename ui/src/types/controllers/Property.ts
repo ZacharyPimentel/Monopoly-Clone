@@ -11,6 +11,7 @@ export type Property = {
     setNumber:number
     propertyRents:PropertyRent[]
     mortgaged:boolean
+    color:string
 }
 
 export type PropertyUpdateParams = {

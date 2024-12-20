@@ -41,7 +41,7 @@ export const GlobalModal = () => {
     },[location])
     
     return (
-        <dialog style={{opacity,transform:`scale(${scale}) translateY(-50%)`}} ref={globalModalRef} className='transition-all duration-[300ms] fixed shadow-lg top-[50%] w-[75%] max-w-[600px] z-[10]'>
+        <dialog style={{opacity,transform:`scale(${scale}) translateY(-50%)`}} ref={globalModalRef} className='transition-all duration-[300ms] fixed shadow-lg top-[50%] w-[75%] max-w-[600px] z-[10] max-h-[75vh]'>
             <img className='absolute bottom-full top-[-70px] rotate-[-15deg] w-[100px]' src='/assets/totoro.png'/>
             <button onClick={() => {
                 setOpacity(0)

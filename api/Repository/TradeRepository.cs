@@ -3,48 +3,73 @@ using Dapper;
 
 public class TradeRepository(IDbConnection db): ITradeRepository
 {
-    public async Task<Trade> Create(TradeCreateParams createParams)
+    public async void Create(TradeCreateParams createParams)
     {
-        var createSql = @"
-                INSERT INTO Trade (FromPlayerId,ToPlayerId,Money,GetOutOfJailFreeCards)
-                VALUES (@FromPlayerId,@ToPlayerId,@Money,@GetOutOfJailFreeCards)
+        var createTradeSql = @"
+                INSERT INTO Trade (GameId)
+                VALUES (@GameId)
                 RETURNING Id   
         ";
-        var tradeId = await db.ExecuteAsync(createSql,createParams);
+        var tradeId = await db.ExecuteAsync(createTradeSql,createParams.GameId);
 
-        if(createParams.GamePropertyIds.Count > 0)
+        var createPlayerTradeSql = @"
+            INSERT INTO PlayerTrade (TradeId,PlayerId,Money,GetOutOfJailFreeCards)
+            VALUES (@TradeId, @PlayerId, @Money, @GetOutOfJailFreeCards)
+            RETURNING Id
+        ";
+
+        var playerTradeOneId = await db.ExecuteAsync(createPlayerTradeSql,createParams.PlayerOne);
+        var playerTradeTwoId = await db.ExecuteAsync(createPlayerTradeSql,createParams.PlayerTwo);   
+
+        //create first player trade offer
+        if(createParams.PlayerOne.GamePropertyIds.Count > 0)
         {
             var tradePropertySql = @"
-                INSERT INTO TradeProperty (GamePropertyId,TradeId)
-                VALUES (@GamePropertyId,@TradeId);
+                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
+                VALUES (@GamePropertyId,@PlayerTradeId);
             ";
 
-            foreach( int gamePropertyId in createParams.GamePropertyIds)
+            foreach( int gamePropertyId in createParams.PlayerOne.GamePropertyIds)
             {
-                await db.ExecuteAsync(tradePropertySql, new {GamePropertyId = gamePropertyId, TradeId = tradeId});
+                await db.ExecuteAsync(tradePropertySql, new {GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeOneId});
             }
         }
 
-        var tradeSql = @"
-            SELECT 
-                t.Id, t.FromPlayerId, t.ToPlayerId, t.GameId, t.Money, t.GetOutOfJailFreeCards,
-                tp.GamePropertyId,
-                gp.Id, gp.PropertyId,
-                p.Id, p.BoardSpaceId,
-                bst.BoardSpaceId, bst.BoardSpaceName, bst.ThemeId
-            FROM Trade t
-            LEFT JOIN TradeProperty tp ON tp.TradeId = t.Id
-            LEFT JOIN GameProperty gp ON gp.Id = tp.GamePropertyId
-            LEFT JOIN Property p ON p.Id = gp.PropertyId
-            LEFT JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
-            LEFT JOIN Game g ON g.Id = t.GameId
-            WHERE 
-                bst.ThemeId = g.ThemeId
-            AND
-            t.Id = @TradeId
-        ";
+        //create second player trade offer
+        if(createParams.PlayerOne.GamePropertyIds.Count > 0)
+        {
+            var tradePropertySql = @"
+                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
+                VALUES (@GamePropertyId,@PlayerTradeId);
+            ";
 
-        var trade = await db.QuerySingleAsync<Trade>(tradeSql, new {TradeId = tradeId, GameId = createParams.GameId});
-        return trade;
+            foreach( int gamePropertyId in createParams.PlayerTwo.GamePropertyIds)
+            {
+                await db.ExecuteAsync(tradePropertySql, new {GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeTwoId});
+            }
+        }
+
+
+        // var tradeSql = @"
+        //     SELECT 
+        //         t.Id, t.FromPlayerId, t.ToPlayerId, t.GameId, t.Money, t.GetOutOfJailFreeCards,
+        //         tp.GamePropertyId,
+        //         gp.Id, gp.PropertyId,
+        //         p.Id, p.BoardSpaceId,
+        //         bst.BoardSpaceId, bst.BoardSpaceName, bst.ThemeId
+        //     FROM Trade t
+        //     LEFT JOIN TradeProperty tp ON tp.TradeId = t.Id
+        //     LEFT JOIN GameProperty gp ON gp.Id = tp.GamePropertyId
+        //     LEFT JOIN Property p ON p.Id = gp.PropertyId
+        //     LEFT JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
+        //     LEFT JOIN Game g ON g.Id = t.GameId
+        //     WHERE 
+        //         bst.ThemeId = g.ThemeId
+        //     AND
+        //     t.Id = @TradeId
+        // ";
+
+        // var trade = await db.QuerySingleAsync<Trade>(tradeSql, new {TradeId = tradeId, GameId = createParams.GameId});
+        // return trade;
     }
 }

@@ -4,5 +4,4 @@ public class Theme
     public required string ThemeName { get; set; }
     public string? PrimaryColor { get; set; }
     public string? SecondaryColor { get; set; }
-
 }
