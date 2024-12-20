@@ -46,6 +46,7 @@ builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
 builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
 builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
+builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 
 //services
 builder.Services.AddSingleton<ICacheService, CacheService>();

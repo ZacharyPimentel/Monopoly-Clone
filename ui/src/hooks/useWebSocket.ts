@@ -4,6 +4,7 @@ import { Game } from "../types/controllers/Game";
 import { PlayerUpdateParams } from "../types/controllers/Player";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
+import { PlayerOfferCreateParams } from "../types/websocket/Trade";
 
 export const useWebSocket = () => {
     const globalState = useGlobalState();
@@ -75,6 +76,11 @@ export const useWebSocket = () => {
             gameProperty:{
                 update:(gamePropertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
                     globalState.ws.invoke("GamePropertyUpdate",gamePropertyId,updateParams)
+                }
+            },
+            trade:{
+                create:(gameId:string,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
+                    globalState.ws.invoke("TradeCreate",gameId,playerOneOffer,playerTwoOffer)
                 }
             }
         },

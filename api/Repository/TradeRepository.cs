@@ -3,25 +3,36 @@ using Dapper;
 
 public class TradeRepository(IDbConnection db): ITradeRepository
 {
-    public async void Create(TradeCreateParams createParams)
+    public async Task<int> Create(TradeCreateParams createParams)
     {
         var createTradeSql = @"
                 INSERT INTO Trade (GameId)
                 VALUES (@GameId)
-                RETURNING Id   
+                RETURNING Id
         ";
-        var tradeId = await db.ExecuteAsync(createTradeSql,createParams.GameId);
+        var tradeId = await db.ExecuteScalarAsync<int>(createTradeSql,new { createParams.GameId } );
 
         var createPlayerTradeSql = @"
             INSERT INTO PlayerTrade (TradeId,PlayerId,Money,GetOutOfJailFreeCards)
             VALUES (@TradeId, @PlayerId, @Money, @GetOutOfJailFreeCards)
             RETURNING Id
         ";
+        
 
-        var playerTradeOneId = await db.ExecuteAsync(createPlayerTradeSql,createParams.PlayerOne);
-        var playerTradeTwoId = await db.ExecuteAsync(createPlayerTradeSql,createParams.PlayerTwo);   
+        var playerTradeOneId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new {
+            TradeId = tradeId,
+            createParams.PlayerOne.PlayerId,
+            createParams.PlayerOne.Money,
+            createParams.PlayerOne.GetOutOfJailFreeCards
+        });
+        var playerTradeTwoId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new {
+            TradeId = tradeId,
+            createParams.PlayerTwo.PlayerId,
+            createParams.PlayerTwo.Money,
+            createParams.PlayerTwo.GetOutOfJailFreeCards
+        });   
 
-        //create first player trade offer
+        //create first player property offers
         if(createParams.PlayerOne.GamePropertyIds.Count > 0)
         {
             var tradePropertySql = @"
@@ -35,7 +46,7 @@ public class TradeRepository(IDbConnection db): ITradeRepository
             }
         }
 
-        //create second player trade offer
+        //create second player property offers
         if(createParams.PlayerOne.GamePropertyIds.Count > 0)
         {
             var tradePropertySql = @"
@@ -71,5 +82,7 @@ public class TradeRepository(IDbConnection db): ITradeRepository
 
         // var trade = await db.QuerySingleAsync<Trade>(tradeSql, new {TradeId = tradeId, GameId = createParams.GameId});
         // return trade;
+
+        return tradeId;
     }
 }

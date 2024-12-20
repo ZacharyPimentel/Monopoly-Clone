@@ -13,7 +13,7 @@ export const NumberInput:React.FC<{
     return (
         <input 
             className='pl-[5px]'
-            {...form.register(formControl,{min,max})} 
+            {...form.register(formControl,{min,max,valueAsNumber:true})} 
             type='number'
             disabled={disabled}
             onBlur={(e) => {

@@ -10,6 +10,7 @@ namespace api.hub
         IPropertyRepository propertyRepository,
         IGamePropertyRepository gamePropertyRepository,
         IGameLogRepository gameLogRepository,
+        ITradeRepository tradeRepository,
         IDbConnection db
     ) : Hub{
         //=======================================================
@@ -424,9 +425,18 @@ namespace api.hub
         //=======================================================
         // Trade
         //=======================================================
-        public async Task TradeCreate()
-        {
-            
+        public async Task TradeCreate(
+            string gameId,
+            PlayerTradeCreateParams playerOneOffer,
+            PlayerTradeCreateParams playerTwoOffer
+        ){
+
+            var createParams =  new TradeCreateParams {
+                GameId = gameId,
+                PlayerOne = playerOneOffer,
+                PlayerTwo = playerTwoOffer,
+            };
+            await tradeRepository.Create(createParams);
         }
     }
 }

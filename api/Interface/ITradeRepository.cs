@@ -10,7 +10,7 @@ public class TradeCreateParams
 
 public interface ITradeRepository
 {
-    void Create(TradeCreateParams createParams);
+    Task<int> Create(TradeCreateParams createParams);
     // Task<bool> Delete(int tradeId);
     // Task<Trade> Update(TradeUpdateParams updateParams);
 }

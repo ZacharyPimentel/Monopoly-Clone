@@ -1,5 +1,5 @@
 import { useGlobalDispatch } from "../../../../../../stateProviders/GlobalStateProvider"
-import { CreateTradeModal } from "./modal/CreateTradeModal";
+import { CreateTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/CreateTradeModal";
 
 export const Trades = () => {
 

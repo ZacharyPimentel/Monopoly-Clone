@@ -307,6 +307,8 @@ public class DatabaseInitializer
                     ID Serial PRIMARY KEY,
                     TradeId INTEGER,
                     FOREIGN KEY (TradeId) REFERENCES Trade(Id),
+                    PlayerId TEXT,
+                    FOREIGN KEY (PlayerId) REFERENCES Player(Id),
                     Money Integer DEFAULT 0,
                     GetOutOfJailFreeCards INTEGER DEFAULT 0
                 );

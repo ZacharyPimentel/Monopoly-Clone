@@ -12,6 +12,7 @@ export type Property = {
     propertyRents:PropertyRent[]
     mortgaged:boolean
     color:string
+    gamePropertyId:number
 }
 
 export type PropertyUpdateParams = {
