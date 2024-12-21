@@ -13,6 +13,7 @@ import { PlayerCreateModal } from "./modal/PlayerCreateModal";
 import { BoardSpace } from "../../types/controllers/BoardSpace";
 import { GameLog } from "../../types/websocket/GameLog";
 import { GameMasterMenu } from "./components/GameMasterMenu";
+import { Trade } from "../../types/websocket/Trade";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -36,12 +37,17 @@ export const GamePage = () => {
         }
         const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
         const logUpdateCallback = (gameLogs:GameLog[]) => gameDispatch({gameLogs})
+        const tradeUpdateCallback = (trades:Trade[]) => {
+            console.log(trades)
+            gameDispatch({trades})
+        }
 
         listen('game:update',gameUpdateCallback)
         listen('player:update',playerUpdateCallback)
         listen('player:updateGroup',playerUpdateAllCallback)
         listen('boardSpace:update', boardSpaceUpdateCallback)
         listen('gameLog:update',logUpdateCallback);
+        listen('trade:update',tradeUpdateCallback);
 
         invoke.game.join(gameId!);
 
@@ -51,6 +57,7 @@ export const GamePage = () => {
             stopListen('player:updateGroup',playerUpdateAllCallback)
             stopListen('boardSpace:update', boardSpaceUpdateCallback)
             stopListen('gameLog:update',logUpdateCallback);
+            stopListen('trade:update',tradeUpdateCallback);
             invoke.game.leave(gameId!);
         }
     },[])

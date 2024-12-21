@@ -4,6 +4,7 @@ import { Player } from "../controllers/Player"
 import { BoardSpace } from "../controllers/BoardSpace"
 import { SocketPlayer } from "../websocket/Player"
 import { GameLog } from "../websocket/GameLog"
+import { Trade } from "../websocket/Trade"
 
 export type GameState = {
     players:Player[]
@@ -19,6 +20,7 @@ export type GameState = {
     gameId:string
     gameLogs:GameLog[]
     cardToastMessage:string
+    trades:Trade[]
 }
 
 export type Theme = {

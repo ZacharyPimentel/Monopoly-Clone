@@ -11,9 +11,7 @@ export const PlayerList = () => {
     const gameState = useGameState();
     const globalDispatch = useGlobalDispatch();
     const {player} = usePlayer();
-
-    console.log(gameState.players)
-    
+        
     return (
         <div className='flex flex-col gap-[10px] p-[10px] bg-totorogreen'>
             {/* Valid players are players who have nickname / profile icon set */}

@@ -215,10 +215,13 @@ namespace api.hub
             }
             var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
+            var trades = await tradeRepository.Search(gameId);
+            Console.WriteLine(trades);
             await SendToSelf("game:update",game);
             await SendToSelf("player:update",currentSocketPlayer);
             await SendToSelf("player:updateGroup",groupPlayers);
             await SendToSelf("gameLog:update",latestLogs);
+            await SendToSelf("trade:update",trades);
             await BoardSpaceGetAll(gameId);
         }
         public async Task GameLeave(string gameId)
@@ -437,6 +440,13 @@ namespace api.hub
                 PlayerTwo = playerTwoOffer,
             };
             await tradeRepository.Create(createParams);
+            var trades = await tradeRepository.Search(gameId);
+            await SendToGroup("trade:update",trades);
+        }
+        public async Task TradeSearch(string gameId)
+        {
+            var trades = await tradeRepository.Search(gameId);
+            await SendToSelf("trade:list",trades);
         }
     }
 }

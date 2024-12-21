@@ -19,7 +19,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     boardSpaces:[],
     gameId:'',
     gameLogs:[],
-    cardToastMessage:''
+    cardToastMessage:'',
+    trades:[]
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
