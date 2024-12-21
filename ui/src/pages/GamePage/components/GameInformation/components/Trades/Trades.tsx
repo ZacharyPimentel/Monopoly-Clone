@@ -2,10 +2,12 @@ import { useGlobalDispatch } from "../../../../../../stateProviders/GlobalStateP
 import { CreateTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/CreateTradeModal";
 import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
 import { Fragment } from "react";
+import { EditTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/EditTradeModal";
 
 export const Trades = () => {
 
     const gameState = useGameState()
+    const globalDispatch = useGlobalDispatch()
 
     return (
         <div className='flex flex-col gap-[10px] p-[30px] bg-totorogreen w-full'>
@@ -30,7 +32,7 @@ export const Trades = () => {
                                         </div>
                                     </Fragment>)
                                 })}
-                                <button onClick={() => {}} className='p-[5px] border ml-auto'>View</button>
+                                <button onClick={() => globalDispatch({modalOpen:true,modalContent:<EditTradeModal trade={trade}/>})} className='p-[5px] border ml-auto'>View</button>
                             </div>
                         </li>
                     )

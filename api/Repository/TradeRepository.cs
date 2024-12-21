@@ -13,8 +13,8 @@ public class TradeRepository(IDbConnection db): ITradeRepository
         var tradeId = await db.ExecuteScalarAsync<int>(createTradeSql,new { createParams.GameId } );
 
         var createPlayerTradeSql = @"
-            INSERT INTO PlayerTrade (TradeId,PlayerId,Money,GetOutOfJailFreeCards)
-            VALUES (@TradeId, @PlayerId, @Money, @GetOutOfJailFreeCards)
+            INSERT INTO PlayerTrade (TradeId,PlayerId,Initiator,Money,GetOutOfJailFreeCards)
+            VALUES (@TradeId, @PlayerId, @Initiator, @Money, @GetOutOfJailFreeCards)
             RETURNING Id
         ";
         
@@ -22,12 +22,14 @@ public class TradeRepository(IDbConnection db): ITradeRepository
         var playerTradeOneId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new {
             TradeId = tradeId,
             createParams.PlayerOne.PlayerId,
+            createParams.PlayerOne.Initiator,
             createParams.PlayerOne.Money,
             createParams.PlayerOne.GetOutOfJailFreeCards
         });
         var playerTradeTwoId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new {
             TradeId = tradeId,
             createParams.PlayerTwo.PlayerId,
+            createParams.PlayerTwo.Initiator,
             createParams.PlayerTwo.Money,
             createParams.PlayerTwo.GetOutOfJailFreeCards
         });   
@@ -65,49 +67,6 @@ public class TradeRepository(IDbConnection db): ITradeRepository
 
     public async Task<List<Trade>> Search(string gameId)
     {
-        // var tradeSql = @"
-        //     SELECT 
-        //         t.Id,
-        //         t.GameId,
-        //         pt.Id,
-        //         pt.PlayerId,
-        //         pt.Money,
-        //         pt.GetOutOfJailFreeCards,
-        //         tp.GamePropertyId,
-        //         gp.Id,
-        //         gp.PropertyId,
-        //         gp.Mortgaged,
-        //         p.Id,
-        //         p.BoardSpaceId,
-        //         bst.BoardSpaceName
-        //     FROM 
-        //         Trade t
-        //     LEFT JOIN 
-        //         PlayerTrade pt ON pt.TradeId = t.Id
-        //     LEFT JOIN 
-        //         TradeProperty tp ON tp.PlayerTradeId = pt.Id
-        //     LEFT JOIN 
-        //         GameProperty gp ON gp.Id = tp.GamePropertyId
-        //     LEFT JOIN 
-        //         Property p ON p.Id = gp.PropertyId
-        //     LEFT JOIN 
-        //         BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
-        //     WHERE 
-        //         t.GameId = @GameId
-        // ";
-
-        // var trade = await db.QueryAsync<Trade, PlayerTrade, TradeProperty, Trade>(
-        //     tradeSql, 
-        //     (trade,playerTrade,tradeProperty) => {
-        //         trade.PlayerTrades.Add(playerTrade);
-        //         return trade;
-        //     },
-        //     new {GameId = gameId},
-        //     splitOn:"TradeId"
-        // );
-        // return trade.ToList();
-
-
         var tradeSql = "SELECT * FROM Trade WHERE GameId = @GameId";
 
         var trades = await db.QueryAsync<Trade>(tradeSql, new {GameId = gameId});
@@ -116,6 +75,7 @@ public class TradeRepository(IDbConnection db): ITradeRepository
             SELECT 
                 pt.Id,
                 pt.PlayerId,
+                pt.Initiator,
                 pt.Money,
                 pt.GetOutOfJailFreeCards
             FROM 

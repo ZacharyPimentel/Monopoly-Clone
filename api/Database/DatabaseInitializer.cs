@@ -309,6 +309,7 @@ public class DatabaseInitializer
                     FOREIGN KEY (TradeId) REFERENCES Trade(Id),
                     PlayerId TEXT,
                     FOREIGN KEY (PlayerId) REFERENCES Player(Id),
+                    Initiator BOOLEAN,
                     Money Integer DEFAULT 0,
                     GetOutOfJailFreeCards INTEGER DEFAULT 0
                 );

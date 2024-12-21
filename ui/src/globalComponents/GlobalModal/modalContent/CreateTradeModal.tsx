@@ -10,12 +10,14 @@ import { useWebSocket } from "../../../hooks/useWebSocket"
 type CreateTradeInputs = {
     playerOne:{
         playerId:string,
+        initiator:boolean
         money:number,
         getOutOfJailFreeCards:number
         gamePropertyIds: number[]
     },
     playerTwo:{
         playerId:string
+        initiator:boolean
         money:number,
         getOutOfJailFreeCards:number
         gamePropertyIds: number[]
@@ -33,20 +35,20 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
         defaultValues:{
             playerOne:{
                 playerId:player.id,
+                initiator:true,
                 money:0,
                 getOutOfJailFreeCards:0,
                 gamePropertyIds:[]
             },
             playerTwo:{
                 playerId:tradeWithPlayer.id,
+                initiator:false,
                 money:0,
                 getOutOfJailFreeCards:0,
                 gamePropertyIds:[]
             },
         }
     })
-
-    console.log(form.formState.isValid)
 
     return (
         <FormProvider {...form}>
