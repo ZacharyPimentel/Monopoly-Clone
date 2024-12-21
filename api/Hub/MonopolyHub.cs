@@ -448,6 +448,21 @@ namespace api.hub
             var trades = await tradeRepository.Search(gameId);
             await SendToSelf("trade:list",trades);
         }
+        public async Task TradeUpdate(
+            int tradeId,
+            PlayerTradeCreateParams playerOneOffer,
+            PlayerTradeCreateParams playerTwoOffer
+        ){
+            var updateparams = new TradeUpdateParams{
+                TradeId = tradeId,
+                PlayerOne = playerOneOffer,
+                PlayerTwo = playerTwoOffer,
+            };
+            await tradeRepository.Update(updateparams);
+            var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            var trades = await tradeRepository.Search(socketPlayer.GameId);
+            await SendToGroup("trade:update",trades);
+        }
     }
 }
 

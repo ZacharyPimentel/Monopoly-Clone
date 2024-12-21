@@ -119,4 +119,78 @@ public class TradeRepository(IDbConnection db): ITradeRepository
         
         return trades.ToList();
     }
+    public async Task<bool> Update(TradeUpdateParams updateParams)
+    {
+        var playerTradeUpdateSql = @"
+            UPDATE PlayerTrade
+            SET 
+                Money = @Money,
+                GetOutOfJailFreeCards = @GetOutOfJailFreeCards,
+                Initiator = @Initiator
+            WHERE
+                TradeId = @TradeId
+            AND
+                PlayerId = @PlayerId
+            RETURNING Id
+        ";
+
+        var playerTradeOneId = await db.ExecuteScalarAsync<int>(playerTradeUpdateSql, new {
+            updateParams.TradeId,
+            updateParams.PlayerOne.PlayerId,
+            updateParams.PlayerOne.Initiator,
+            updateParams.PlayerOne.Money,
+            updateParams.PlayerOne.GetOutOfJailFreeCards
+        });
+        var playerTradeTwoId = await db.ExecuteScalarAsync<int>(playerTradeUpdateSql, new {
+            updateParams.TradeId,
+            updateParams.PlayerTwo.PlayerId,
+            updateParams.PlayerTwo.Initiator,
+            updateParams.PlayerTwo.Money,
+            updateParams.PlayerTwo.GetOutOfJailFreeCards
+        });
+
+        var deleteTradePropertySQL = @"
+            DELETE FROM TradeProperty
+            WHERE 
+                PlayerTradeId = @PlayerTradeOneId
+            OR 
+                PlayerTradeId = @PlayerTradeTwoId
+        ";
+
+        //delete trade properties
+        await db.ExecuteAsync(deleteTradePropertySQL, new {
+            PlayerTradeOneId = playerTradeOneId,
+            PlayerTradeTwoId = playerTradeTwoId
+        });
+
+        //create first player property offers
+        if(updateParams.PlayerOne.GamePropertyIds.Count > 0)
+        {
+            var tradePropertySql = @"
+                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
+                VALUES (@GamePropertyId,@PlayerTradeId);
+            ";
+
+            foreach( int gamePropertyId in updateParams.PlayerOne.GamePropertyIds)
+            {
+                await db.ExecuteAsync(tradePropertySql, new {GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeOneId});
+            }
+        }
+
+        //create second player property offers
+        if(updateParams.PlayerTwo.GamePropertyIds.Count > 0)
+        {
+            var tradePropertySql = @"
+                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
+                VALUES (@GamePropertyId,@PlayerTradeId);
+            ";
+
+            foreach( int gamePropertyId in updateParams.PlayerTwo.GamePropertyIds)
+            {
+                await db.ExecuteAsync(tradePropertySql, new {GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeTwoId});
+            }
+        }
+
+        return true;
+    }
 }
