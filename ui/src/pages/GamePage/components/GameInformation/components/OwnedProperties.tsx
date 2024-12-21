@@ -21,7 +21,7 @@ export const OwnedProperties = () => {
 
     return (
         <div className='flex flex-col gap-[10px] p-[30px] bg-totorogreen w-full flex-1'>
-            Properties
+            Owned Properties
             <ul className='flex flex-col gap-[10px]'>
                 {gameState.boardSpaces
                     .filter( space => space.property)

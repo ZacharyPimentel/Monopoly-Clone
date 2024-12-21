@@ -12,11 +12,11 @@ export const GameInformation:React.FC<{}> = ({}) => {
         <div className={`bg-totorodarkgreen flex-1 flex flex-col gap-[10px] p-[10px]`}>
             <GameStatus/>
             <PlayerList/>
-            <Rules/>
             {gameState.game?.gameStarted && (<>
                 <Trades/>
                 <OwnedProperties/>
             </>)}
+            <Rules/>
         </div>
     )
 }

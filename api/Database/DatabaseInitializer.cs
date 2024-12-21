@@ -104,6 +104,22 @@ public class DatabaseInitializer
             db.Execute("INSERT INTO THEMECARD (CardId,ThemeId,CardDescription) VALUES (@CardId, @ThemeId,@CardDescription)",themeCard);
         }
 
+        //color groups
+        var colorGroupJsonData = File.ReadAllText("./Database/SeedData/ColorGroup.json");
+        var colorGroups = JsonConvert.DeserializeObject<List<ColorGroup>>(colorGroupJsonData);
+        foreach(var group in colorGroups)
+        {
+            db.Execute("INSERT INTO COLORGROUP (Id,GroupName) VALUES (@Id, @GroupName)",group);
+        }
+
+        //theme colors
+        var themeColorJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeColor.json");
+        var themeColors = JsonConvert.DeserializeObject<List<ThemeColor>>(themeColorJsonData);
+        foreach(var themeColor in themeColors)
+        {
+            db.Execute("INSERT INTO ThemeColor (ThemeId,ColorGroupId,Color,Shade) VALUES (@ThemeId,@ColorGroupId,@Color,@Shade)",themeColor);
+        }
+
     }
     private static void DropAllTables(IDbConnection db)
     {
@@ -320,6 +336,21 @@ public class DatabaseInitializer
                     FOREIGN KEY (GamePropertyId) REFERENCES GameProperty(Id),
                     PlayerTradeId INTEGER,
                     FOREIGN KEY (PlayerTradeId) REFERENCES PlayerTrade(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS COLORGROUP(
+                    ID Serial PRIMARY KEY,
+                    GroupName TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS THEMECOLOR(
+                    ID Serial PRIMARY KEY,
+                    ThemeId INTEGER,
+                    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+                    ColorGroupId INTEGER,
+                    FOREIGN KEY (ColorGroupId) REFERENCES ColorGroup(Id),
+                    Color TEXT,
+                    Shade INTEGER CHECK (Shade BETWEEN 1 AND 10)
                 );
             ";
             db.Execute(sql,transaction);

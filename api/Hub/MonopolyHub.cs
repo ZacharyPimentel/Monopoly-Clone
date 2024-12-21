@@ -460,8 +460,11 @@ namespace api.hub
             };
             await tradeRepository.Update(updateparams);
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            var trades = await tradeRepository.Search(socketPlayer.GameId);
-            await SendToGroup("trade:update",trades);
+            if(socketPlayer.GameId != null)
+            {
+                var trades = await tradeRepository.Search(socketPlayer.GameId);
+                await SendToGroup("trade:update",trades);
+            }
         }
     }
 }
