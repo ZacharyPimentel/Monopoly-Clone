@@ -6,8 +6,8 @@ import React from "react";
 import { useGlobalDispatch} from "../../../stateProviders/GlobalStateProvider";
 import { useWebSocket } from "../../../hooks/useWebSocket";
 import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
-import { FetchWrapper } from "../../../globalComponents/FetchWrapper";
-import { ActionButtons } from "../../../globalComponents/GlobalModal/ActionButtons";
+import { FetchWrapper } from "../../FetchWrapper";
+import { ActionButtons } from "../ActionButtons";
 
 export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
 

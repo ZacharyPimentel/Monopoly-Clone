@@ -9,11 +9,13 @@ import { Game } from "../../types/controllers/Game";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useNavigate, useParams } from "react-router-dom";
-import { PlayerCreateModal } from "./modal/PlayerCreateModal";
+import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
 import { BoardSpace } from "../../types/controllers/BoardSpace";
 import { GameLog } from "../../types/websocket/GameLog";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { Trade } from "../../types/websocket/Trade";
+import { ThemeColor } from "../../types/websocket/ThemeColor";
+import { ThemeColorGroup } from "../../types/enums/ThemeColorGroup";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -37,9 +39,13 @@ export const GamePage = () => {
         }
         const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
         const logUpdateCallback = (gameLogs:GameLog[]) => gameDispatch({gameLogs})
-        const tradeUpdateCallback = (trades:Trade[]) => {
-            console.log(trades)
-            gameDispatch({trades})
+        const tradeUpdateCallback = (trades:Trade[]) => gameDispatch({trades})
+        const themeUpdateCallback = (themeColors:ThemeColor[]) => {
+            const primaryColors = themeColors.filter( (themeColor) => themeColor.colorGroupId === ThemeColorGroup.Primary);
+            const root = document.documentElement;
+            primaryColors.forEach( (themeColor) => {
+                root.style.setProperty(`--primary${themeColor.shade}`,themeColor.color)
+            })
         }
 
         listen('game:update',gameUpdateCallback)
@@ -48,6 +54,7 @@ export const GamePage = () => {
         listen('boardSpace:update', boardSpaceUpdateCallback)
         listen('gameLog:update',logUpdateCallback);
         listen('trade:update',tradeUpdateCallback);
+        listen('theme:update',themeUpdateCallback);
 
         invoke.game.join(gameId!);
 
@@ -77,9 +84,12 @@ export const GamePage = () => {
     return (
         <div className='flex flex-col relative'>
             <GameMasterMenu/>
-            <div className='justify-center w-full h-full flex flex-wrap'>
+            <div className='justify-center w-full h-full flex items-center'>
+                <div className='hidden xl:flex h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll bg-primary6'>
+                    <p>Test</p>
+                </div>
                 <GameBoard/>
-                <div className='h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll'>
+                <div className='h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll bg-primary6'>
                     <GameInformation />
                 </div>
             </div>

@@ -41,7 +41,7 @@ export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
 
     return (
         <div className='h-full relative'>
-            <div className='bg-[green] flex items-center justify-center w-full h-full shadow-lg border border-totorodarkgreen rounded-[5px]'>
+            <div className='flex items-center justify-center w-full h-full shadow-lg border border-totorodarkgreen'>
                 <p className='text-[12px]'>{space.boardSpaceName}</p>
             </div>
             <div style={{display: toastVisible ? 'flex' : 'none'}} className={`${positionStyles} bg-white flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px] z-[1]`}>

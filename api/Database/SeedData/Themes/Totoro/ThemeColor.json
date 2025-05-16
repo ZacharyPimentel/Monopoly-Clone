@@ -2,61 +2,61 @@
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#132515",
+        "Color":"#4C9052",
         "Shade":10
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#2D3E2F",
+        "Color":"#234326",
         "Shade":9
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#3D5740",
+        "Color":"#69B070",
         "Shade":8
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#4B7150",
+        "Color":"#7DBA83",
         "Shade":7
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#5A8C5F",
+        "Color":"#91C596",
         "Shade":6
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#6AA471",
+        "Color":"#A5CFA9",
         "Shade":5
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#89C28E",
+        "Color":"#B9DABC",
         "Shade":4
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#ABD4AE",
+        "Color":"#CDE5CF",
         "Shade":3
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#CDE5CF",
+        "Color":"#E1EFE2",
         "Shade":2
     },
     {
         "ThemeId":1,
         "ColorGroupId":1,
-        "Color":"#FCFDFC",
+        "Color":"#EAF1EA",
         "Shade":1
     }
 ]

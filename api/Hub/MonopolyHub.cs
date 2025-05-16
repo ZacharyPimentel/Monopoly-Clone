@@ -11,6 +11,7 @@ namespace api.hub
         IGamePropertyRepository gamePropertyRepository,
         IGameLogRepository gameLogRepository,
         ITradeRepository tradeRepository,
+        IThemeRepository themeRepository,
         IDbConnection db
     ) : Hub{
         //=======================================================
@@ -216,8 +217,10 @@ namespace api.hub
             var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             var trades = await tradeRepository.Search(gameId);
+            var primaryColors = await themeRepository.GetColors(game.ThemeId);
             Console.WriteLine(trades);
             await SendToSelf("game:update",game);
+            await SendToSelf("theme:update",primaryColors);
             await SendToSelf("player:update",currentSocketPlayer);
             await SendToSelf("player:updateGroup",groupPlayers);
             await SendToSelf("gameLog:update",latestLogs);

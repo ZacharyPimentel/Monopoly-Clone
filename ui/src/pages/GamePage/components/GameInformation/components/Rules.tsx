@@ -8,7 +8,7 @@ export const Rules = () => {
     const startingMoneyOptions = [500,1000,1500,2000,2500,3000]
 
     return(
-        <div className='flex flex-col gap-[20px] p-[30px] bg-totorogreen w-full flex-1'>
+        <div className='flex flex-col gap-[20px] p-[30px] w-full flex-1'>
             Game Rules and Settings
             <ul className='flex flex-col gap-[10px]'>
                 {/* Starting Money */}

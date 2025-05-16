@@ -41,8 +41,8 @@ export const GlobalModal = () => {
     },[location])
     
     return (
-        <dialog style={{opacity,transform:`scale(${scale}) translateY(-50%)`}} ref={globalModalRef} className='transition-all duration-[300ms] fixed shadow-lg top-[50%] w-[75%] max-w-[600px] z-[10] max-h-[75vh]'>
-            <img className='absolute bottom-full top-[-70px] rotate-[-15deg] w-[100px]' src='/assets/totoro.png'/>
+        <dialog style={{opacity,transform:`scale(${scale}) translateY(-50%)`}} ref={globalModalRef} className='transition-all duration-[300ms] fixed shadow-lg top-[50%] w-[75%] max-w-[700px] z-[10] max-h-[75vh] rounded-[10px]'>
+            {/* <img className='absolute bottom-full top-[-70px] rotate-[-15deg] w-[100px]' src='/assets/totoro.png'/> */}
             <button onClick={() => {
                 setOpacity(0)
                 setScale(0)
@@ -52,7 +52,7 @@ export const GlobalModal = () => {
              } className='absolute z-[1] top-[-14px] right-[20px] border-2 border-black rounded-[50%] bg-white hover:rotate-[90deg] transition-[0.2s]'>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
-            <div className='flex flex-col gap-[20px] p-[20px] relative bg-totorolightgreen border-2 border-black'>
+            <div className='flex flex-col gap-5 p-7 relative bg-primary2 rounded-[10px] border-2 border-primary10'>
                 {lastcontent}
             </div>
         </dialog>

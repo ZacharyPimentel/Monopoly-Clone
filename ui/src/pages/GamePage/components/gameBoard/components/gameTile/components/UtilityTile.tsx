@@ -10,7 +10,7 @@ export const UtilityTile:React.FC<{space:BoardSpace,sideClass:string}> = ({space
     const property = space.property;
 
     return (
-        <button className={`${sideClass} w-full h-full bg-[yellow] flex items-center justify-between shadow-lg border border-totorodarkgreen rounded-[5px] overflow-hidden`}>
+        <button className={`${sideClass} w-full h-full flex items-center justify-between shadow-lg border border-totorodarkgreen overflow-hidden`}>
             {property.playerId
                 ? <img className='w-[30px] h-[30px] opacity-[0.7]' src={gameState.players.find( (player) => player.id === property.playerId)?.iconUrl}/>
                 : <p className='text-center bg-[#eaeaea]'>${property.purchasePrice}</p>

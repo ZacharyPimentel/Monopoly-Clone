@@ -1,7 +1,7 @@
 import { usePlayer } from "../../../../../../hooks/usePlayer";
 import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
 import { useGlobalDispatch} from "../../../../../../stateProviders/GlobalStateProvider";
-import { PlayerCreateModal } from "../../../../modal/PlayerCreateModal";
+import { PlayerCreateModal } from "../../../../../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
 import { CurrentPlayerInLobbyListItem } from "./components/CurrentPlayerInLobbyListItem";
 import { PlayerInGameListitem } from "./components/PlayerInGameListitem";
 import { PlayerInLobbyListItem } from "./components/PlayerInLobbyListItem";

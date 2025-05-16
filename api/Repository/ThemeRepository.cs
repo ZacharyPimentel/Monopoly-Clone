@@ -21,4 +21,21 @@ public class ThemeRepository(IDbConnection db) : IThemeRepository
         Console.WriteLine(themes.ToList());
         return themes.ToList();
     }
+    public async Task<List<ThemeColor>> GetColors(int themeId)
+    {
+        var primaryColorsql = @"
+            SELECT 
+                *
+            FROM 
+                ThemeColor
+            WHERE
+                ThemeId = @ThemeId
+            AND
+                ColorGroupId = 1
+            ORDER BY Shade ASC
+        ";
+
+        var primaryThemeColors = await db.QueryAsync<ThemeColor>(primaryColorsql, new {ThemeId = themeId});
+        return primaryThemeColors.ToList();
+    }
 }

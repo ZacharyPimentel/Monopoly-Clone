@@ -6,7 +6,7 @@ export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
     const {players} = useGameState();
 
     return (
-        <div className='h-full bg-totorolightgreen shadow-lg border border-totorodarkgreen rounded-[5px] relative'>
+        <div className='h-full shadow-lg border border-totorodarkgreen relative'>
             {/* Visiting Jail Players */}
             <ul className={`absolute top-0 left-[50%] translate-x-[-50%] flex space-x-[-5px] z-[1]`}>
                     {players.map((player) => {

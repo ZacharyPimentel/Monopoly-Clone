@@ -1,7 +1,7 @@
 import { useWebSocket } from "../../../../../../../hooks/useWebSocket";
 import { useGlobalDispatch } from "../../../../../../../stateProviders/GlobalStateProvider"
 import { Player } from "../../../../../../../types/controllers/Player"
-import { PlayerEditModal } from "../../../../../modal/PlayerEditModal";
+import { PlayerEditModal } from "../../../../../../../globalComponents/GlobalModal/modalContent/PlayerEditModal";
 
 export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
 

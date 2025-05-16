@@ -7,7 +7,7 @@ export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
     return (
-        <div ref={gameBoardRef} className='p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
+        <div ref={gameBoardRef} className='overflow-hidden w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-primary3 relative'>
             <div className='flex w-full'>
                 {/* Top Left Square */}
                 <div className='aspect-square min-w-[10%]'>
@@ -45,9 +45,9 @@ export const GameBoard = () => {
                     <div className='absolute w-full h-full flex items-center justify-center'>
                         <CenterBoardDisplay/>
                     </div>
-                    <div className='absolute z-[-1] w-full h-full flex items-center justify-center opacity-[0.3]'>
+                    {/* <div className='absolute z-[-1] w-full h-full flex items-center justify-center opacity-[0.3]'>
                         <TotoroFamily/>
-                    </div>
+                    </div> */}
                     
                 </div>
 

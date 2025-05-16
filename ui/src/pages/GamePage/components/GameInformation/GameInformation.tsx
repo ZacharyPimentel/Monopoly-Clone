@@ -9,8 +9,8 @@ export const GameInformation:React.FC<{}> = ({}) => {
     
     const gameState = useGameState();
     return (
-        <div className={`bg-totorodarkgreen flex-1 flex flex-col gap-[10px] p-[10px]`}>
-            <GameStatus/>
+        <div className={`flex-1 flex flex-col gap-[10px] p-[10px]`}>
+            {/* <GameStatus/> */}
             <PlayerList/>
             {gameState.game?.gameStarted && (<>
                 <Trades/>
