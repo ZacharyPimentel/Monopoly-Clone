@@ -1,0 +1,208 @@
+CREATE TABLE IF NOT EXISTS THEME(
+    Id INTEGER PRIMARY KEY,
+    ThemeName TEXT,
+    PrimaryColor TEXT,
+    SecondaryColor TEXT
+);
+
+CREATE TABLE IF NOT EXISTS GAME(
+    Id TEXT PRIMARY KEY,
+    GameName TEXT UNIQUE,
+    InLobby BOOLEAN DEFAULT true,
+    GameOver BOOLEAN DEFAULT false,
+    GameStarted BOOLEAN DEFAULT false,
+    StartingMoney INTEGER DEFAULT 1500,
+    ThemeId INTEGER NOT NULL,
+    FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
+    FullSetDoublePropertyRent BOOLEAN DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS LASTDICEROLL(
+    Id SERIAL PRIMARY KEY,
+    GameId TEXT,
+    FOREIGN KEY (GameId) REFERENCES GAME(Id),
+    DiceOne INTEGER DEFAULT 1,
+    DiceTwo INTEGER DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS PLAYERICON(
+    Id INTEGER PRIMARY KEY,
+    IconUrl TEXT
+);
+
+CREATE TABLE IF NOT EXISTS BOARDSPACECATEGORY(
+    Id INTEGER PRIMARY KEY,
+    CategoryName TEXT
+);
+
+CREATE TABLE IF NOT EXISTS BOARDSPACE(
+    Id INTEGER PRIMARY KEY,
+    BoardSpaceCategoryId INTEGER,
+    FOREIGN KEY (BoardSpaceCategoryId) REFERENCES BoardSpaceCategory(Id)
+);
+
+CREATE TABLE IF NOT EXISTS BOARDSPACETHEME(
+    ID Integer PRIMARY KEY,
+    ThemeId INTEGER,
+    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+    BoardSpaceId INTEGER,
+    FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
+    BoardSpaceName Text
+);
+
+CREATE TABLE IF NOT EXISTS PLAYER(
+    Id TEXT PRIMARY KEY,
+    PlayerName TEXT,
+    Active BOOLEAN DEFAULT true,
+    Money INTEGER,
+    BoardSpaceId Integer DEFAULT 1,
+    FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
+    IconId Integer NULL CHECK (IconId BETWEEN 1 AND 8),
+    InCurrentGame BOOLEAN DEFAULT false,
+    IsReadyToPlay BOOLEAN DEFAULT false,
+    RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
+    TurnComplete BOOLEAN DEFAULT false,
+    InJail BOOLEAN DEFAULT false,
+    GameId TEXT,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    RollingForUtilities BOOLEAN DEFAULT false,
+    JailTurnCount INTEGER DEFAULT 0,
+    GetOutOfJailFreeCards INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS PROPERTY(
+    Id INTEGER PRIMARY KEY,
+    SetNumber INTEGER,
+    PurchasePrice INTEGER,
+    MortgageValue INTEGER,
+    BoardSpaceId INTEGER,
+    FOREIGN KEY (BoardSpaceId) REFERENCES BoardSpace(Id),
+    UpgradeCost INTEGER,
+    UpgradeCount INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS PROPERTYRENT(
+    Id INTEGER PRIMARY KEY,
+    PropertyId INTEGER,
+    FOREIGN KEY (PropertyId) REFERENCES Property(Id),
+    UpgradeNumber INTEGER CHECK (UpgradeNumber BETWEEN 0 AND 5),
+    RENT INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS THEMEPROPERTY(
+    Id SERIAL PRIMARY KEY,
+    ThemeId INTEGER,
+    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+    PropertyId INTEGER,
+    FOREIGN KEY (PropertyId) REFERENCES Property(Id),
+    SetNumber INTEGER CHECK (SetNumber BETWEEN 1 AND 8),
+    Color TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS TURNORDER(
+    Id TEXT PRIMARY KEY,
+    PlayerId TEXT,
+    FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
+    GameId TEXT,
+    FOREIGN KEY (GameId) REFERENCES GAME(Id),
+    PlayOrder INTEGER,
+    HasPlayed BOOLEAN DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS GAMEPROPERTY(
+    Id SERIAL PRIMARY KEY,
+    PlayerId TEXT,
+    FOREIGN KEY (PlayerId) REFERENCES Player(Id),
+    GameId TEXT,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    PropertyId INTEGER,
+    FOREIGN KEY (PropertyId) REFERENCES Property(Id),
+    UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0,
+    Mortgaged BOOLEAN DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS GAMELOG(
+    Id SERIAL PRIMARY KEY,
+    GameId TEXT NOT NULL,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    Message TEXT NOT NULL,
+    CreatedAt TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS CARDACTION(
+    Id INTEGER PRIMARY KEY,
+    CardActionName TEXT
+);
+
+CREATE TABLE IF NOT EXISTS CARDTYPE(
+    Id INTEGER PRIMARY KEY,
+    CardTypeName TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS CARD(
+    Id INTEGER PRIMARY KEY,
+    CardActionId INTEGER,
+    FOREIGN KEY (CardActionId) REFERENCES CARDACTION(Id),
+    Amount INTEGER,
+    AdvanceToSpaceId INTEGER,
+    FOREIGN KEY (AdvanceToSpaceId) REFERENCES BoardSpace(Id),
+    CardTypeId INTEGER,
+    FOREIGN KEY (CardTypeId) REFERENCES CARDTYPE(Id)
+);
+
+CREATE TABLE IF NOT EXISTS THEMECARD(
+    ID Serial PRIMARY KEY,
+    CardId INTEGER,
+    FOREIGN KEY (CardId) REFERENCES Card(Id),
+    ThemeId INTEGER,
+    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+    CardDescription TEXT
+);
+
+CREATE TABLE IF NOT EXISTS GAMECARD(
+    ID Serial PRIMARY KEY,
+    CardId INTEGER,
+    FOREIGN KEY (CardId) REFERENCES Card(Id),
+    GameId TEXT,
+    FOREIGN KEY (GameId) REFERENCES Game(Id)
+);
+
+CREATE TABLE IF NOT EXISTS TRADE(
+    ID Serial PRIMARY KEY,
+    GameId text,
+    FOREIGN KEY (GameId) REFERENCES Game(Id)
+);
+
+CREATE TABLE IF NOT EXISTS PLAYERTRADE(
+    ID Serial PRIMARY KEY,
+    TradeId INTEGER,
+    FOREIGN KEY (TradeId) REFERENCES Trade(Id),
+    PlayerId TEXT,
+    FOREIGN KEY (PlayerId) REFERENCES Player(Id),
+    Initiator BOOLEAN,
+    Money Integer DEFAULT 0,
+    GetOutOfJailFreeCards INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS TRADEPROPERTY(
+    ID Serial PRIMARY KEY,
+    GamePropertyId INTEGER,
+    FOREIGN KEY (GamePropertyId) REFERENCES GameProperty(Id),
+    PlayerTradeId INTEGER,
+    FOREIGN KEY (PlayerTradeId) REFERENCES PlayerTrade(Id)
+);
+
+CREATE TABLE IF NOT EXISTS COLORGROUP(
+    ID Serial PRIMARY KEY,
+    GroupName TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS THEMECOLOR(
+    ID Serial PRIMARY KEY,
+    ThemeId INTEGER,
+    FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
+    ColorGroupId INTEGER,
+    FOREIGN KEY (ColorGroupId) REFERENCES ColorGroup(Id),
+    Color TEXT,
+    Shade INTEGER CHECK (Shade BETWEEN 1 AND 10)
+);
