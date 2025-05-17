@@ -19,10 +19,13 @@ export const ViewLogsModal = () => {
     return (
         <div className='flex flex-col gap-[20px]'>
             <p className='font-bold'>Logs</p>
-            <ul>
-                {logs.map( log => {
+            <ul className='max-h-[300px] overflow-y-scroll flex flex-col gap-[10px]'>
+                {logs.reverse().map( log => {
                     return (
-                        <li key={log.id}>{log.message}</li>
+                        <li key={log.id} className='flex flex-col'>
+                            <p className='opacity-[0.5] text-[12px]'>{new Date(log.createdAt).toTimeString().slice(0, 8)}</p>
+                            {log.message}
+                        </li>
                     )
                 })}
             </ul>
