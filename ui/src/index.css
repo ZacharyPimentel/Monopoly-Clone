@@ -151,3 +151,7 @@
 dialog{
     transition: opacity 0.3s ease, scale 0.3s ease;
 }
+
+.btn-secondary{
+    @apply underline w-fit;
+}

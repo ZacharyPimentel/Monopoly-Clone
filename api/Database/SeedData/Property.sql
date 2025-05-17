@@ -1,4 +1,5 @@
 INSERT INTO Property (Id, BoardSpaceId, PurchasePrice, MortgageValue, UpgradeCost) VALUES
+--Regular Properties
 (1, 2, 60, 50, 50),
 (2, 4, 60, 50, 50),
 (3, 7, 100, 50, 50),
@@ -21,9 +22,11 @@ INSERT INTO Property (Id, BoardSpaceId, PurchasePrice, MortgageValue, UpgradeCos
 (20, 35, 320, 200, 200),
 (21, 38, 300, 200, 200),
 (22, 40, 320, 200, 200),
+--Railroads
 (23, 6, 200, 100, 0),
 (24, 16, 200, 100, 0),
 (25, 26, 200, 100, 0),
 (26, 36, 200, 100, 0),
+--Utilities
 (27, 13, 150, 75, 0),
 (28, 29, 150, 75, 0);

@@ -1,3 +1,4 @@
+import { GameLog } from "src/types/controllers/GameLog";
 import { BoardSpace } from "../types/controllers/BoardSpace";
 import { Card } from "../types/controllers/Card";
 import { Player, PlayerUpdateParams, PlayerWhereParams } from "../types/controllers/Player";
@@ -41,6 +42,11 @@ export const useApi = () => {
         gameCard:{
             getOne: async(gameId:string,cardTypeId:number) => {
                 return await request.get(`${apiUrl}/gameCard/getone`,{gameId,cardTypeId})
+            }
+        },
+        gameLog:{
+            getAll: async(gameId:string):Promise<GameLog[]> => {
+                return await request.get(`${apiUrl}/gameLog`,{gameId})
             }
         }
     }
