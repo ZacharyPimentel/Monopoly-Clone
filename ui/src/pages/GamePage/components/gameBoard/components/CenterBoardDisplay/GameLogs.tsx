@@ -11,7 +11,7 @@ export const GameLogs = () => {
                     <li 
                         style={{opacity}}
                         key={log.id}
-                        className="text-white transition-[0.2s] text-center"
+                        className="text-white transition-[0.2s] text-center truncate"
                     >
                         {log.message}
                     </li>

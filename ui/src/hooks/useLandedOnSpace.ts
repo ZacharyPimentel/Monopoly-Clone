@@ -134,12 +134,15 @@ export const useLandedOnSpace = () => {
         //pull a card and handle it
         (async() => {
             const cardType = currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance ?  CardTypeId.Chance :  CardTypeId.CommunityChest
+            const cardName = currentBoardSpace.boardSpaceCategoryId === BoardSpaceCategory.Chance ? "Chance" : "Community Chest"
             let card:Card;
             if(forceNextCardId){
                 card = await api.card.find(forceNextCardId);
             }else{
                 card = await api.gameCard.getOne(gameState.gameId, cardType);
             }
+
+            invoke.gameLog.create(gameState.gameId, `${player.playerName} landed on ${cardName}: "${card.cardDescription}"`)
 
             //Pay bank
             if(card.cardActionId === CardActionId.PayBank){

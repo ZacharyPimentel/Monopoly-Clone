@@ -48,6 +48,7 @@ public class GameCardController(IDbConnection db) : ControllerBase {
             ";
             await db.ExecuteAsync(cardsInsertSql, new {GameId = gameId, CardTypeId = cardTypeId});
 
+            //then fetch a new one from the fresh deck
             gameCard = await db.QueryAsync<GameCard,Card,ThemeCard,GameCard>(
                 cardGetSql,
                 (gameCard,card,themeCard) => {
