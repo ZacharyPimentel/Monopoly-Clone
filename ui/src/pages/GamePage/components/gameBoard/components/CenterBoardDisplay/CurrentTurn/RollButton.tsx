@@ -1,5 +1,5 @@
-import { usePlayer } from "../../../../../../../hooks/usePlayer";
-import { useGameDispatch, useGameState } from "../../../../../../../stateProviders/GameStateProvider"
+import { usePlayer } from "@hooks/usePlayer";
+import { useGameDispatch, useGameState } from "@stateProviders/GameStateProvider"
 
 export const RollButton = () => {
 
@@ -13,7 +13,10 @@ export const RollButton = () => {
             onClick={() => gameDispatch({rolling:true})}
             className='bg-white p-[5px]'
         >
-            Roll
+            {gameState.game?.utilityDiceOne && gameState.game?.utilityDiceTwo 
+                ? "Continue Turn"
+                : "Roll"
+            }
         </button>
     )
 }

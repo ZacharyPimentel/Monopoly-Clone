@@ -95,7 +95,7 @@ export const useLandedOnSpace = () => {
         //no automatic action if player owns the property, or if property is unowned
         if(currentBoardSpace.property?.playerId === player.id)return
         if(!currentBoardSpace.property?.playerId) return
-        console.log('update player to roll for utils')
+        invoke.gameLog.create(gameState.gameId, `${player.playerName} landed on ${currentBoardSpace.boardSpaceName}. Roll For Payment.`)
         invoke.player.update(player.id,{rollingForUtilities:true})
     }
     //=====================

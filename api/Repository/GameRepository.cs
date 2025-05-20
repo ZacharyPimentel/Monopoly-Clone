@@ -76,7 +76,7 @@ public class GameRepository(IDbConnection db) : IGameRepository
                 ORDER BY PlayOrder
                 LIMIT 1
             )
-            SELECT g.*, f.PlayerId AS CurrentPlayerTurn, ldr.DiceOne, ldr.DiceTwo
+            SELECT g.*, f.PlayerId AS CurrentPlayerTurn, ldr.DiceOne, ldr.DiceTwo, ldr.UtilityDiceOne, ldr.UtilityDiceTwo
             FROM Game as g
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
             Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId

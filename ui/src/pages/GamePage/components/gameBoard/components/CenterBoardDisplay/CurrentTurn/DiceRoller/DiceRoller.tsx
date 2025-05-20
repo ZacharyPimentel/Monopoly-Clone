@@ -19,8 +19,17 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
         if(!gameState.rolling || uiOnly)return
         var diceOne  = Math.floor((Math.random() * 6) + 1);
         var diceTwo  = Math.floor((Math.random() * 6) + 1);
-        
-        invoke.lastDiceRoll.update(gameState.gameId,diceOne,diceTwo);
+
+        //make sure the correct dice roll is set (real roll vs utilities)
+        if(player.rollingForUtilities){
+            invoke.lastDiceRoll.updateUtilityDiceRoll(gameState.gameId,diceOne,diceTwo)
+        }else{
+            invoke.lastDiceRoll.update(gameState.gameId,diceOne,diceTwo);
+            if(gameState.game?.utilityDiceOne && gameState.game?.utilityDiceTwo){
+              invoke.lastDiceRoll.updateUtilityDiceRoll(gameState.gameId)
+            }
+        }
+
         setTimeout( () => {
             //handle roll logic different if player is in jail
             if(player.inJail){
@@ -52,10 +61,10 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             }
 
             if(player.rollingForUtilities){
-                const ownerUtilities = gameState.boardSpaces.filter( (space) => {
+                const ownerUtilities = gameState.boardSpaces.filter( (space) => 
                     space.boardSpaceCategoryId === BoardSpaceCategory.Utility &&
                     space.property?.playerId === currentBoardSpace.property?.playerId
-                });
+                );
                 let amountToPay = 0
                 if(ownerUtilities.length === 1){
                     amountToPay = (diceOne + diceTwo) * 4;
@@ -120,8 +129,8 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
     return (
         <div className='flex flex-col items-center gap-[50px]'>
             <div className='flex gap-[50px]'>
-                <Die value={gameState.game?.diceOne || 1}/>
-                <Die value={gameState.game?.diceTwo || 1}/>
+                <Die value={gameState.game?.utilityDiceOne || gameState.game?.diceOne || 1}/>
+                <Die value={gameState.game?.utilityDiceTwo || gameState.game?.diceTwo || 1}/>
             </div>
         </div>
     )

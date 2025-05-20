@@ -57,7 +57,10 @@ export const useWebSocket = () => {
             lastDiceRoll:{
                 update: (gameId:string,diceOne:number,diceTwo:number) => {
                     globalState.ws.invoke('LastDiceRollUpdate',gameId,diceOne,diceTwo)
-                }
+                },
+                updateUtilityDiceRoll: (gameId:string,diceOne?:number,diceTwo?:number) => {
+                    globalState.ws.invoke("LastUtilityDiceRollUpdate",gameId,diceOne,diceTwo)
+                },
             },
             player:{
                 getAll: () => {

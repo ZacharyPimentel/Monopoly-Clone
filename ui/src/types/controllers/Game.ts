@@ -8,5 +8,7 @@ export type Game = {
     currentPlayerTurn:string | null
     gameName:string
     diceOne:number
-    diceTwo:number
+    diceTwo:number,
+    utilityDiceOne:number | null,
+    utilityDiceTwo:number | null
 }

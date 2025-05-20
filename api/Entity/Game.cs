@@ -16,4 +16,6 @@ public class Game
     //Join for LastDiceRoll
     public int? DiceOne { get; set; }
     public int? DiceTwo { get; set; }
+    public int? UtilityDiceOne { get; set; }
+    public int? UtilityDiceTwo { get; set; }
 }

@@ -257,6 +257,25 @@ namespace api.hub
             var gameId = currentSocketPlayer.GameId;
             Game currentGame = await gameRepository.GetByIdAsync(gameId);
 
+            //clean up dice rolls
+            var updateDiceRollSql = @"
+                UPDATE LastDiceRoll
+                SET
+                    DiceOne = @DiceOne,
+                    DiceTwo = @DiceTwo,
+                    UtilityDiceOne = null,
+                    UtilityDiceTwo = null
+                WHERE
+                    GameId = @GameId
+            ";
+            var DiceRollUpdateParams = new
+            {
+                DiceOne = currentGame.UtilityDiceOne,
+                DiceTwo = currentGame.UtilityDiceTwo,
+                GameId = currentGame.Id
+            };
+            await db.ExecuteAsync(updateDiceRollSql, DiceRollUpdateParams);
+            
             var markPlayerAsPlayed = @"
                 UPDATE TurnOrder
                 SET 
@@ -425,6 +444,25 @@ namespace api.hub
             Game game = await gameRepository.GetByIdAsync(gameId);
             await SendToGroup("game:update", game);
         }
+        public async Task LastUtilityDiceRollUpdate(string gameId,int? diceOne, int? diceTwo)
+        {
+            var sql = @"
+                UPDATE LASTDICEROLL
+                SET
+                    UtilityDiceOne = @UtilityDiceOne,
+                    UtilityDIceTwo = @UtilityDiceTwo
+                WHERE GameId = @GameId
+            ";
+
+            await db.ExecuteAsync(sql, new {
+                GameId = gameId,
+                UtilityDiceOne = diceOne,
+                UtilityDiceTwo = diceTwo
+            });
+
+            Game game = await gameRepository.GetByIdAsync(gameId);
+            await SendToGroup("game:update", game);
+        }
         //=======================================================
         // Trade
         //=======================================================
@@ -432,16 +470,18 @@ namespace api.hub
             string gameId,
             PlayerTradeCreateParams playerOneOffer,
             PlayerTradeCreateParams playerTwoOffer
-        ){
+        )
+        {
 
-            var createParams =  new TradeCreateParams {
+            var createParams = new TradeCreateParams
+            {
                 GameId = gameId,
                 PlayerOne = playerOneOffer,
                 PlayerTwo = playerTwoOffer,
             };
             await tradeRepository.Create(createParams);
             var trades = await tradeRepository.Search(gameId);
-            await SendToGroup("trade:update",trades);
+            await SendToGroup("trade:update", trades);
         }
         public async Task TradeSearch(string gameId)
         {
