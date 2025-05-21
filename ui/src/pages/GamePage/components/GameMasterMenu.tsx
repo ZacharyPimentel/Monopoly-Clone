@@ -42,6 +42,36 @@ export const GameMasterMenu = () => {
                             type='number'
                         />
                     </label>
+                    <label>
+                        <p>Force Next Dice One</p>
+                        <input
+                            value={gameMasterState.forceDiceOne}
+                            className='border border-black rounded' 
+                            onChange={(e) => {
+                                if(e.target.value){
+                                    gameMasterDispatch({forceDiceOne:parseInt(e.target.value)})
+                                }else{
+                                    gameMasterDispatch({forceDiceOne:0})
+                                }
+                            }} 
+                            type='number'
+                        />
+                    </label>
+                    <label>
+                        <p>Force Next Dice Two</p>
+                        <input
+                            value={gameMasterState.forceDiceTwo}
+                            className='border border-black rounded' 
+                            onChange={(e) => {
+                                if(e.target.value){
+                                    gameMasterDispatch({forceDiceTwo:parseInt(e.target.value)})
+                                }else{
+                                    gameMasterDispatch({forceDiceTwo:0})
+                                }
+                            }} 
+                            type='number'
+                        />
+                    </label>
                 </div>
             )}
             <button onClick={( () => setMenuOpen(!menuOpen))} className='bg-white  rounded-[50%] border border-black h-[50px] w-[50px] flex items-center justify-center'>

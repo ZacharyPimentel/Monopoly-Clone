@@ -14,11 +14,12 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
     const {player,currentBoardSpace} = usePlayer();
     const {forceLandedSpace} = useGameMasterState()
     const gameMasterDispatch = useGameMasterDispatch()
+    const gameMasterState = useGameMasterState();
 
     useEffect( () => {
         if(!gameState.rolling || uiOnly)return
-        var diceOne  = Math.floor((Math.random() * 6) + 1);
-        var diceTwo  = Math.floor((Math.random() * 6) + 1);
+        var diceOne  = gameMasterState.forceDiceOne || Math.floor((Math.random() * 6) + 1);
+        var diceTwo  = gameMasterState.forceDiceTwo || Math.floor((Math.random() * 6) + 1);
 
         //make sure the correct dice roll is set (real roll vs utilities)
         if(player.rollingForUtilities){
@@ -35,10 +36,6 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             if(player.inJail){
                 //escape jail
                 if(diceOne === diceTwo){
-                    invoke.player.update(player.id,{
-                        inJail:false,
-                        rollCount:0,
-                    })
                     invoke.gameLog.create(gameState.gameId,`${player.playerName} is free from jail.`)
                 }else{
                     //logic for rolling out of jail
@@ -55,9 +52,9 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
                         invoke.player.update(player.id,{turnComplete:true,rollCount:1,jailTurnCount:newJailTurnCount})
                         invoke.gameLog.create(gameState.gameId,`${player.playerName} is still in jail (${newJailTurnCount}/3)`)
                     }
+                    gameDispatch({rolling:false})
+                    return
                 }
-                gameDispatch({rolling:false})
-                return
             }
 
             if(player.rollingForUtilities){
@@ -84,10 +81,11 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             }
 
             //if doubles was rolled 3 times, go straight to jail
-            if(player.rollCount === 3){
+            if(player.rollCount + 1 === 3 && diceOne === diceTwo){
                 invoke.player.update(player.id,{
                     inJail:true,
                     boardSpaceId: 11, // 11 is the space for jail
+                    rollCount: player.rollCount + 1,
                     turnComplete:true
                 })
                 invoke.gameLog.create(gameState.gameId,`${player.playerName} went to jail.`)
@@ -115,6 +113,7 @@ export const DiceRoller:React.FC<{uiOnly?:boolean}> = ({uiOnly = false}) => {
             invoke.player.update(player.id,{
                 boardSpaceId: newBoardPosition,
                 rollCount: player.rollCount + 1,
+                inJail:false,
                 //add GO money if passed
                 ...(passedGo && {money:player.money + 200}),
             })

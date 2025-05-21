@@ -8,7 +8,9 @@ export const GameMasterStateProvider:React.FC<{children:React.ReactNode}> = ({ c
 
   const initialGameMasterState:GameMasterState = {
     forceLandedSpace:0,
-    forceNextCardId:0
+    forceNextCardId:0,
+    forceDiceOne:0,
+    forceDiceTwo:0
   }
 
   const [gameMasterState, setGameMasterState] = useState<GameMasterState>(initialGameMasterState)
