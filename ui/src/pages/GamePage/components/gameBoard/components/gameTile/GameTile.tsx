@@ -58,8 +58,15 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
                     {space.boardSpaceCategoryId !== BoardSpaceCategory.Jail && 
                         gameState.players.filter((player) => player.inCurrentGame).map((player) => {
                         if(player.boardSpaceId !== position)return null
+                        const isThisPlayersTurn = gameState.game?.currentPlayerTurn === player.id;
                         return (
-                            <img key={player.id} className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' src={player.iconUrl}/>
+                            <div key={player.id} className='relative' >
+                                <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
+                                <img 
+                                    className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' 
+                                    src={player.iconUrl}
+                                />
+                            </div>
                         )
                     })}
                 </ul>

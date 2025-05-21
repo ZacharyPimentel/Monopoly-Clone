@@ -18,7 +18,7 @@ export const PurchaseButton:React.FC<{property:Property,player:Player,spaceName:
                 })
                 invoke.gameLog.create(gameId,`${player.playerName} purchased ${spaceName}`)
             }}
-            className='bg-white p-[5px]'
+            className='bg-white p-[5px] disabled:opacity-[0.6]'
         >
             Purchase (${property.purchasePrice})
         </button>

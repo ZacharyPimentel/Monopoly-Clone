@@ -1,9 +1,9 @@
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
-import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace";
+import { useGameState } from "@stateProviders/GameStateProvider"
+import { BoardSpace } from "@types/controllers/BoardSpace";
 
 export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
 
-    const {players} = useGameState();
+    const {players,game} = useGameState();
 
     return (
         <div className='h-full bg-totorolightgreen shadow-lg border border-totorodarkgreen rounded-[5px] relative'>
@@ -11,8 +11,12 @@ export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
             <ul className={`absolute top-0 left-[50%] translate-x-[-50%] flex space-x-[-5px] z-[1]`}>
                     {players.map((player) => {
                         if(player.boardSpaceId !== 11 ||player.inJail)return null
+                        const isThisPlayersTurn = game?.currentPlayerTurn === player.id;
                         return (
-                            <img key={player.id} className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative' src={player.iconUrl}/>
+                            <div key={player.id} className='relative' >
+                                <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
+                                <img className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative' src={player.iconUrl}/>
+                            </div>
                         )
                     })}
                 </ul>
@@ -22,8 +26,12 @@ export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
                 <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-5px] z-[1]`}>
                     {players.map((player) => {
                         if(player.boardSpaceId !== 11 ||!player.inJail)return null
+                        const isThisPlayersTurn = game?.currentPlayerTurn === player.id;
                         return (
-                            <img key={player.id} className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative' src={player.iconUrl}/>
+                            <div key={player.id} className='relative' >
+                                <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
+                                <img className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative' src={player.iconUrl}/>
+                            </div>
                         )
                     })}
                 </ul>

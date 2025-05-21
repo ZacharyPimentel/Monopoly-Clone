@@ -24,7 +24,8 @@
     "baseUrl": ".",
     "paths": {
       "@hooks/*": ["src/hooks/*"],
-      "@stateProviders/*": ["src/stateProviders/*"]
+      "@stateProviders/*": ["src/stateProviders/*"],
+      "@types/*": ["src/types/*"]
     }
   },
   "include": ["src"],

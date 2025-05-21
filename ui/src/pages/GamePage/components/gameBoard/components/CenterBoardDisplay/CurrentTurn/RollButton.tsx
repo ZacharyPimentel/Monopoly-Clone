@@ -11,7 +11,7 @@ export const RollButton = () => {
         <button
             disabled={gameState.rolling || player.rollCount === 3}
             onClick={() => gameDispatch({rolling:true})}
-            className='bg-white p-[5px]'
+            className='bg-white p-[5px] disabled:opacity-[0.6]'
         >
             {gameState.game?.utilityDiceOne && gameState.game?.utilityDiceTwo 
                 ? "Continue Turn"
