@@ -1,3 +1,4 @@
+using api.Interface;
 public class PropertyUpdateParams
 {
     public int? UpgradeCount { get; set; }
@@ -5,8 +6,7 @@ public class PropertyUpdateParams
     public bool? Mortgaged { get; set; }
 }
 
-public interface IPropertyRepository
+public interface IPropertyRepository : IBaseRepository<Property,int>
 {
-    Task<IEnumerable<Property>> GetAll();
-    Task<Property> GetByIdAsync(int gamePropertyId);
+    
 }

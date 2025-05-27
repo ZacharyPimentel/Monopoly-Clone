@@ -7,6 +7,7 @@ import React, { useMemo } from "react"
 import { PlayerOfferView } from "./components/PlayerOfferView"
 import { useWebSocket } from "../../../hooks/useWebSocket"
 import { Trade } from "../../../types/websocket/Trade"
+import { AdvancedActionButtons, AdvancedButtonConfig } from "../AdvancedActionButtons"
 
 type EditTradeInputs = {
     playerOne:{
@@ -49,6 +50,38 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
 
     const otherPlayer = gameState.players.find( x => x.id === otherPlayerOffer?.playerId)
 
+    const advancedbuttonConfig:AdvancedButtonConfig[] =  useMemo( () => {
+        
+        const config:AdvancedButtonConfig[] = [];
+        // allow modify trade
+        if(player.id == trade.lastUpdatedBy){
+            config.push({
+                buttonText:'Modify',
+                buttonStyle:'success',
+                buttonCallback: async() => {
+                    console.log('modify trade')
+                }
+            })
+            config.push({
+                buttonText:'Accept',
+                buttonStyle:'success',
+                buttonCallback: async() => {
+                    console.log('accept trade')
+                }
+            })
+        }
+        config.push({
+            buttonText:'Decline',
+            buttonStyle:'warning',
+            buttonCallback: async() => {
+                console.log('decline trade')
+            }
+        })
+        return config;
+    },[])
+
+    console.log(advancedbuttonConfig)
+
     const form = useForm<EditTradeInputs>({
         mode:'onBlur',
         defaultValues:{
@@ -80,7 +113,10 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                         <PlayerOfferView formControlPrefix="playerTwo" player={otherPlayer}/>
                     </div>
                 </div>
-                <ActionButtons
+                <AdvancedActionButtons
+                    buttonConfigs={advancedbuttonConfig}
+                />
+                {/* <ActionButtons
                     confirmButtonStyle="success"
                     confirmCallback={async() => {
                         //the player that initiated the trade last cannot accept the trade, only modify it
@@ -95,9 +131,9 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                         //the player that didn't initate the trade can counter trade, or accept trade
                         //TO DO
                     }}
-                    confirmButtonText={currentPlayerOffer?.initiator ? 'Modify Trade' : "Accept Trade"}
+                    confirmButtonText={player.id === trade.lastUpdatedBy ? 'Modify Trade' : "Accept Trade"}
                     confirmDisabled={!form.formState.isValid}
-                />
+                /> */}
             </div>
         </FormProvider>
     )

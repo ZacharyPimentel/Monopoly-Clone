@@ -1,24 +1,28 @@
 namespace api.hub
 {
     using System.Data;
+    using api.Interface;
+    using api.Repository;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
         IPlayerRepository playerRepository,
         IGameRepository gameRepository,
-        IPropertyRepository propertyRepository,
         IGamePropertyRepository gamePropertyRepository,
         IGameLogRepository gameLogRepository,
         ITradeRepository tradeRepository,
+        ILastDiceRollRepository lastDiceRollRepository,
+        IGameCardRepository gameCardRepository,
         IDbConnection db
-    ) : Hub{
+    ) : Hub
+    {
         //=======================================================
         // Default socket methods for connect / disconnect
         //=======================================================
         public override Task OnConnectedAsync()
         {
-            var newPlayer = new SocketPlayer{SocketId = Context.ConnectionId};
+            var newPlayer = new SocketPlayer { SocketId = Context.ConnectionId };
             gameState.Players.Add(newPlayer);
             return base.OnConnectedAsync();
         }
@@ -26,15 +30,18 @@ namespace api.hub
         {
             var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             //if the socket player has a game player id, update to inactive
-            if(currentSocketPlayer.PlayerId != null && currentSocketPlayer.GameId != null)
+            if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
             {
-                await playerRepository.Update(currentSocketPlayer.PlayerId, new PlayerUpdateParams {Active = false});
-                var groupPlayers = await playerRepository.Search( new PlayerWhereParams {GameId = currentSocketPlayer.GameId});
+                await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
+                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
                 var gamePlayer = groupPlayers.First(x => x.Id == currentSocketPlayer.PlayerId);
-                await gameLogRepository.CreateLog(gamePlayer.GameId, $"{gamePlayer.PlayerName} has disconnected.");
+                await gameLogRepository.CreateAsync(new GameLogCreateParams{
+                    GameId = gamePlayer.Id,
+                    Message = $"{gamePlayer.PlayerName} has disconnected.",
+                });
                 var latestLogs = await gameLogRepository.GetLatestFive(gamePlayer.GameId);
                 await SendToGroup("player:updateGroup", groupPlayers);
-                await SendToGroup("gameLog:update",latestLogs);
+                await SendToGroup("gameLog:update", latestLogs);
             }
             gameState.RemovePlayer(Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);
@@ -44,19 +51,21 @@ namespace api.hub
         //=======================================================
         private async Task SendToSelf(string eventName, object? data)
         {
-            await Clients.Caller.SendAsync(eventName,data);
+            await Clients.Caller.SendAsync(eventName, data);
         }
-        private async Task SendToGroup(string eventName, object data)
+        private async Task SendToGroup(string eventName, object? data)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if(currentSocketPlayer.GameId != null)
+            if (currentSocketPlayer.GameId is Guid gameId)
             {
-                await Clients.Group(currentSocketPlayer.GameId).SendAsync(eventName, data);
-            }else{
+                await Clients.Group(gameId.ToString()).SendAsync(eventName, data);
+            }
+            else
+            {
                 throw new Exception("Tried to send data to a group where the GameId was not found.");
             }
 
-            await Clients.Caller.SendAsync(eventName,data);
+            await Clients.Caller.SendAsync(eventName, data);
         }
         private async Task SendToAll(string eventName, object data)
         {
@@ -66,54 +75,63 @@ namespace api.hub
         //=======================================================
         // Player 
         //=======================================================
-        public async Task PlayerReconnect(string playerId)
+        public async Task PlayerReconnect(Guid playerId)
         {
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            await playerRepository.Update(playerId, new PlayerUpdateParams {Active = true});
+            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = true });
             socketPlayer.PlayerId = playerId;
             var allPlayers = await playerRepository.GetAllAsync();
 
             var currentPlayer = allPlayers.First(x => x.Id == playerId);
-            await gameLogRepository.CreateLog(currentPlayer.GameId, $"{currentPlayer.PlayerName} has reconnected.");
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
+            {
+                GameId = currentPlayer.GameId,
+                Message = $"{currentPlayer.PlayerName} has reconnected."
+            });
             var latestLogs = await gameLogRepository.GetLatestFive(currentPlayer.GameId);
-            await SendToGroup("gameLog:update",latestLogs);
+            await SendToGroup("gameLog:update", latestLogs);
             await SendToSelf("player:update", socketPlayer);
-            await SendToGroup("player:updateGroup",allPlayers);
+            await SendToGroup("player:updateGroup", allPlayers);
 
             //trigger updated player counts in lobby
-            var games = await gameRepository.Search(new GameWhereParams{});
-            await SendToAll("game:updateAll",games);
+            var games = await gameRepository.Search(new GameWhereParams { });
+            await SendToAll("game:updateAll", games);
         }
         public async Task PlayerCreate(PlayerCreateParams playerCreateParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            Player newPlayer = await playerRepository.Create(playerCreateParams);
+            var newPlayer = await playerRepository.CreateAndReturnAsync(playerCreateParams);
             currentSocketPlayer.PlayerId = newPlayer.Id;
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams {
+            var groupPlayers = await playerRepository.Search(new PlayerWhereParams
+            {
                 GameId = currentSocketPlayer.GameId
             });
-
-            await gameLogRepository.CreateLog(newPlayer.GameId, $"{newPlayer.PlayerName} has joined the game.");
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
+            {
+                GameId = newPlayer.GameId,
+                Message = $"{newPlayer.PlayerName} has joined the game."
+            });
             var latestLogs = await gameLogRepository.GetLatestFive(newPlayer.GameId);
-            await SendToGroup("gameLog:update",latestLogs);
-            await SendToSelf("player:update",currentSocketPlayer);
-            await SendToGroup("player:updateGroup",groupPlayers);
+            await SendToGroup("gameLog:update", latestLogs);
+            await SendToSelf("player:update", currentSocketPlayer);
+            await SendToGroup("player:updateGroup", groupPlayers);
 
             //trigger updated player counts in lobby
-            var games = await gameRepository.Search(new GameWhereParams{});
-            await SendToAll("game:updateAll",games);
+            var games = await gameRepository.Search(new GameWhereParams { });
+            await SendToAll("game:updateAll", games);
         }
-        public async Task PlayerUpdate(string playerId,PlayerUpdateParams playerUpdateParams)
+        public async Task PlayerUpdate(Guid playerId, PlayerUpdateParams playerUpdateParams)
         {
-            await playerRepository.Update(playerId, playerUpdateParams);
+            await playerRepository.UpdateAsync(playerId, playerUpdateParams);
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if(currentSocketPlayer.GameId == null)
+            if (currentSocketPlayer.GameId is not Guid gameId)
             {
                 throw new Exception("Player does not have a GameId when it should be there.");
             }
 
-            Game currentGame = await gameRepository.GetByIdAsync(currentSocketPlayer.GameId);
-            var activeGroupPlayers = await playerRepository.Search( new PlayerWhereParams{
+            Game currentGame = await gameRepository.GetByIdAsync(gameId);
+            var activeGroupPlayers = await playerRepository.Search(new PlayerWhereParams
+            {
                 Active = true,
                 GameId = currentGame.Id
             });
@@ -121,13 +139,15 @@ namespace api.hub
             //if at least two players are all ready and the game is in lobby, start the game
             if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
             {
-                await gameRepository.Update(currentGame.Id, new GameUpdateParams{
+                await gameRepository.UpdateAsync(currentGame.Id, new GameUpdateParams
+                {
                     InLobby = false,
                     GameStarted = true
                 });
                 await playerRepository.UpdateMany(
-                    new PlayerWhereParams {Active = true},
-                    new PlayerUpdateParams {
+                    new PlayerWhereParams { Active = true },
+                    new PlayerUpdateParams
+                    {
                         InCurrentGame = true,
                         IsReadyToPlay = false,
                         Money = currentGame.StartingMoney
@@ -137,7 +157,7 @@ namespace api.hub
                 //randomize and set the turn order
                 Random random = new();
                 var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
-                foreach(var (player,index) in shuffledActivePlayers.Select( (value,i) => (value,i)))
+                foreach (var (player, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
                 {
                     var addTurnOrder = @"
                         INSERT INTO TurnOrder (Id,PlayerId,GameId,PlayOrder)
@@ -146,115 +166,106 @@ namespace api.hub
 
                     var parameters = new TurnOrder
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid(),
                         PlayerId = player.Id,
                         GameId = currentGame.Id,
                         PlayOrder = index + 1
                     };
 
-                    await db.ExecuteAsync(addTurnOrder,parameters);
-                } 
-                
-                var updatedGame = await gameRepository.GetByIdAsync(currentGame.Id);
-                await SendToGroup("game:update",updatedGame);
+                    await db.ExecuteAsync(addTurnOrder, parameters);
+                }
+
+                Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
+                await SendToGroup("game:update", updatedGame);
             }
-            var updatedGroupPlayers = await playerRepository.Search(new PlayerWhereParams {
+            var updatedGroupPlayers = await playerRepository.Search(new PlayerWhereParams
+            {
                 GameId = currentSocketPlayer.GameId
             });
-            
-            await SendToGroup("player:updateGroup",updatedGroupPlayers);
+
+            await SendToGroup("player:updateGroup", updatedGroupPlayers);
         }
-        
+
         //=======================================================
         // Game
         //=======================================================
         public async Task GameGetAll()
         {
-            var games = await gameRepository.Search(new GameWhereParams{});
+            var games = await gameRepository.GetAllAsync();
             await SendToSelf("game:updateAll", games);
         }
-        public async Task GameGetById(string gameId)
+        public async Task GameGetById(Guid gameId)
         {
-            Game game = await gameRepository.GetByIdAsync(gameId);
-            await SendToSelf("game:update",game);
+            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+            await SendToSelf("game:update", game);
         }
         public async Task GameCreate(GameCreateParams gameCreateParams)
         {
-            var newGame = await gameRepository.Create(gameCreateParams);
-            var properties = await propertyRepository.GetAll();
-
-            //create GameProperty entries
-            var gamePropertyInsert = @"
-                INSERT INTO GAMEPROPERTY (GameId,PropertyId)
-                VALUES (@GameId,@PropertyId)
-            ";
-            var gameProperties = new List<GameProperty>{};
-            foreach (var property in properties)
-            {
-                gameProperties.Add( new GameProperty {
-                    GameId = newGame.Id,
-                    PropertyId = property.Id
-                });
-            }
-            await db.ExecuteAsync(gamePropertyInsert,gameProperties);
-
-            await SendToSelf("game:create",newGame.Id);
-            var games = await gameRepository.Search(new GameWhereParams{});
-            await SendToAll("game:updateAll",games);
+            var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
+            //populate tables for new game
+            await lastDiceRollRepository.CreateAsync(new { GameId = newGame.Id });
+            await gamePropertyRepository.CreateForNewGameAsync(newGame.Id);
+            await gameCardRepository.CreateForNewGameAsync(newGame.Id);
+            await SendToSelf("game:create", newGame.Id);;
+            var games = await gameRepository.GetAllAsync();
+            await SendToAll("game:updateAll", games);
         }
-        public async Task GameJoin(string gameId)
+        public async Task GameJoin(Guid gameId)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             currentSocketPlayer.GameId = gameId;
-            await Groups.AddToGroupAsync(Context.ConnectionId,gameId);
-            Game? game = await gameRepository.GetByIdAsync(gameId);
-            if(game == null)
+            await Groups.AddToGroupAsync(Context.ConnectionId, gameId.ToString());
+            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+            if (game == null)
             {
-                await SendToSelf("game:update",game);
+                await SendToSelf("game:update", game);
                 return;
             }
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
+            var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = gameId });
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             var trades = await tradeRepository.Search(gameId);
             Console.WriteLine(trades);
-            await SendToSelf("game:update",game);
-            await SendToSelf("player:update",currentSocketPlayer);
-            await SendToSelf("player:updateGroup",groupPlayers);
-            await SendToSelf("gameLog:update",latestLogs);
-            await SendToSelf("trade:update",trades);
+            await SendToSelf("game:update", game);
+            await SendToSelf("player:update", currentSocketPlayer);
+            await SendToSelf("player:updateGroup", groupPlayers);
+            await SendToSelf("gameLog:update", latestLogs);
+            await SendToSelf("trade:update", trades);
             await BoardSpaceGetAll(gameId);
         }
         public async Task GameLeave(string gameId)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if(currentSocketPlayer.PlayerId != null && currentSocketPlayer.GameId != null)
+            if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
             {
-                await playerRepository.Update(currentSocketPlayer.PlayerId, new PlayerUpdateParams {Active = false});
-                var groupPlayers = await playerRepository.Search( new PlayerWhereParams {GameId = currentSocketPlayer.GameId});
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId,gameId);
+                await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
+                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
                 await SendToGroup("player:updateGroup", groupPlayers);
                 currentSocketPlayer.GameId = null;
                 currentSocketPlayer.PlayerId = null;
-                var games = await gameRepository.Search(new GameWhereParams{});
-                await SendToAll("game:updateAll",games);
+                var games = await gameRepository.Search(new GameWhereParams { });
+                await SendToAll("game:updateAll", games);
             }
         }
-        public async Task GameUpdate(string gameId,GameUpdateParams gameUpdateParams)
+        public async Task GameUpdate(Guid gameId, GameUpdateParams gameUpdateParams)
         {
-                await gameRepository.Update(gameId,gameUpdateParams);
-                Game game = await gameRepository.GetByIdAsync(gameId);
-                await SendToGroup("game:Update",game);
+            await gameRepository.UpdateAsync(gameId, gameUpdateParams);
+            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+            await SendToGroup("game:Update", game);
         }
         public async Task GameEndTurn()
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
 
-            if(currentSocketPlayer.PlayerId == null || currentSocketPlayer.GameId == null)
+            if (currentSocketPlayer.PlayerId is not Guid playerId || currentSocketPlayer.GameId == null)
             {
                 throw new Exception("Socket player is missing data, PlayerId or GameId");
             }
 
-            var gameId = currentSocketPlayer.GameId;
+            if (currentSocketPlayer.GameId is not Guid gameId)
+            {
+                throw new Exception("Game Id does not exist");
+            }
             Game currentGame = await gameRepository.GetByIdAsync(gameId);
 
             //clean up dice rolls
@@ -275,7 +286,7 @@ namespace api.hub
                 GameId = currentGame.Id
             };
             await db.ExecuteAsync(updateDiceRollSql, DiceRollUpdateParams);
-            
+
             var markPlayerAsPlayed = @"
                 UPDATE TurnOrder
                 SET 
@@ -288,30 +299,30 @@ namespace api.hub
                 currentSocketPlayer.PlayerId,
                 GameId = currentGame.Id,
             };
-            await db.ExecuteAsync(markPlayerAsPlayed,parameters);
+            await db.ExecuteAsync(markPlayerAsPlayed, parameters);
 
             //check if everyone has taken their turn, reset if so
             var notPlayedCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE");
-            if(notPlayedCount  == 0)
+            if (notPlayedCount == 0)
             {
                 await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
                 await playerRepository.UpdateMany(
-                    new PlayerWhereParams {InCurrentGame = true},
-                    new PlayerUpdateParams { RollCount = 0}
+                    new PlayerWhereParams { InCurrentGame = true },
+                    new PlayerUpdateParams { RollCount = 0 }
                 );
             }
 
-            await playerRepository.Update(currentSocketPlayer.PlayerId, new PlayerUpdateParams{TurnComplete = false});
+            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { TurnComplete = false });
 
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams {GameId = gameId});
-            var updatedGame = await gameRepository.GetByIdAsync(gameId);
-            await SendToGroup("player:updateGroup",groupPlayers);
-            await SendToGroup("game:update",updatedGame);
+            var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = gameId });
+            var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
+            await SendToGroup("player:updateGroup", groupPlayers);
+            await SendToGroup("game:update", updatedGame);
         }
-        public async Task BoardSpaceGetAll(string gameId)
+        public async Task BoardSpaceGetAll(Guid gameId)
         {
-            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new {GameId = gameId});
-            
+            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new { GameId = gameId });
+
             var sql = @"
                 SELECT bs.*, bst.BoardSpaceName
                 FROM BoardSpace bs
@@ -319,7 +330,11 @@ namespace api.hub
                 WHERE ThemeId = @ThemeId;
 
                 SELECT 
-                    p.*, 
+                    p.Id,
+                    p.PurchasePrice,
+                    p.MortgageValue,
+                    p.upgradeCost,
+                    p.BoardSpaceId, 
                     gp.Id AS GamePropertyId, 
                     gp.PlayerId, 
                     gp.UpgradeCount, 
@@ -355,7 +370,7 @@ namespace api.hub
                 property?.PropertyRents.Add(rent);
             }
 
-            await SendToSelf("boardSpace:update",boardSpaces);
+            await SendToSelf("boardSpace:update", boardSpaces);
         }
 
         //=======================================================
@@ -363,10 +378,10 @@ namespace api.hub
         //=======================================================
         public async Task GamePropertyUpdate(int gamePropertyId, GamePropertyUpdateParams updateParams)
         {
-            await gamePropertyRepository.Update(gamePropertyId,updateParams);
+            await gamePropertyRepository.UpdateAsync(gamePropertyId, updateParams);
             GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
-            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new {gameProperty.GameId});
-            
+            Game game = await db.QuerySingleAsync<Game>("SELECT * FROM Game WHERE Id = @GameId", new { gameProperty.GameId });
+
             var sql = @"
                 SELECT bs.*, bst.BoardSpaceName
                 FROM BoardSpace bs
@@ -409,23 +424,27 @@ namespace api.hub
                 var property = properties.FirstOrDefault(p => p.Id == rent.PropertyId);
                 property?.PropertyRents.Add(rent);
             }
-            await SendToGroup("boardSpace:update",boardSpaces);
+            await SendToGroup("boardSpace:update", boardSpaces);
         }
 
         //=======================================================
         // GameLog
         //=======================================================
-        public async Task GameLogCreate(string gameId, string message)
+        public async Task GameLogCreate(Guid gameId, string message)
         {
-            await gameLogRepository.CreateLog(gameId,message);
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
+            {
+                GameId = gameId,
+                Message = message
+            });
             var latestLogs = await gameLogRepository.GetLatestFive(gameId);
-            await SendToGroup("gameLog:update",latestLogs);
+            await SendToGroup("gameLog:update", latestLogs);
         }
 
         //=======================================================
         // Last Dice Roll
         //=======================================================
-        public async Task LastDiceRollUpdate(string gameId,int diceOne, int diceTwo)
+        public async Task LastDiceRollUpdate(Guid gameId, int diceOne, int diceTwo)
         {
             var sql = @"
                 UPDATE LASTDICEROLL
@@ -435,16 +454,17 @@ namespace api.hub
                 WHERE GameId = @GameId
             ";
 
-            await db.ExecuteAsync(sql, new {
+            await db.ExecuteAsync(sql, new
+            {
                 GameId = gameId,
                 DiceOne = diceOne,
                 DiceTwo = diceTwo
             });
 
-            Game game = await gameRepository.GetByIdAsync(gameId);
+            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
             await SendToGroup("game:update", game);
         }
-        public async Task LastUtilityDiceRollUpdate(string gameId,int? diceOne, int? diceTwo)
+        public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
         {
             var sql = @"
                 UPDATE LASTDICEROLL
@@ -454,20 +474,22 @@ namespace api.hub
                 WHERE GameId = @GameId
             ";
 
-            await db.ExecuteAsync(sql, new {
+            await db.ExecuteAsync(sql, new
+            {
                 GameId = gameId,
                 UtilityDiceOne = diceOne,
                 UtilityDiceTwo = diceTwo
             });
 
-            Game game = await gameRepository.GetByIdAsync(gameId);
+            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
             await SendToGroup("game:update", game);
         }
         //=======================================================
         // Trade
         //=======================================================
         public async Task TradeCreate(
-            string gameId,
+            Guid gameId,
+            string initiator,
             PlayerTradeCreateParams playerOneOffer,
             PlayerTradeCreateParams playerTwoOffer
         )
@@ -476,6 +498,7 @@ namespace api.hub
             var createParams = new TradeCreateParams
             {
                 GameId = gameId,
+                Initiator = initiator,
                 PlayerOne = playerOneOffer,
                 PlayerTwo = playerTwoOffer,
             };
@@ -483,27 +506,48 @@ namespace api.hub
             var trades = await tradeRepository.Search(gameId);
             await SendToGroup("trade:update", trades);
         }
-        public async Task TradeSearch(string gameId)
+        public async Task TradeSearch(Guid gameId)
         {
             var trades = await tradeRepository.Search(gameId);
-            await SendToSelf("trade:list",trades);
+            await SendToSelf("trade:list", trades);
         }
         public async Task TradeUpdate(
             int tradeId,
+            string updatedBy,
             PlayerTradeCreateParams playerOneOffer,
             PlayerTradeCreateParams playerTwoOffer
-        ){
-            var updateparams = new TradeUpdateParams{
+        )
+        {
+            var updateparams = new TradeUpdateParams
+            {
                 TradeId = tradeId,
+                LastUpdatedBy = updatedBy,
                 PlayerOne = playerOneOffer,
                 PlayerTwo = playerTwoOffer,
             };
             await tradeRepository.Update(updateparams);
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if(socketPlayer.GameId != null)
+            if (socketPlayer.GameId is Guid gameId)
             {
-                var trades = await tradeRepository.Search(socketPlayer.GameId);
-                await SendToGroup("trade:update",trades);
+                var trades = await tradeRepository.Search(gameId);
+                await SendToGroup("trade:update", trades);
+            }
+        }
+        public async Task TradeDecline(int tradeId)
+        {
+            var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            if (socketPlayer.GameId is Guid gameId)
+            {
+                await tradeRepository.DeclineTrade(tradeId, gameId);
+                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = socketPlayer.GameId });
+                var gamePlayer = groupPlayers.First(x => x.Id == socketPlayer.PlayerId);
+                await gameLogRepository.CreateAsync(new GameLogCreateParams
+                {
+                    GameId = gameId,
+                    Message = $"{gamePlayer.PlayerName} has disconnected."
+                });
+                var trades = await tradeRepository.Search(gameId);
+                await SendToGroup("trade:update", trades);
             }
         }
     }

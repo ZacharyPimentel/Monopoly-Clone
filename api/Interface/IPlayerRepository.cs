@@ -1,8 +1,10 @@
+using api.Interface;
+
 public class PlayerWhereParams
 {
     public bool? Active { get; set; }
     public bool? InCurrentGame { get; set; }
-    public string? GameId { get; set; }
+    public Guid? GameId { get; set; }
     public string? ExcludeId { get; set; }
 }
 public class PlayerUpdateParams
@@ -26,15 +28,13 @@ public class PlayerCreateParams
 {
     public required string PlayerName { get; set;}
     public required int IconId { get; set;}
-    public required string GameId { get; set;}
+    public required Guid GameId { get; set;}
 }
 
-public interface IPlayerRepository
+public interface IPlayerRepository: IBaseRepository<Player, Guid>
 {
-    Task<Player> GetByIdAsync(string id);
-    Task<IEnumerable<Player>> GetAllAsync();
+    new Task<Player> GetByIdAsync(Guid id);
+    new Task<IEnumerable<Player>> GetAllAsync();
     Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams);
-    Task<bool> Update(string playerId, PlayerUpdateParams updateParams);
     Task<bool> UpdateMany(PlayerWhereParams whereParams, PlayerUpdateParams updateParams);
-    Task<Player> Create(PlayerCreateParams createParams);
 }

@@ -1,6 +1,12 @@
-public interface IGameLogRepository
+namespace api.Interface;
+
+public class GameLogCreateParams
 {
-    Task CreateLog (string gameId, string message);
-    Task<List<GameLog>> GetLatestFive(string gameId);
-    Task<List<GameLog>> GetAll (string gameId);
+    public required Guid GameId { get; set; }
+    public required string Message { get; set; }
+}
+public interface IGameLogRepository : IBaseRepository<GameLog,int>
+{
+    Task<List<GameLog>> GetLatestFive(Guid gameId);
+    Task<List<GameLog>> GetAll(Guid gameId);
 }

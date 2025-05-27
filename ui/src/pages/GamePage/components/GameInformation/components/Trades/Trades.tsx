@@ -17,7 +17,7 @@ export const Trades = () => {
             <ul>
                 {gameState.trades.map( (trade) => {
                     return (
-                        <li className='flex justify-between gap-[20px]'>
+                        <li key={trade.id} className='flex justify-between gap-[20px]'>
                             <div className='flex gap-[20px] justify-around items-center w-full'>
                                 {trade.playerTrades.map( (playerTrade,index) => {
                                     const player = gameState.players.find( x => x.id === playerTrade.playerId);
@@ -40,5 +40,6 @@ export const Trades = () => {
             </ul>
             
         </div>
+        
     )
 }

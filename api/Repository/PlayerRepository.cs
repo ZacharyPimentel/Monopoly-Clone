@@ -1,11 +1,29 @@
 using System.Data;
 using System.Text;
+using api.Interface;
 using Dapper;
 
-public class PlayerRepository(IDbConnection db): IPlayerRepository
+namespace api.Repository;
+public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
 {
+    public PlayerRepository(IDbConnection db, IPlayerIconRepository playerIconRepository) : base(db, "Player")
+    {
+        _playerIconRepository = playerIconRepository;
+        _playerIconsLazy = new Lazy<Task<List<PlayerIcon>>>(LoadPlayerIconsAsync);
+        _db = db;
+    }
+    public readonly Lazy<Task<List<PlayerIcon>>> _playerIconsLazy;
+    public Task<List<PlayerIcon>> PlayerIcons => _playerIconsLazy.Value;
 
-    public async Task<Player> GetByIdAsync(string id)
+    private readonly IDbConnection _db;
+    private readonly IPlayerIconRepository _playerIconRepository;
+    public required IPlayerIconRepository PlayerIconRepository { get; init; }
+    private async Task<List<PlayerIcon>> LoadPlayerIconsAsync()
+    {
+        var icons = await _playerIconRepository.GetAllAsync();
+        return [.. icons];
+    }
+    public override async Task<Player> GetByIdAsync(Guid id)
     {
         var query = @"
             SELECT p.*, pi.iconurl
@@ -13,10 +31,10 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
             WHERE p.Id = @Id
         ";
-        return await db.QuerySingleAsync<Player>(query, new { Id = id });
+        return await _db.QuerySingleAsync<Player>(query, new { Id = id });
     }
 
-    public async Task<IEnumerable<Player>> GetAllAsync()
+    public override async Task<IEnumerable<Player>> GetAllAsync()
     {
         var query = @"
             SELECT p.*, pi.iconurl
@@ -24,7 +42,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
             LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
             ORDER BY Id
         ";
-        var players = await db.QueryAsync<Player>(query);
+        var players = await _db.QueryAsync<Player>(query);
         return players.AsList();
     }
     public async Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams)
@@ -51,103 +69,13 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         
         sql += " ORDER BY Id";
 
-        var players = await db.QueryAsync<Player>(sql, parameters);
+        var players = await _db.QueryAsync<Player>(sql, parameters);
 
         if(searchParams.ExcludeId != null)
         {
-            return players.Where(p => p.Id != searchParams.ExcludeId).AsList();
+            return players.Where(p => p.ToString() != searchParams.ExcludeId).AsList();
         }
         return players.AsList();
-    }
-    public async Task<bool> Update(string playerId , PlayerUpdateParams updateParams)
-    {
-        var currentPlayer = await GetByIdAsync(playerId) ?? throw new Exception("Player not found");
-        
-        if(updateParams.Active.HasValue)
-        {
-            currentPlayer.Active = updateParams.Active.Value;
-        }
-        if(updateParams.IconId.HasValue)
-        {
-            currentPlayer.IconId = updateParams.IconId.Value;
-        }
-        if(updateParams.PlayerName != null)
-        {
-            currentPlayer.PlayerName = updateParams.PlayerName;
-        }
-        if(updateParams.IsReadyToPlay.HasValue)
-        {
-            currentPlayer.IsReadyToPlay = updateParams.IsReadyToPlay.Value;
-        }
-        if(updateParams.BoardSpaceId.HasValue)
-        {
-            currentPlayer.BoardSpaceId = updateParams.BoardSpaceId.Value;
-        }
-        if(updateParams.RollCount.HasValue)
-        {
-            currentPlayer.RollCount = updateParams.RollCount.Value;
-        }
-        if(updateParams.Money.HasValue)
-        {
-            currentPlayer.Money = updateParams.Money.Value;
-        }
-        if(updateParams.TurnComplete.HasValue)
-        {
-            currentPlayer.TurnComplete = updateParams.TurnComplete.Value;
-        }
-        if(updateParams.InJail.HasValue)
-        {
-            currentPlayer.InJail = updateParams.InJail.Value;
-        }
-        if(updateParams.RollingForUtilities.HasValue)
-        {
-            currentPlayer.RollingForUtilities = updateParams.RollingForUtilities.Value;
-        }
-        if(updateParams.JailTurnCount.HasValue)
-        {
-            currentPlayer.JailTurnCount = updateParams.JailTurnCount.Value;
-        }
-        if(updateParams.GetOutOfJailFreeCards.HasValue)
-        {
-            currentPlayer.GetOutOfJailFreeCards = updateParams.GetOutOfJailFreeCards.Value;
-        }
-        
-        var sql = @"
-            UPDATE Player
-            SET
-                Active = @Active,
-                IconId = @IconId,
-                PlayerName = @PlayerName,
-                IsReadyToPlay = @IsReadyToPlay,
-                BoardSpaceId = @BoardSpaceId,
-                RollCount = @RollCount,
-                Money = @Money,
-                TurnComplete = @TurnComplete,
-                InJail = @InJail,
-                RollingForUtilities = @RollingForUtilities,
-                JailTurnCount = @JailTurnCount,
-                GetOutOfJailFreeCards = @GetOutOfJailFreeCards
-            WHERE Id = @Id
-        ";
-
-        var parameters = new {
-            currentPlayer.Id,
-            currentPlayer.Active,
-            currentPlayer.IconId,
-            currentPlayer.PlayerName,
-            currentPlayer.IsReadyToPlay,
-            currentPlayer.BoardSpaceId,
-            currentPlayer.RollCount,
-            currentPlayer.Money,
-            currentPlayer.TurnComplete,
-            currentPlayer.InJail,
-            currentPlayer.RollingForUtilities,
-            currentPlayer.JailTurnCount,
-            currentPlayer.GetOutOfJailFreeCards
-        };
-
-        var result = await db.ExecuteAsync(sql,parameters);
-        return result > 0;
     }
 
     public async Task<bool> UpdateMany(PlayerWhereParams whereParams, PlayerUpdateParams updateParams)
@@ -202,30 +130,7 @@ public class PlayerRepository(IDbConnection db): IPlayerRepository
         Console.WriteLine(sql);
 
         // Execute the update
-        var result = await db.ExecuteAsync(sql.ToString(), parameters);
+        var result = await _db.ExecuteAsync(sql.ToString(), parameters);
         return result > 0; // Returns the number of rows affected
-    }
-
-    public async Task<Player> Create(PlayerCreateParams createparams)
-    {
-        var uuid = Guid.NewGuid().ToString();
-        
-        var addNewPlayer = @"
-            INSERT INTO Player (Id,PlayerName,IconId,GameId)
-            VALUES (@Id, @PlayerName, @IconId, @GameId)
-        ";
-
-        var parameters = new 
-        {
-            Id = uuid,
-            createparams.PlayerName,
-            createparams.IconId,
-            createparams.GameId
-        };
-
-        await db.ExecuteAsync(addNewPlayer,parameters);
-
-        var newPlayer = await GetByIdAsync(uuid);
-        return newPlayer;
     }
 }

@@ -1,3 +1,4 @@
+namespace api.Interface;
 public class GameCreateParams
 {
     public required string GameName { get; set; }
@@ -18,10 +19,8 @@ public class GameWhereParams
     public string? GameName { get; set; }
 }
 
-public interface IGameRepository
+public interface IGameRepository: IBaseRepository<Game,Guid>
 {
-    Task<Game> Create(GameCreateParams gameCreateParams);
-    Task<Game> GetByIdAsync(string id);
+    Task<Game?> GetByIdWithDetailsAsync(Guid id);
     Task<List<Game>> Search(GameWhereParams gameWhereParams);
-    Task<bool> Update(string id,GameUpdateParams updateParams);
 }

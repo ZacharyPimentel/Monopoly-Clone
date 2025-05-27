@@ -1,25 +1,11 @@
 using System.Data;
+using api.Interface;
 using Dapper;
 
-public class GameLogRepository(IDbConnection db): IGameLogRepository
+namespace api.Repository;
+public class GameLogRepository(IDbConnection db) : BaseRepository<GameLog,int>(db,"GameLog"), IGameLogRepository
 {
-    public async Task CreateLog(string gameId, string message)
-    {
-        
-        var insertValues = new GameLog
-        {
-            GameId = gameId,
-            Message = message,
-            CreatedAt = DateTime.Now,
-        };
-
-        var sql = @"
-            INSERT INTO GameLog (GameId, Message, CreatedAt)
-            VALUES (@GameId, @Message, @CreatedAt)
-        ";
-        await db.ExecuteAsync(sql,insertValues);
-    }
-    public async Task<List<GameLog>> GetAll(string gameId)
+    public async Task<List<GameLog>> GetAll(Guid gameId)
     {
         var sql = @"
             SELECT * FROM GameLog
@@ -27,10 +13,10 @@ public class GameLogRepository(IDbConnection db): IGameLogRepository
             ORDER BY CreatedAt DESC
         ";
 
-        var gameLogs = await db.QueryAsync<GameLog>(sql,gameId);
+        var gameLogs = await db.QueryAsync<GameLog>(sql, gameId);
         return gameLogs.ToList();
     }
-    public async Task<List<GameLog>> GetLatestFive(string gameId)
+    public async Task<List<GameLog>> GetLatestFive(Guid gameId)
     {
         var sql = @"
             SELECT * FROM GameLog
@@ -39,7 +25,7 @@ public class GameLogRepository(IDbConnection db): IGameLogRepository
             LIMIT 5
         ";
 
-        var gameLogs = await db.QueryAsync<GameLog>(sql,new {GameId = gameId});
+        var gameLogs = await db.QueryAsync<GameLog>(sql, new { GameId = gameId });
         return gameLogs.ToList();
     }
 }

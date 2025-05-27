@@ -82,8 +82,8 @@ export const useWebSocket = () => {
                 }
             },
             trade:{
-                create:(gameId:string,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
-                    globalState.ws.invoke("TradeCreate",gameId,playerOneOffer,playerTwoOffer)
+                create:(gameId:string,initiator:string,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
+                    globalState.ws.invoke("TradeCreate",gameId,initiator,playerOneOffer,playerTwoOffer)
                 },
                 update:(tradeId:number,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
                     globalState.ws.invoke("TradeUpdate",tradeId,playerOneOffer,playerTwoOffer)

@@ -1,5 +1,7 @@
 using System.Data;
 using api.hub;
+using api.Interface;
+using api.Repository;
 using Microsoft.Data.Sqlite;
 using Npgsql;
 
@@ -40,6 +42,7 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
 }
 
 //add repositories for db calls
+builder.Services.AddScoped<IPlayerIconRepository, PlayerIconRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IGameRepository,GameRepository>();
 builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
@@ -47,6 +50,8 @@ builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
 builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
+builder.Services.AddScoped<ILastDiceRollRepository, LastDiceRollRepository>();
+builder.Services.AddScoped<IGameCardRepository, GameCardRepository>();
 
 //services
 builder.Services.AddSingleton<ICacheService, CacheService>();

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS THEME(
 );
 
 CREATE TABLE IF NOT EXISTS GAME(
-    Id TEXT PRIMARY KEY,
+    Id UUID PRIMARY KEY,
     GameName TEXT UNIQUE,
     InLobby BOOLEAN DEFAULT true,
     GameOver BOOLEAN DEFAULT false,
@@ -14,17 +14,20 @@ CREATE TABLE IF NOT EXISTS GAME(
     StartingMoney INTEGER DEFAULT 1500,
     ThemeId INTEGER NOT NULL,
     FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
-    FullSetDoublePropertyRent BOOLEAN DEFAULT false
+    FullSetDoublePropertyRent BOOLEAN DEFAULT false,
+    CreatedAt TimeStamp NOT NULL
+
 );
 
 CREATE TABLE IF NOT EXISTS LASTDICEROLL(
     Id SERIAL PRIMARY KEY,
-    GameId TEXT,
+    GameId UUID,
     FOREIGN KEY (GameId) REFERENCES GAME(Id),
     DiceOne INTEGER DEFAULT 1,
     DiceTwo INTEGER DEFAULT 1,
     UtilityDiceOne INTEGER,
-    UtilityDiceTwo INTEGER
+    UtilityDiceTwo INTEGER,
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PLAYERICON(
@@ -53,7 +56,7 @@ CREATE TABLE IF NOT EXISTS BOARDSPACETHEME(
 );
 
 CREATE TABLE IF NOT EXISTS PLAYER(
-    Id TEXT PRIMARY KEY,
+    Id UUID PRIMARY KEY,
     PlayerName TEXT,
     Active BOOLEAN DEFAULT true,
     Money INTEGER,
@@ -65,11 +68,12 @@ CREATE TABLE IF NOT EXISTS PLAYER(
     RollCount INTEGER CHECK (RollCount BETWEEN 0 AND 3) DEFAULT 0,
     TurnComplete BOOLEAN DEFAULT false,
     InJail BOOLEAN DEFAULT false,
-    GameId TEXT,
+    GameId UUID,
     FOREIGN KEY (GameId) REFERENCES Game(Id),
     RollingForUtilities BOOLEAN DEFAULT false,
     JailTurnCount INTEGER DEFAULT 0,
-    GetOutOfJailFreeCards INTEGER DEFAULT 0
+    GetOutOfJailFreeCards INTEGER DEFAULT 0,
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PROPERTY(
@@ -103,9 +107,9 @@ CREATE TABLE IF NOT EXISTS THEMEPROPERTY(
 
 CREATE TABLE IF NOT EXISTS TURNORDER(
     Id TEXT PRIMARY KEY,
-    PlayerId TEXT,
+    PlayerId UUID,
     FOREIGN KEY (PlayerId) REFERENCES PLAYER(Id),
-    GameId TEXT,
+    GameId UUID,
     FOREIGN KEY (GameId) REFERENCES GAME(Id),
     PlayOrder INTEGER,
     HasPlayed BOOLEAN DEFAULT false
@@ -113,19 +117,20 @@ CREATE TABLE IF NOT EXISTS TURNORDER(
 
 CREATE TABLE IF NOT EXISTS GAMEPROPERTY(
     Id SERIAL PRIMARY KEY,
-    PlayerId TEXT,
+    PlayerId UUID,
     FOREIGN KEY (PlayerId) REFERENCES Player(Id),
-    GameId TEXT,
+    GameId UUID,
     FOREIGN KEY (GameId) REFERENCES Game(Id),
     PropertyId INTEGER,
     FOREIGN KEY (PropertyId) REFERENCES Property(Id),
     UpgradeCount INTEGER CHECK (UpgradeCount BETWEEN 0 AND 5) DEFAULT 0,
-    Mortgaged BOOLEAN DEFAULT false
+    Mortgaged BOOLEAN DEFAULT false,
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS GAMELOG(
     Id SERIAL PRIMARY KEY,
-    GameId TEXT NOT NULL,
+    GameId UUID NOT NULL,
     FOREIGN KEY (GameId) REFERENCES Game(Id),
     Message TEXT NOT NULL,
     CreatedAt TIMESTAMP NOT NULL
@@ -165,25 +170,31 @@ CREATE TABLE IF NOT EXISTS GAMECARD(
     ID Serial PRIMARY KEY,
     CardId INTEGER,
     FOREIGN KEY (CardId) REFERENCES Card(Id),
-    GameId TEXT,
-    FOREIGN KEY (GameId) REFERENCES Game(Id)
+    GameId UUID,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS TRADE(
     ID Serial PRIMARY KEY,
-    GameId text,
-    FOREIGN KEY (GameId) REFERENCES Game(Id)
+    GameId UUID,
+    InitiatedBy TEXT,
+    LastUpdatedBy TEXT,
+    DeclinedBy TEXT,
+    AcceptedBy TEXT,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS PLAYERTRADE(
     ID Serial PRIMARY KEY,
     TradeId INTEGER,
     FOREIGN KEY (TradeId) REFERENCES Trade(Id),
-    PlayerId TEXT,
+    PlayerId UUID,
     FOREIGN KEY (PlayerId) REFERENCES Player(Id),
-    Initiator BOOLEAN,
     Money Integer DEFAULT 0,
-    GetOutOfJailFreeCards INTEGER DEFAULT 0
+    GetOutOfJailFreeCards INTEGER DEFAULT 0,
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS TRADEPROPERTY(
@@ -191,7 +202,8 @@ CREATE TABLE IF NOT EXISTS TRADEPROPERTY(
     GamePropertyId INTEGER,
     FOREIGN KEY (GamePropertyId) REFERENCES GameProperty(Id),
     PlayerTradeId INTEGER,
-    FOREIGN KEY (PlayerTradeId) REFERENCES PlayerTrade(Id)
+    FOREIGN KEY (PlayerTradeId) REFERENCES PlayerTrade(Id),
+    CreatedAt TimeStamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS COLORGROUP(
