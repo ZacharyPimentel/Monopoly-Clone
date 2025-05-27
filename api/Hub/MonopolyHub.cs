@@ -36,7 +36,7 @@ namespace api.hub
                 var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
                 var gamePlayer = groupPlayers.First(x => x.Id == currentSocketPlayer.PlayerId);
                 await gameLogRepository.CreateAsync(new GameLogCreateParams{
-                    GameId = gamePlayer.Id,
+                    GameId = gamePlayer.GameId,
                     Message = $"{gamePlayer.PlayerName} has disconnected.",
                 });
                 var latestLogs = await gameLogRepository.GetLatestFive(gamePlayer.GameId);
