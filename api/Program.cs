@@ -42,6 +42,7 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
 }
 
 //add repositories for db calls
+builder.Services.AddScoped<IBoardSpaceRepository, BoardSpaceRepository>();
 builder.Services.AddScoped<IPlayerIconRepository, PlayerIconRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IGameRepository,GameRepository>();
