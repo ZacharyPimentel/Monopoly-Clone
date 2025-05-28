@@ -289,7 +289,7 @@ namespace api.hub
             );
 
             //check if everyone has taken their turn, reset if so
-            var notPlayedCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE");
+            var notPlayedCount = await db.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE AND GameId = {currentGame.Id}");
             if (notPlayedCount == 0)
             {
                 await turnOrderRepository.UpdateManyAsync(
@@ -438,40 +438,24 @@ namespace api.hub
         //=======================================================
         public async Task LastDiceRollUpdate(Guid gameId, int diceOne, int diceTwo)
         {
-            var sql = @"
-                UPDATE LASTDICEROLL
-                SET
-                    DiceOne = @DiceOne,
-                    DiceTwo = @DiceTwo
-                WHERE GameId = @GameId
-            ";
 
-            await db.ExecuteAsync(sql, new
-            {
-                GameId = gameId,
-                DiceOne = diceOne,
-                DiceTwo = diceTwo
-            });
+            await lastDiceRollRepository.UpdateManyAsync(
+                new LastDiceRollUpdateParams { DiceOne = diceOne, DiceTwo = diceTwo },
+                new LastDiceRollWhereParams { GameId = gameId },
+                new { }
+            );
 
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
             await SendToGroup("game:update", game);
         }
         public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
         {
-            var sql = @"
-                UPDATE LASTDICEROLL
-                SET
-                    UtilityDiceOne = @UtilityDiceOne,
-                    UtilityDIceTwo = @UtilityDiceTwo
-                WHERE GameId = @GameId
-            ";
 
-            await db.ExecuteAsync(sql, new
-            {
-                GameId = gameId,
-                UtilityDiceOne = diceOne,
-                UtilityDiceTwo = diceTwo
-            });
+            await lastDiceRollRepository.UpdateManyAsync(
+                new LastDiceRollUpdateParams { UtilityDiceOne = diceOne, UtilityDiceTwo = diceTwo },
+                new LastDiceRollWhereParams { GameId = gameId },
+                new { }
+            );
 
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
             await SendToGroup("game:update", game);
