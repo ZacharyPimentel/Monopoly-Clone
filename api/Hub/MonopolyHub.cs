@@ -298,9 +298,9 @@ namespace api.hub
                     new {}
                 );
                 await playerRepository.UpdateManyAsync(
-                    new PlayerWhereParams { InCurrentGame = true },
                     new PlayerUpdateParams { RollCount = 0 },
-                    new {}
+                    new PlayerWhereParams { InCurrentGame = true },
+                    new { }
                 );
             }
 
