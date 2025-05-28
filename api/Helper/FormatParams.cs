@@ -15,7 +15,7 @@ public static class FormatParams
             return dynamicParameters;
         }
 
-        foreach (var property in parameters.GetType().GetProperties())
+        foreach (var property in parameters.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             var name = property.Name;
             var value = property.GetValue(parameters);
@@ -74,22 +74,19 @@ public static class FormatParams
     }
     private static void CopyDynamicParameters(DynamicParameters source, DynamicParameters destination, bool throwOnConflict)
     {
-        var field = typeof(DynamicParameters).GetField("parameters", BindingFlags.Instance | BindingFlags.NonPublic);
+        foreach (var paramName in source.ParameterNames.Distinct())
+    {
+        var value = ((dynamic)source).Get<object>(paramName);
 
-        if (field?.GetValue(source) is IDictionary<string, object> paramValues)
+        if (destination.ParameterNames.Contains(paramName))
         {
-            foreach (var kvp in paramValues)
-            {
-                if (destination.ParameterNames.Contains(kvp.Key))
-                {
-                    if (throwOnConflict)
-                        throw new ArgumentException($"Parameter conflict: '{kvp.Key}' already exists in the destination DynamicParameters.");
-                }
-                else
-                {
-                    destination.Add(kvp.Key, kvp.Value);
-                }
-            }
+            if (throwOnConflict)
+                throw new ArgumentException($"Parameter conflict: '{paramName}' already exists in destination.");
         }
+        else
+        {
+            destination.Add(paramName, value);
+        }
+    }
     }
 }

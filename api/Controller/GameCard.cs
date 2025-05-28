@@ -1,4 +1,5 @@
 using System.Data;
+using api.Entity;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,12 +9,18 @@ public class GameCardController(IDbConnection db) : ControllerBase {
 
     //Handles the logic of keeping a deck in sync while returning a Card in the end
     [HttpGet("getone")]
-    public async Task<ActionResult<Card>> GetOne(string gameId, int cardTypeId){
+    public async Task<ActionResult<Card>> GetOne(Guid gameId, int cardTypeId){
 
         var cardGetSql = @"
             SELECT 
-                gc.*,
-                c.*,
+                gc.Id,
+                gc.CardId,
+                gc.GameId,
+                c.Id,
+                c.CardActionId,
+                c.Amount,
+                c.AdvanceToSpaceId,
+                c.CardTypeId,
                 tc.CardDescription
             FROM GameCard gc
             LEFT JOIN Card c ON c.Id = gc.CardId

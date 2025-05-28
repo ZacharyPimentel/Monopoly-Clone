@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Dapper;
-
 namespace api.Interface;
 
 public interface IBaseRepository<T, TKey>

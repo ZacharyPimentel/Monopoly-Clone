@@ -262,46 +262,41 @@ namespace api.hub
             {
                 throw new Exception("Game Id does not exist");
             }
-            Game currentGame = await gameRepository.GetByIdAsync(gameId);
+            Game? currentGame = await gameRepository.GetByIdWithDetailsAsync(gameId) ?? throw new Exception("Game Doesn't Exist.");
 
-            //clean up dice rolls
-            var updateDiceRollSql = @"
-                UPDATE LastDiceRoll
-                SET
-                    DiceOne = @DiceOne,
-                    DiceTwo = @DiceTwo,
-                    UtilityDiceOne = null,
-                    UtilityDiceTwo = null
-                WHERE
-                    GameId = @GameId
-            ";
-            var DiceRollUpdateParams = new
+            //keep the visuals of the dice in sync between real rolls and utility rolls
+            if (currentGame.UtilityDiceOne != null && currentGame.UtilityDiceTwo != null)
             {
-                DiceOne = currentGame.UtilityDiceOne,
-                DiceTwo = currentGame.UtilityDiceTwo,
-                GameId = currentGame.Id
-            };
-            await db.ExecuteAsync(updateDiceRollSql, DiceRollUpdateParams);
-
-            var markPlayerAsPlayed = @"
-                UPDATE TurnOrder
-                SET 
-                    HasPlayed = TRUE
-                WHERE
-                    GameId = @GameId AND PlayerId = @PlayerId
-            ";
-            var parameters = new
-            {
-                currentSocketPlayer.PlayerId,
-                GameId = currentGame.Id,
-            };
-            await db.ExecuteAsync(markPlayerAsPlayed, parameters);
+                await lastDiceRollRepository.UpdateManyAsync(
+                    new LastDiceRollUpdateParams
+                    {
+                        DiceOne = currentGame.UtilityDiceOne,
+                        DiceTwo = currentGame.UtilityDiceTwo,
+                    },
+                    new LastDiceRollWhereParams { GameId = currentGame.Id },
+                    new { }
+                );
+            }
+            
+            await turnOrderRepository.UpdateManyAsync(
+                new TurnOrderUpdateParams { HasPlayed = true},
+                new TurnOrderWhereParams
+                {
+                    PlayerId = currentSocketPlayer.PlayerId,
+                    GameId = currentGame.Id,
+                },
+                new {}
+            );
 
             //check if everyone has taken their turn, reset if so
             var notPlayedCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE");
             if (notPlayedCount == 0)
             {
-                await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
+                await turnOrderRepository.UpdateManyAsync(
+                    new TurnOrderUpdateParams { HasPlayed = false},
+                    new TurnOrderWhereParams { GameId = currentGame.Id},
+                    new {}
+                );
                 await playerRepository.UpdateManyAsync(
                     new PlayerWhereParams { InCurrentGame = true },
                     new PlayerUpdateParams { RollCount = 0 },
