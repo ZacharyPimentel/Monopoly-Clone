@@ -43,16 +43,16 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
 
 //add repositories for db calls
 builder.Services.AddScoped<IBoardSpaceRepository, BoardSpaceRepository>();
+builder.Services.AddScoped<IGameCardRepository, GameCardRepository>();
+builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
+builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<ILastDiceRollRepository, LastDiceRollRepository>();
 builder.Services.AddScoped<IPlayerIconRepository, PlayerIconRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<IGameRepository,GameRepository>();
 builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
-builder.Services.AddScoped<IGamePropertyRepository,GamePropertyRepository>();
-builder.Services.AddScoped<IGameLogRepository,GameLogRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
-builder.Services.AddScoped<ILastDiceRollRepository, LastDiceRollRepository>();
-builder.Services.AddScoped<IGameCardRepository, GameCardRepository>();
 builder.Services.AddScoped<ITurnOrderRepository,TurnOrderRepository>();
 
 //services
