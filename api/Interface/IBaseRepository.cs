@@ -20,6 +20,6 @@ public interface IBaseRepository<T, TKey>
         TExcludeParams? excludeParams
     )
         where TUpdateParams : class
-        where TIncludeParams : class
-        where TExcludeParams : class;
+        where TIncludeParams : class?
+        where TExcludeParams : class?;
 }

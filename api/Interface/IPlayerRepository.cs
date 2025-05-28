@@ -1,5 +1,6 @@
 using api.Interface;
 
+namespace api.Interface;
 public class PlayerWhereParams
 {
     public bool? Active { get; set; }
@@ -33,8 +34,7 @@ public class PlayerCreateParams
 
 public interface IPlayerRepository: IBaseRepository<Player, Guid>
 {
-    new Task<Player> GetByIdAsync(Guid id);
-    new Task<IEnumerable<Player>> GetAllAsync();
-    Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams);
-    Task<bool> UpdateMany(PlayerWhereParams whereParams, PlayerUpdateParams updateParams);
+    Task<Player> GetByIdWithIconAsync(Guid id);
+    Task<IEnumerable<Player>> GetAllWithIconsAsync();
+    Task<IEnumerable<Player>> SearchWithIconsAsync(PlayerWhereParams? includeParams = null, PlayerWhereParams? excludeParams = null);
 }

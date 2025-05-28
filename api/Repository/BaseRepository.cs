@@ -172,8 +172,8 @@ public class BaseRepository<T, TKey>(IDbConnection db, string tableName) : IBase
         TExcludeParams? excludeParams = null
     )
         where TUpdateParams : class
-        where TIncludeParams : class
-        where TExcludeParams : class
+        where TIncludeParams : class?
+        where TExcludeParams : class?
     {
         DynamicParameters dynamicParamsUpdate = FormatParams.BuildDynamicParameters(updateInput);
         DynamicParameters dynamicParamsInclude = FormatParams.BuildDynamicParameters(includeParams);

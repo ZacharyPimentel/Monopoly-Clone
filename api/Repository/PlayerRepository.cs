@@ -1,5 +1,4 @@
 using System.Data;
-using System.Text;
 using api.Interface;
 using Dapper;
 
@@ -23,114 +22,35 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
         var icons = await _playerIconRepository.GetAllAsync();
         return [.. icons];
     }
-    public override async Task<Player> GetByIdAsync(Guid id)
+    public async Task<Player> GetByIdWithIconAsync(Guid id)
     {
-        var query = @"
-            SELECT p.*, pi.iconurl
-            FROM Player p
-            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
-            WHERE p.Id = @Id
-        ";
-        return await _db.QuerySingleAsync<Player>(query, new { Id = id });
+        Player player = await GetByIdAsync(id);
+        player.IconUrl = (await LoadPlayerIconsAsync()).First(pi => pi.Id == player.IconId).IconUrl;
+        return player;
     }
 
-    public override async Task<IEnumerable<Player>> GetAllAsync()
+    public async Task<IEnumerable<Player>> GetAllWithIconsAsync()
     {
-        var query = @"
-            SELECT p.*, pi.iconurl
-            FROM Player p
-            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
-            ORDER BY Id
-        ";
-        var players = await _db.QueryAsync<Player>(query);
+        List<PlayerIcon> playerIcons = await LoadPlayerIconsAsync();
+        var players = await GetAllAsync();
+
+        foreach (var player in players)
+        {
+            player.IconUrl = playerIcons.First(pi => pi.Id == player.IconId).IconUrl;
+        }
+
         return players.AsList();
     }
-    public async Task<IEnumerable<Player>> Search(PlayerWhereParams searchParams)
+    public async Task<IEnumerable<Player>> SearchWithIconsAsync(PlayerWhereParams? includeParams, PlayerWhereParams? excludeParams)
     {
-        var sql = @"
-            SELECT p.*, pi.iconurl 
-            FROM Player p
-            LEFT JOIN PlayerIcon pi ON p.IconId = pi.Id
-            WHERE 1=1
-        ";
+        List<PlayerIcon> playerIcons = await LoadPlayerIconsAsync();
 
-        var parameters = new DynamicParameters();
-
-        if (searchParams.Active.HasValue)
+        var players = await SearchAsync(includeParams, excludeParams);
+        foreach (var player in players)
         {
-            sql += " AND Active = @IsActive";
-            parameters.Add("IsActive", searchParams.Active.Value);
+            player.IconUrl = playerIcons.First(pi => pi.Id == player.IconId).IconUrl;
         }
-        if(searchParams.GameId != null)
-        {
-            sql += " AND GameId = @GameId";
-            parameters.Add("GameId", searchParams.GameId);
-        }
-        
-        sql += " ORDER BY Id";
 
-        var players = await _db.QueryAsync<Player>(sql, parameters);
-
-        if(searchParams.ExcludeId != null)
-        {
-            return players.Where(p => p.ToString() != searchParams.ExcludeId).AsList();
-        }
         return players.AsList();
-    }
-
-    public async Task<bool> UpdateMany(PlayerWhereParams whereParams, PlayerUpdateParams updateParams)
-    {
-        // Start building the SQL query
-        var sql = new StringBuilder("UPDATE Player SET ");
-
-        // Dynamically build the SET clause from the updateParams
-        var updateClauses = new List<string>();
-        foreach (var property in updateParams.GetType().GetProperties())
-        {
-            if(property.GetValue(updateParams)  != null){
-                updateClauses.Add($"{property.Name} = @{property.Name}");
-            }
-        }
-        sql.Append(string.Join(", ", updateClauses));
-
-        // Build the WHERE clause from whereParams if it exists
-        var whereClauses = new List<string>();
-        foreach (var property in whereParams.GetType().GetProperties())
-        {
-            if (property.GetValue(whereParams) != null)
-            {
-                whereClauses.Add($"{property.Name} = @Where{property.Name}");
-            }
-        }
-
-        if(whereClauses.Count > 0)
-        {
-            sql.Append(" WHERE ");
-            sql.Append(string.Join(" AND ", whereClauses));
-        }
-        
-        // Combine the update and where parameters into a single anonymous object
-        var parameters = new DynamicParameters();
-
-        // Add the update parameters
-        foreach (var property in updateParams.GetType().GetProperties())
-        {
-            if(property.GetValue(updateParams)  != null)
-            {
-                parameters.Add($"@{property.Name}", property.GetValue(updateParams));
-            }
-        }
-
-        // Add the where parameters with a prefix to avoid conflicts
-        foreach (var property in whereParams.GetType().GetProperties())
-        {
-            parameters.Add($"@Where{property.Name}", property.GetValue(whereParams));
-        }
-
-        Console.WriteLine(sql);
-
-        // Execute the update
-        var result = await _db.ExecuteAsync(sql.ToString(), parameters);
-        return result > 0; // Returns the number of rows affected
     }
 }

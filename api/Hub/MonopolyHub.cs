@@ -7,14 +7,15 @@ namespace api.hub
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
-        IPlayerRepository playerRepository,
-        IGameRepository gameRepository,
-        IGamePropertyRepository gamePropertyRepository,
-        IGameLogRepository gameLogRepository,
-        ITradeRepository tradeRepository,
-        ILastDiceRollRepository lastDiceRollRepository,
+        IDbConnection db,
         IGameCardRepository gameCardRepository,
-        IDbConnection db
+        IGameLogRepository gameLogRepository,
+        IGamePropertyRepository gamePropertyRepository,
+        IGameRepository gameRepository,
+        ILastDiceRollRepository lastDiceRollRepository,
+        IPlayerRepository playerRepository,
+        ITradeRepository tradeRepository,
+        ITurnOrderRepository turnOrderRepository
     ) : Hub
     {
         //=======================================================
@@ -33,7 +34,7 @@ namespace api.hub
             if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
             {
                 await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
-                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
+                var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
                 var gamePlayer = groupPlayers.First(x => x.Id == currentSocketPlayer.PlayerId);
                 await gameLogRepository.CreateAsync(new GameLogCreateParams{
                     GameId = gamePlayer.GameId,
@@ -102,7 +103,7 @@ namespace api.hub
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             var newPlayer = await playerRepository.CreateAndReturnAsync(playerCreateParams);
             currentSocketPlayer.PlayerId = newPlayer.Id;
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams
+            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
             {
                 GameId = currentSocketPlayer.GameId
             });
@@ -130,11 +131,13 @@ namespace api.hub
             }
 
             Game currentGame = await gameRepository.GetByIdAsync(gameId);
-            var activeGroupPlayers = await playerRepository.Search(new PlayerWhereParams
+            var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
             {
                 Active = true,
                 GameId = currentGame.Id
-            });
+            },
+            new {}
+            );
 
             //if at least two players are all ready and the game is in lobby, start the game
             if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
@@ -144,14 +147,15 @@ namespace api.hub
                     InLobby = false,
                     GameStarted = true
                 });
-                await playerRepository.UpdateMany(
-                    new PlayerWhereParams { Active = true },
+                await playerRepository.UpdateManyAsync(
                     new PlayerUpdateParams
                     {
                         InCurrentGame = true,
                         IsReadyToPlay = false,
                         Money = currentGame.StartingMoney
-                    }
+                    },
+                    new PlayerWhereParams { Active = true },
+                    new {}
                 );
 
                 //randomize and set the turn order
@@ -159,26 +163,18 @@ namespace api.hub
                 var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
                 foreach (var (player, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
                 {
-                    var addTurnOrder = @"
-                        INSERT INTO TurnOrder (Id,PlayerId,GameId,PlayOrder)
-                        VALUES (@Id,@PlayerId, @GameId,@PlayOrder)
-                    ";
-
-                    var parameters = new TurnOrder
+                    await turnOrderRepository.CreateAsync(new TurnOrderCreateParams
                     {
-                        Id = Guid.NewGuid(),
                         PlayerId = player.Id,
                         GameId = currentGame.Id,
                         PlayOrder = index + 1
-                    };
-
-                    await db.ExecuteAsync(addTurnOrder, parameters);
+                    });
                 }
 
                 Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
                 await SendToGroup("game:update", updatedGame);
             }
-            var updatedGroupPlayers = await playerRepository.Search(new PlayerWhereParams
+            var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
             {
                 GameId = currentSocketPlayer.GameId
             });
@@ -221,7 +217,7 @@ namespace api.hub
                 await SendToSelf("game:update", game);
                 return;
             }
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = gameId });
+            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             var trades = await tradeRepository.Search(gameId);
             Console.WriteLine(trades);
@@ -238,7 +234,7 @@ namespace api.hub
             if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
             {
                 await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
-                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
+                var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
                 await SendToGroup("player:updateGroup", groupPlayers);
                 currentSocketPlayer.GameId = null;
@@ -306,15 +302,16 @@ namespace api.hub
             if (notPlayedCount == 0)
             {
                 await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
-                await playerRepository.UpdateMany(
+                await playerRepository.UpdateManyAsync(
                     new PlayerWhereParams { InCurrentGame = true },
-                    new PlayerUpdateParams { RollCount = 0 }
+                    new PlayerUpdateParams { RollCount = 0 },
+                    new {}
                 );
             }
 
             await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { TurnComplete = false });
 
-            var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = gameId });
+            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
             await SendToGroup("player:updateGroup", groupPlayers);
             await SendToGroup("game:update", updatedGame);
@@ -539,7 +536,7 @@ namespace api.hub
             if (socketPlayer.GameId is Guid gameId)
             {
                 await tradeRepository.DeclineTrade(tradeId, gameId);
-                var groupPlayers = await playerRepository.Search(new PlayerWhereParams { GameId = socketPlayer.GameId });
+                var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = socketPlayer.GameId });
                 var gamePlayer = groupPlayers.First(x => x.Id == socketPlayer.PlayerId);
                 await gameLogRepository.CreateAsync(new GameLogCreateParams
                 {

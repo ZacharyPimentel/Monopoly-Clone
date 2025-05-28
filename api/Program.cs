@@ -52,6 +52,7 @@ builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<ILastDiceRollRepository, LastDiceRollRepository>();
 builder.Services.AddScoped<IGameCardRepository, GameCardRepository>();
+builder.Services.AddScoped<ITurnOrderRepository,TurnOrderRepository>();
 
 //services
 builder.Services.AddSingleton<ICacheService, CacheService>();

@@ -1,7 +1,9 @@
 using System.Data;
+using api.Interface;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
+namespace api.Controller;
 [ApiController]
 [Route("/monopoly/player")]
 public class PlayerController(IPlayerRepository playerRepository, ICacheService cacheService) : ControllerBase {
@@ -9,7 +11,7 @@ public class PlayerController(IPlayerRepository playerRepository, ICacheService 
     [HttpGet]
     public async Task<ActionResult<Card>> Search([FromQuery]PlayerWhereParams whereParams){
 
-        var players = await cacheService.CachedResponse(() => playerRepository.Search(whereParams));
+        var players = await cacheService.CachedResponse( async () => await playerRepository.SearchWithIconsAsync(whereParams));
         
         return Ok(players);
     }
