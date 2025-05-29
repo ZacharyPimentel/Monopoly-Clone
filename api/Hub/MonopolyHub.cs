@@ -1,8 +1,8 @@
 namespace api.hub
 {
     using System.Data;
+    using api.Entity;
     using api.Interface;
-    using api.Repository;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
@@ -220,7 +220,7 @@ namespace api.hub
             }
             var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
-            var trades = await tradeRepository.Search(gameId);
+            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             Console.WriteLine(trades);
             await SendToSelf("game:update", game);
             await SendToSelf("player:update", currentSocketPlayer);
@@ -381,12 +381,11 @@ namespace api.hub
         //=======================================================
         public async Task TradeCreate(
             Guid gameId,
-            string initiator,
-            PlayerTradeCreateParams playerOneOffer,
-            PlayerTradeCreateParams playerTwoOffer
+            Guid initiator,
+            PlayerTradeOffer playerOneOffer,
+            PlayerTradeOffer playerTwoOffer
         )
         {
-
             var createParams = new TradeCreateParams
             {
                 GameId = gameId,
@@ -394,34 +393,33 @@ namespace api.hub
                 PlayerOne = playerOneOffer,
                 PlayerTwo = playerTwoOffer,
             };
-            await tradeRepository.Create(createParams);
-            var trades = await tradeRepository.Search(gameId);
+            await tradeRepository.CreateFullTradeAsync(createParams);
+            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             await SendToGroup("trade:update", trades);
         }
         public async Task TradeSearch(Guid gameId)
         {
-            var trades = await tradeRepository.Search(gameId);
+            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             await SendToSelf("trade:list", trades);
         }
         public async Task TradeUpdate(
             int tradeId,
-            string updatedBy,
-            PlayerTradeCreateParams playerOneOffer,
-            PlayerTradeCreateParams playerTwoOffer
+            Guid updatedBy,
+            PlayerTradeOffer playerOneOffer,
+            PlayerTradeOffer playerTwoOffer
         )
         {
             var updateparams = new TradeUpdateParams
             {
-                TradeId = tradeId,
                 LastUpdatedBy = updatedBy,
                 PlayerOne = playerOneOffer,
                 PlayerTwo = playerTwoOffer,
             };
-            await tradeRepository.Update(updateparams);
+            await tradeRepository.UpdateFullTradeAsync(tradeId,updateparams);
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
             if (socketPlayer.GameId is Guid gameId)
             {
-                var trades = await tradeRepository.Search(gameId);
+                var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
                 await SendToGroup("trade:update", trades);
             }
         }
@@ -438,7 +436,7 @@ namespace api.hub
                     GameId = gameId,
                     Message = $"{gamePlayer.PlayerName} has disconnected."
                 });
-                var trades = await tradeRepository.Search(gameId);
+                var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
                 await SendToGroup("trade:update", trades);
             }
         }

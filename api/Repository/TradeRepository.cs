@@ -1,218 +1,129 @@
 using System.Data;
+using api.Entity;
+using api.Interface;
 using Dapper;
 
 namespace api.Repository;
-public class TradeRepository(IDbConnection db) : BaseRepository<Trade, int>(db, "Trade"), ITradeRepository
+public class TradeRepository(
+    IDbConnection db,
+    IPlayerTradeRepository playerTradeRepository,
+    ITradePropertyRepository tradePropertyRepository
+) : BaseRepository<Trade, int>(db, "Trade"), ITradeRepository
 {
-    public async Task<int> Create(TradeCreateParams createParams)
+    public async Task<int> CreateFullTradeAsync(TradeCreateParams createParams)
     {
-        var createTradeSql = @"
-                INSERT INTO Trade (GameId,InitiatedBy, LastUpdatedBy)
-                VALUES (@GameId, @InitiatedBy, @LastUpdatedBy)
-                RETURNING Id
-        ";
-
-        var tradeId = await db.ExecuteScalarAsync<int>(createTradeSql, new
+        Trade trade = await CreateAndReturnAsync(new
         {
             createParams.GameId,
             InitiatedBy = createParams.Initiator,
             LastUpdatedBy = createParams.Initiator
         });
 
-        var createPlayerTradeSql = @"
-            INSERT INTO PlayerTrade (TradeId, PlayerId, Money, GetOutOfJailFreeCards)
-            VALUES (@TradeId, @PlayerId, @Money, @GetOutOfJailFreeCards)
-            RETURNING Id
-        ";
-
-        var playerTradeOneId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new
+        //create records for first player's trade offer
+        var playerTrade1 = await playerTradeRepository.CreateAndReturnAsync(new PlayerTradeCreateParams
         {
-            TradeId = tradeId,
-            createParams.PlayerOne.PlayerId,
-            createParams.PlayerOne.Money,
-            createParams.PlayerOne.GetOutOfJailFreeCards
+            PlayerId = createParams.PlayerOne.PlayerId,
+            Money = createParams.PlayerOne.Money,
+            GetOutOfJailFreeCards = createParams.PlayerOne.GetOutOfJailFreeCards,
+            TradeId = trade.Id
         });
-        var playerTradeTwoId = await db.ExecuteScalarAsync<int>(createPlayerTradeSql, new
-        {
-            TradeId = tradeId,
-            createParams.PlayerTwo.PlayerId,
-            createParams.PlayerTwo.Money,
-            createParams.PlayerTwo.GetOutOfJailFreeCards
-        });
-
         //create first player property offers
-        if (createParams.PlayerOne.GamePropertyIds.Count > 0)
+        foreach (int gamePropertyId in createParams.PlayerOne.GamePropertyIds)
         {
-            var tradePropertySql = @"
-                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
-                VALUES (@GamePropertyId,@PlayerTradeId);
-            ";
-
-            foreach (int gamePropertyId in createParams.PlayerOne.GamePropertyIds)
+            await tradePropertyRepository.CreateAsync(new TradePropertyCreateParams
             {
-                await db.ExecuteAsync(tradePropertySql, new { GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeOneId });
-            }
-        }
+                GamePropertyId = gamePropertyId,
+                PlayerTradeId = playerTrade1.Id
+            });
+        };
 
+        //create records for second player's trade offer
+        var playerTrade2 = await playerTradeRepository.CreateAndReturnAsync(new PlayerTradeCreateParams
+        {
+            PlayerId = createParams.PlayerTwo.PlayerId,
+            Money = createParams.PlayerTwo.Money,
+            GetOutOfJailFreeCards = createParams.PlayerTwo.GetOutOfJailFreeCards,
+            TradeId = trade.Id
+        });
         //create second player property offers
-        if (createParams.PlayerOne.GamePropertyIds.Count > 0)
+        foreach (int gamePropertyId in createParams.PlayerTwo.GamePropertyIds)
         {
-            var tradePropertySql = @"
-                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
-                VALUES (@GamePropertyId,@PlayerTradeId);
-            ";
-
-            foreach (int gamePropertyId in createParams.PlayerTwo.GamePropertyIds)
+            await tradePropertyRepository.CreateAsync(new TradePropertyCreateParams
             {
-                await db.ExecuteAsync(tradePropertySql, new { GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeTwoId });
-            }
-        }
+                GamePropertyId = gamePropertyId,
+                PlayerTradeId = playerTrade2.Id
+            });
+        };
 
-        return tradeId;
+        return trade.Id;
     }
-
-    public async Task<List<Trade>> Search(Guid gameId, bool activeOnly = true)
+    public async Task<List<Trade>> GetActiveFullTradesForGameAsync(Guid gameId)
     {
-        var tradeSql = "SELECT * FROM Trade WHERE GameId = @GameId";
+        IEnumerable<Trade> activeTrades = await SearchAsync(
+            new TradeWhereParams { GameId = gameId, AcceptedBy = null, DeclinedBy = null },
+            new { }
+        );
 
-        var trades = await db.QueryAsync<Trade>(tradeSql, new { GameId = gameId });
-
-        var playerTradeSql = @"
-            SELECT 
-                pt.Id,
-                pt.PlayerId,
-                pt.Money,
-                pt.GetOutOfJailFreeCards
-            FROM 
-                PlayerTrade pt
-            WHERE 
-                pt.TradeId = @TradeId
-        ";
-
-        //optionally filter out trades that have been declined or accepted (not active)
-        if (activeOnly)
+        foreach (var trade in activeTrades)
         {
-            playerTradeSql += " AND pt.DeclinedBy IS NOT NULL AND pt.AcceptedBy IS NOT NULL";
-        }
-
-        var tradePropertySql = @"
-            SELECT
-                tp.PlayerTradeId,
-                tp.GamePropertyId,
-                gp.Id,
-                gp.PropertyId,
-                gp.Mortgaged,
-                p.Id,
-                p.BoardSpaceId,
-                bst.BoardSpaceName AS PropertyName
-            FROM
-                TradeProperty tp
-            LEFT JOIN 
-                GameProperty gp ON gp.Id = tp.GamePropertyId
-            LEFT JOIN 
-                Property p ON p.Id = gp.PropertyId
-            LEFT JOIN 
-                BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
-            WHERE tp.PlayerTradeId = @PlayerTradeId
-        ";
-
-        foreach (var trade in trades)
-        {
-            var playerTrades = await db.QueryAsync<PlayerTrade>(playerTradeSql, new { TradeId = trade.Id });
-            trade.PlayerTrades = playerTrades.ToList();
+            IEnumerable<PlayerTrade> playerTrades = await playerTradeRepository.SearchAsync(
+                new PlayerTradeWhereParams { TradeId = trade.Id },
+                new { }
+            );
 
             foreach (var playerTrade in playerTrades)
             {
-                var tradeProperties = await db.QueryAsync<TradeProperty>(tradePropertySql, new { PlayerTradeId = playerTrade.Id });
-                playerTrade.TradeProperties = tradeProperties.ToList();
+                IEnumerable<TradeProperty> tradeProperties =
+                    await tradePropertyRepository.GetAllForPlayerTradeWithPropertyDetailsAsync(playerTrade.Id);
+                playerTrade.TradeProperties = [.. tradeProperties];
             }
-        }
 
-        return trades.ToList();
+            trade.PlayerTrades = [.. playerTrades];
+        }
+        return [..activeTrades];
     }
-    public async Task<bool> Update(TradeUpdateParams updateParams)
+    public async Task<bool> UpdateFullTradeAsync(int tradeId, TradeUpdateParams updateParams)
     {
-        var playerTradeUpdateSql = @"
-            UPDATE PlayerTrade
-            SET 
-                Money = @Money,
-                GetOutOfJailFreeCards = @GetOutOfJailFreeCards,
-            WHERE
-                TradeId = @TradeId
-            AND
-                PlayerId = @PlayerId
-            RETURNING Id
-        ";
-
-        var playerTradeOneId = await db.ExecuteScalarAsync<int>(playerTradeUpdateSql, new
+        await UpdateAsync(tradeId, new TradeUpdateParams
         {
-            updateParams.TradeId,
-            updateParams.PlayerOne.PlayerId,
-            updateParams.PlayerOne.Money,
-            updateParams.PlayerOne.GetOutOfJailFreeCards
-        });
-        var playerTradeTwoId = await db.ExecuteScalarAsync<int>(playerTradeUpdateSql, new
-        {
-            updateParams.TradeId,
-            updateParams.PlayerTwo.PlayerId,
-            updateParams.PlayerTwo.Money,
-            updateParams.PlayerTwo.GetOutOfJailFreeCards
+            LastUpdatedBy = updateParams.LastUpdatedBy,
+            DeclinedBy = updateParams.DeclinedBy,
+            AcceptedBy = updateParams.AcceptedBy
         });
 
-        var deleteTradePropertySQL = @"
-            DELETE FROM TradeProperty
-            WHERE 
-                PlayerTradeId = @PlayerTradeOneId
-            OR 
-                PlayerTradeId = @PlayerTradeTwoId
-        ";
-
-        //delete trade properties
-        await db.ExecuteAsync(deleteTradePropertySQL, new
+        //loop over each players new offer and update them
+        foreach (var offer in new[] { updateParams.PlayerOne, updateParams.PlayerTwo })
         {
-            PlayerTradeOneId = playerTradeOneId,
-            PlayerTradeTwoId = playerTradeTwoId
-        });
-
-        //create first player property offers
-        if (updateParams.PlayerOne.GamePropertyIds.Count > 0)
-        {
-            var tradePropertySql = @"
-                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
-                VALUES (@GamePropertyId,@PlayerTradeId);
-            ";
-
-            foreach (int gamePropertyId in updateParams.PlayerOne.GamePropertyIds)
+            if (offer == null) continue;
+            PlayerTrade playerTrade = (await playerTradeRepository.SearchAsync(
+                new PlayerTradeWhereParams
+                {
+                    PlayerId = offer.PlayerId,
+                    TradeId = tradeId
+                },
+                new { }
+            )).Single();
+            
+            await playerTradeRepository.UpdateAsync(playerTrade.Id, new PlayerTradeUpdateParams
             {
-                await db.ExecuteAsync(tradePropertySql, new { GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeOneId });
+                Money = offer.Money,
+                GetOutOfJailFreeCards = offer.GetOutOfJailFreeCards
+            });
+
+            await tradePropertyRepository.DeleteManyAsync(
+                new TradePropertyWhereParams { PlayerTradeId = playerTrade.Id },
+                new { }
+            );
+
+            foreach (int gamePropertyId in offer.GamePropertyIds)
+            {
+                await tradePropertyRepository.CreateAsync(new TradePropertyCreateParams
+                {
+                    PlayerTradeId = playerTrade.Id,
+                    GamePropertyId = gamePropertyId
+                });
             }
         }
-
-        //create second player property offers
-        if (updateParams.PlayerTwo.GamePropertyIds.Count > 0)
-        {
-            var tradePropertySql = @"
-                INSERT INTO TradeProperty (GamePropertyId,PlayerTradeId)
-                VALUES (@GamePropertyId,@PlayerTradeId);
-            ";
-
-            foreach (int gamePropertyId in updateParams.PlayerTwo.GamePropertyIds)
-            {
-                await db.ExecuteAsync(tradePropertySql, new { GamePropertyId = gamePropertyId, PlayerTradeId = playerTradeTwoId });
-            }
-        }
-
-        //update LastUpdatedBy on the trade
-        var tradeUpdateSql = @"
-            UPDATE Trade
-            SET LastUpdatedBy = @LastUpdatedBy
-            WHERE TradeId = @TradeId;
-        ";
-        await db.ExecuteScalarAsync(tradeUpdateSql, new
-        {
-            updateParams.LastUpdatedBy,
-            updateParams.TradeId
-        });
 
         return true;
     }

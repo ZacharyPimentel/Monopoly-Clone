@@ -70,6 +70,45 @@ public class BaseRepository<T, TKey>(IDbConnection db, string tableName) : IBase
         var rows = await db.ExecuteAsync(sql, new { Id = id });
         return rows > 0;
     }
+    //=================
+    // DELETE MANY
+    //=================
+    public virtual async Task<int> DeleteManyAsync<TIncludeParams,TExcludeParams>(TIncludeParams includeParams,TExcludeParams excludeParams)
+    {
+        var sql = $@"
+            DELETE FROM {tableName}
+        ";
+        DynamicParameters dynamicParamsInclude = FormatParams.BuildDynamicParameters(includeParams);
+        DynamicParameters dynamicParamsExclude = FormatParams.BuildDynamicParameters(excludeParams);
+        DynamicParameters dynamicParamsAll = FormatParams.MergeDynamicParameters(dynamicParamsInclude, dynamicParamsExclude);
+
+        //run sql as is with no additional filtering
+        if (!dynamicParamsAll.ParameterNames.Any())
+        {
+            return await db.ExecuteAsync(sql);
+        }
+
+        var whereClauses = new List<string>();
+
+        if (dynamicParamsInclude.ParameterNames.Any())
+        {
+            string whereClausesInclude = FormatParams.BuildWhereClauses(dynamicParamsInclude, WhereClauseFilters.Include);
+            whereClauses.Add(whereClausesInclude);
+        }
+        if (dynamicParamsExclude.ParameterNames.Any())
+        {
+            string whereClausesExclude = FormatParams.BuildWhereClauses(dynamicParamsExclude, WhereClauseFilters.Exclude);
+            whereClauses.Add(whereClausesExclude);
+        }
+
+        if (whereClauses.Count != 0)
+        {
+            sql += "WHERE " + string.Join(" AND ", whereClauses);
+        }
+
+        var deletedRowCount = await db.ExecuteAsync(sql, dynamicParamsAll);
+        return deletedRowCount;
+    }
 
     //=================
     // GET ALL

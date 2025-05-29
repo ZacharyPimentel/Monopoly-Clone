@@ -179,10 +179,10 @@ CREATE TABLE IF NOT EXISTS GAMECARD(
 CREATE TABLE IF NOT EXISTS TRADE(
     ID Serial PRIMARY KEY,
     GameId UUID,
-    InitiatedBy TEXT,
-    LastUpdatedBy TEXT,
-    DeclinedBy TEXT,
-    AcceptedBy TEXT,
+    InitiatedBy UUID,
+    LastUpdatedBy UUID,
+    DeclinedBy UUID,
+    AcceptedBy UUID,
     FOREIGN KEY (GameId) REFERENCES Game(Id),
     CreatedAt TimeStamp NOT NULL
 );

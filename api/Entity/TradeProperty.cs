@@ -1,3 +1,9 @@
+namespace api.Entity;
+
+public class TradePropertyWhereParams
+{
+    public int? PlayerTradeId { get; set; }
+}
 public class TradeProperty
 {
     public int Id { get; set; }

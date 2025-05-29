@@ -50,8 +50,10 @@ builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<ILastDiceRollRepository, LastDiceRollRepository>();
 builder.Services.AddScoped<IPlayerIconRepository, PlayerIconRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
+builder.Services.AddScoped<IPlayerTradeRepository, PlayerTradeRepository>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
+builder.Services.AddScoped<ITradePropertyRepository, TradePropertyRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<ITurnOrderRepository,TurnOrderRepository>();
 
