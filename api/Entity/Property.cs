@@ -1,3 +1,8 @@
+
+using TypeGen.Core.TypeAnnotations;
+
+namespace api.Entity;
+[ExportTsInterface]
 public class Property
 {
     public int Id { get; set; }

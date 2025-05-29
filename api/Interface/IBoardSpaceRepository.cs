@@ -1,3 +1,5 @@
+using api.Entity;
+
 namespace api.Interface;
 public interface IBoardSpaceRepository : IBaseRepository<BoardSpace, int>
 {

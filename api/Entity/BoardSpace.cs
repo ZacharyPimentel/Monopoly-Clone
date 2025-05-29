@@ -1,3 +1,7 @@
+using TypeGen.Core.TypeAnnotations;
+
+namespace api.Entity;
+[ExportTsInterface]
 public class BoardSpace
 {
     public int Id { get; set; }

@@ -1,3 +1,5 @@
+using api.Entity;
+
 public interface IThemeRepository
 {
     Task<List<BoardSpace>> GetBoardSpaces(int themeId);

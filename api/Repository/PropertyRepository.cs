@@ -1,5 +1,6 @@
 using System.Data;
 using System.Text;
+using api.Entity;
 using api.Repository;
 using Dapper;
 

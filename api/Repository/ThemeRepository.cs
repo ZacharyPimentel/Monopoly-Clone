@@ -1,4 +1,5 @@
 using System.Data;
+using api.Entity;
 using Dapper;
 
 public class ThemeRepository(IDbConnection db) : IThemeRepository

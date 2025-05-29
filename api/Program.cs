@@ -1,9 +1,12 @@
 using System.Data;
+using System.Reflection;
+using api.Helper;
 using api.hub;
 using api.Interface;
 using api.Repository;
 using Microsoft.Data.Sqlite;
 using Npgsql;
+using TypeGen.Core.Generator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +76,17 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
+    //generate types 
+    var options = new GeneratorOptions // create the options object
+    {
+        BaseOutputDirectory = @"../ui/src/generated",
+        TypeNameConverters = [],
+        FileNameConverters = [new NoOpFileNameConverter()],
+    }; 
+    var generator = new Generator(options); // create the generator instance
+    var assembly = Assembly.GetCallingAssembly(); // get the assembly to generate files for
+    generator.Generate(assembly);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }

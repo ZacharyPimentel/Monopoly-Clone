@@ -1,4 +1,5 @@
 using System.Data;
+using api.Entity;
 using api.Interface;
 using Dapper;
 namespace api.Repository;

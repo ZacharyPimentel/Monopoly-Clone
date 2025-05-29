@@ -1,5 +1,8 @@
+using TypeGen.Core.TypeAnnotations;
+
 namespace api.Entity;
 
+[ExportTsInterface]
 public class PlayerTradeCreateParams
 {
     public required Guid PlayerId { get; set; }
@@ -7,18 +10,19 @@ public class PlayerTradeCreateParams
     public int Money { get; set; } = 0;
     public int GetOutOfJailFreeCards { get; set; } = 0;
 }
+[ExportTsInterface]
 public class PlayerTradeWhereParams
 {
     public int? TradeId { get; set; }
     public Guid? PlayerId { get; set; }
 }
+[ExportTsInterface]
 public class PlayerTradeUpdateParams
 {
     public int? Money { get; set; }
     public int? GetOutOfJailFreeCards { get; set; }
 }
-
-public class PlayerTrade
+[ExportTsInterface]public class PlayerTrade
 {
     public int Id { get; set; }
     public int TradeId { get; set; }

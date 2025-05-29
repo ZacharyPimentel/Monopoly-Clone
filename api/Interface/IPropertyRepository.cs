@@ -1,3 +1,4 @@
+using api.Entity;
 using api.Interface;
 public class PropertyUpdateParams
 {
