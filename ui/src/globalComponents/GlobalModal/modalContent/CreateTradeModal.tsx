@@ -1,25 +1,15 @@
 import { ActionButtons } from "../ActionButtons"
-import { usePlayer } from "../../../hooks/usePlayer"
-import { useGameState } from "../../../stateProviders/GameStateProvider"
-import { Player } from "../../../types/controllers/Player"
+import { usePlayer } from "@hooks/usePlayer"
+import { useGameState } from "@stateProviders/GameStateProvider"
 import {useForm, FormProvider} from 'react-hook-form'
-import React from "react"
 import { PlayerOfferView } from "./components/PlayerOfferView"
-import { useWebSocket } from "../../../hooks/useWebSocket"
+import { useWebSocket } from "@hooks/useWebSocket"
+import { Player } from "@generated/Player"
+import { PlayerTradeOffer } from "@generated/PlayerTradeOffer"
 
 type CreateTradeInputs = {
-    playerOne:{
-        playerId:string,
-        money:number,
-        getOutOfJailFreeCards:number
-        gamePropertyIds: number[]
-    },
-    playerTwo:{
-        playerId:string
-        money:number,
-        getOutOfJailFreeCards:number
-        gamePropertyIds: number[]
-    }
+    playerOne:PlayerTradeOffer
+    playerTwo:PlayerTradeOffer
 }
 
 export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPlayer}) => {
@@ -64,12 +54,12 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
                 <ActionButtons
                     confirmButtonStyle="success"
                     confirmCallback={async() => {
-                        invoke.trade.create(
-                            gameState.gameId,
-                            form.getValues('playerOne').playerId,
-                            form.getValues('playerOne'),
-                            form.getValues('playerTwo')
-                        )
+                        invoke.trade.create({
+                            gameId: gameState.gameId,
+                            initiator: form.getValues('playerOne').playerId,
+                            playerOne: form.getValues('playerOne'),
+                            playerTwo: form.getValues('playerTwo')
+                        })
                     }}
                     confirmButtonText="Create Trade"
                     confirmDisabled={!form.formState.isValid}

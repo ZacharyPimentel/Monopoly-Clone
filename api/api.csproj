@@ -12,8 +12,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
+    <!-- Below Needed as dependencies for TypeGen -->
     <PackageReference Include="Namotion.Reflection" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <!-- Above Needed as dependencies for TypeGen -->
     <PackageReference Include="Npgsql" Version="8.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />

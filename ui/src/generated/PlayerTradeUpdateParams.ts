@@ -4,6 +4,6 @@
  */
 
 export interface PlayerTradeUpdateParams {
-    money: number;
-    getOutOfJailFreeCards: number;
+    money?: number;
+    getOutOfJailFreeCards?: number;
 }

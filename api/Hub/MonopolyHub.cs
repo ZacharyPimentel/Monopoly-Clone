@@ -82,7 +82,7 @@ namespace api.hub
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
             await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = true });
             socketPlayer.PlayerId = playerId;
-            var allPlayers = await playerRepository.GetAllAsync();
+            var allPlayers = await playerRepository.GetAllWithIconsAsync();
 
             var currentPlayer = allPlayers.First(x => x.Id == playerId);
             await gameLogRepository.CreateAsync(new GameLogCreateParams
@@ -379,22 +379,10 @@ namespace api.hub
         //=======================================================
         // Trade
         //=======================================================
-        public async Task TradeCreate(
-            Guid gameId,
-            Guid initiator,
-            PlayerTradeOffer playerOneOffer,
-            PlayerTradeOffer playerTwoOffer
-        )
+        public async Task TradeCreate(TradeCreateParams tradeCreateParams)
         {
-            var createParams = new TradeCreateParams
-            {
-                GameId = gameId,
-                Initiator = initiator,
-                PlayerOne = playerOneOffer,
-                PlayerTwo = playerTwoOffer,
-            };
-            await tradeRepository.CreateFullTradeAsync(createParams);
-            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
+            await tradeRepository.CreateFullTradeAsync(tradeCreateParams);
+            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(tradeCreateParams.GameId);
             await SendToGroup("trade:update", trades);
         }
         public async Task TradeSearch(Guid gameId)

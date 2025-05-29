@@ -1,3 +1,4 @@
+import { TradeCreateParams } from "@generated/TradeCreateParams";
 import { useGameState } from "../stateProviders/GameStateProvider"
 import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
@@ -5,6 +6,7 @@ import { PlayerUpdateParams } from "../types/controllers/Player";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
 import { PlayerOfferCreateParams } from "../types/websocket/Trade";
+import { TradeUpdateParams } from "@generated/TradeUpdateParams";
 
 export const useWebSocket = () => {
     const globalState = useGlobalState();
@@ -82,11 +84,11 @@ export const useWebSocket = () => {
                 }
             },
             trade:{
-                create:(gameId:string,initiator:string,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
-                    globalState.ws.invoke("TradeCreate",gameId,initiator,playerOneOffer,playerTwoOffer)
+                create:(tradeCreateParams:TradeCreateParams) => {
+                    globalState.ws.invoke("TradeCreate",tradeCreateParams)
                 },
-                update:(tradeId:number,playerOneOffer:PlayerOfferCreateParams,playerTwoOffer:PlayerOfferCreateParams) => {
-                    globalState.ws.invoke("TradeUpdate",tradeId,playerOneOffer,playerTwoOffer)
+                update:(TradeUpdateParams:TradeUpdateParams) => {
+                    globalState.ws.invoke("TradeUpdate",TradeUpdateParams)
                 }
             }
         },

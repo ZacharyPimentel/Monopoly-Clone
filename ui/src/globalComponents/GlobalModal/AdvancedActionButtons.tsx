@@ -1,4 +1,3 @@
-import { LoadingSpinner } from "../LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useState } from "react";
 
@@ -22,9 +21,9 @@ export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[
             }} className='min-w-[100px] bg-black text-white rounded p-[10px] hover:opacity-[0.8] transition-[0.2s] mr-auto'>
                 Cancel
             </button>
-            {buttonConfigs.map( (config) => {
+            {buttonConfigs.map( (config,index) => {
                 return (
-                    <button onClick={() => runCallback(config.buttonCallback)} className={`${config.buttonStyle === 'success' && !error ? 'bg-lime-500':'bg-[tomato]'} min-w-[100px] rounded p-[10px] text-white disabled:bg-[lightgrey] enabled:hover:opacity-[0.8] transition-[0.2s] flex justify-center`}>
+                    <button key={index} onClick={() => runCallback(config.buttonCallback)} className={`${config.buttonStyle === 'success' && !error ? 'bg-lime-500':'bg-[tomato]'} min-w-[100px] rounded p-[10px] text-white disabled:bg-[lightgrey] enabled:hover:opacity-[0.8] transition-[0.2s] flex justify-center`}>
                         {config.buttonText}
                     </button>
                 )

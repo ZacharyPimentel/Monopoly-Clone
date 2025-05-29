@@ -8,6 +8,6 @@ import { Property } from "./Property";
 export interface BoardSpace {
     id: number;
     boardSpaceCategoryId: number;
-    property: Property;
+    property?: Property;
     boardSpaceName: string;
 }

@@ -25,7 +25,8 @@
     "paths": {
       "@hooks/*": ["src/hooks/*"],
       "@stateProviders/*": ["src/stateProviders/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/types/*"],
+      "@generated/*":["src/generated/*"],
     }
   },
   "include": ["src"],

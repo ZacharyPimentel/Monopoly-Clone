@@ -82,9 +82,10 @@ if (app.Environment.IsDevelopment())
         BaseOutputDirectory = @"../ui/src/generated",
         TypeNameConverters = [],
         FileNameConverters = [new NoOpFileNameConverter()],
+        CsNullableTranslation = TypeGen.Core.StrictNullTypeUnionFlags.Optional
     }; 
     var generator = new Generator(options); // create the generator instance
-    var assembly = Assembly.GetCallingAssembly(); // get the assembly to generate files for
+    var assembly = Assembly.GetExecutingAssembly(); // get the assembly to generate files for
     generator.Generate(assembly);
 
     app.UseSwagger();

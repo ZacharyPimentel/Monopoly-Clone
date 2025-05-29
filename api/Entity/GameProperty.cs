@@ -1,3 +1,7 @@
+using TypeGen.Core.TypeAnnotations;
+
+namespace api.Entity;
+[ExportTsInterface]
 public class GameProperty
 {
     public int Id { get; set; }
@@ -5,5 +9,5 @@ public class GameProperty
     public required Guid GameId { get; set; }
     public required int PropertyId { get; set; }
     public int UpgradeCount { get; set; } = 0;
-    public bool Mortgaged {get; set; } = false;
+    public bool Mortgaged { get; set; } = false;
 }

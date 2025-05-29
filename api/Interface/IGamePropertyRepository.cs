@@ -1,4 +1,4 @@
-using api.Interface;
+using api.Entity;
 
 namespace api.Interface;
 public class GamePropertyUpdateParams

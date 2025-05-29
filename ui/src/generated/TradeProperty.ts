@@ -3,7 +3,7 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export class TradeProperty {
+export interface TradeProperty {
     id: number;
     gamePropertyId: number;
     playerTradeId: number;

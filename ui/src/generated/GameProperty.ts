@@ -3,7 +3,11 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export interface PlayerTradeWhereParams {
-    tradeId?: number;
+export interface GameProperty {
+    id: number;
     playerId?: string;
+    gameId: string;
+    propertyId: number;
+    upgradeCount: number;
+    mortgaged: boolean;
 }

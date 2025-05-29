@@ -1,8 +1,7 @@
 using System.Data;
 using Dapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient; // or System.Data.SqlClient
+using api.Entity; // or System.Data.SqlClient
 
 [ApiController]
 [Route("/monopoly/playerIcon")]
