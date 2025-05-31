@@ -3,7 +3,6 @@ import { useApi } from "../../../hooks/useApi"
 import { Player } from "../../../types/controllers/Player";
 import { useGameState } from "../../../stateProviders/GameStateProvider";
 import React from "react";
-import { useGlobalDispatch} from "../../../stateProviders/GlobalStateProvider";
 import { useWebSocket } from "../../../hooks/useWebSocket";
 import { PlayerIcon } from "../../../types/controllers/PlayerIcon";
 import { FetchWrapper } from "../../../globalComponents/FetchWrapper";
@@ -13,8 +12,6 @@ export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
 
     const api = useApi();
     const gameState = useGameState();
-    const webSocket = useWebSocket();
-    const globalDispatch = useGlobalDispatch();
     const [selectedIconId,setSelectedIconId] = useState(player.iconId);
     const [name,setName] = useState(player.playerName);
     const {invoke} = useWebSocket();
@@ -51,9 +48,12 @@ export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
             </div>
             <ActionButtons 
                 confirmCallback={async() => {
-                    invoke.player.update(player.id,{
-                        iconId:selectedIconId,
-                        playerName: name
+                    invoke.player.update({
+                        playerId:player.id,
+                        playerUpdateParams:{
+                            iconId:selectedIconId,
+                            playerName: name
+                        }
                     })
                 }} 
                 confirmButtonStyle={"success"} 

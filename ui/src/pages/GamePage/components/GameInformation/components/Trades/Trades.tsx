@@ -1,6 +1,5 @@
-import { useGlobalDispatch } from "../../../../../../stateProviders/GlobalStateProvider"
-import { CreateTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/CreateTradeModal";
-import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
+import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
+import { useGameState } from "@stateProviders/GameStateProvider";
 import { Fragment } from "react";
 import { EditTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/EditTradeModal";
 

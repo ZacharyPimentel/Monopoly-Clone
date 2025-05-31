@@ -10,8 +10,8 @@ export type AdvancedButtonConfig = {
 export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[]}> = ({buttonConfigs}) => {
     
     const globalDispatch = useGlobalDispatch();
-    const [loading,setLoading] = useState(false);
-    const [success,setSuccess] = useState(false);
+    const [_loading,setLoading] = useState(false);
+    const [_success,setSuccess] = useState(false);
     const [error,setError] = useState(false);
     
     return (

@@ -1,6 +1,5 @@
-using System.Data;
+using api.DTO.Entity;
 using api.Interface;
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controller;

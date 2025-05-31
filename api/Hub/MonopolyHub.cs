@@ -1,6 +1,8 @@
 namespace api.hub
 {
     using System.Data;
+    using api.DTO.Entity;
+    using api.DTO.Websocket;
     using api.Entity;
     using api.Interface;
     using Dapper;
@@ -122,9 +124,9 @@ namespace api.hub
             var games = await gameRepository.Search(new GameWhereParams { });
             await SendToAll("game:updateAll", games);
         }
-        public async Task PlayerUpdate(Guid playerId, PlayerUpdateParams playerUpdateParams)
+        public async Task PlayerUpdate(SocketEventPlayerUpdateParams playerUpdateParams)
         {
-            await playerRepository.UpdateAsync(playerId, playerUpdateParams);
+            await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             if (currentSocketPlayer.GameId is not Guid gameId)
             {

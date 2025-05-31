@@ -1,7 +1,5 @@
-import { ActionButtons } from "../ActionButtons"
 import { usePlayer } from "../../../hooks/usePlayer"
 import { useGameState } from "../../../stateProviders/GameStateProvider"
-import { Player } from "../../../types/controllers/Player"
 import {useForm, FormProvider} from 'react-hook-form'
 import React, { useMemo } from "react"
 import { PlayerOfferView } from "./components/PlayerOfferView"
