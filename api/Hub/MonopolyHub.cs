@@ -392,21 +392,15 @@ namespace api.hub
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             await SendToSelf("trade:list", trades);
         }
-        public async Task TradeUpdate(
-            int tradeId,
-            Guid updatedBy,
-            PlayerTradeOffer playerOneOffer,
-            PlayerTradeOffer playerTwoOffer
-        )
+        public async Task TradeUpdate(SocketEventTradeUpdateParams socketEventData)
         {
-            var updateparams = new TradeUpdateParams
-            {
-                LastUpdatedBy = updatedBy,
-                PlayerOne = playerOneOffer,
-                PlayerTwo = playerTwoOffer,
-            };
-            await tradeRepository.UpdateFullTradeAsync(tradeId,updateparams);
+
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            socketEventData.TradeUpdateParams.LastUpdatedBy = socketPlayer.PlayerId;
+            await tradeRepository.UpdateFullTradeAsync(
+                socketEventData.TradeId,
+                socketEventData.TradeUpdateParams
+            );
             if (socketPlayer.GameId is Guid gameId)
             {
                 var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);

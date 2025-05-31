@@ -1,3 +1,4 @@
+using api.DTO.Entity;
 using api.Entity;
 
 namespace api.Interface;
