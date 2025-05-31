@@ -4,8 +4,7 @@ import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
-import { TradeUpdateParams } from "@generated/TradeUpdateParams";
-import { SocketEventPlayerUpdateParams } from "@generated/SocketEventPlayerUpdateParams";
+import { SocketEventPlayerUpdate, SocketEventTradeUpdate } from "@generated/index";
 
 export const useWebSocket = () => {
     const globalState = useGlobalState();
@@ -67,7 +66,7 @@ export const useWebSocket = () => {
                 getAll: () => {
                     globalState.ws.invoke("PlayerGetAll")
                 },
-                update: (updateParams:SocketEventPlayerUpdateParams) => {
+                update: (updateParams:SocketEventPlayerUpdate) => {
                     globalState.ws.invoke("PlayerUpdate",updateParams)
                 },
                 reconnect: (playerId:string) => {
@@ -86,7 +85,7 @@ export const useWebSocket = () => {
                 create:(tradeCreateParams:TradeCreateParams) => {
                     globalState.ws.invoke("TradeCreate",tradeCreateParams)
                 },
-                update:(TradeUpdateParams:TradeUpdateParams) => {
+                update:(TradeUpdateParams:SocketEventTradeUpdate) => {
                     globalState.ws.invoke("TradeUpdate",TradeUpdateParams)
                 }
             }

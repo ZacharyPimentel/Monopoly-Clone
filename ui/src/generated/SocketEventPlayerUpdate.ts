@@ -5,7 +5,7 @@
 
 import { PlayerUpdateParams } from "./PlayerUpdateParams";
 
-export interface SocketEventPlayerUpdateParams {
+export interface SocketEventPlayerUpdate {
     playerId: string;
     playerUpdateParams: PlayerUpdateParams;
 }

@@ -76,17 +76,29 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    //generate types 
+    // Delete old types
+    var outputDir = Path.GetFullPath(@"../ui/src/generated");
+    if (Directory.Exists(outputDir))
+    {
+        Directory.Delete(outputDir, recursive: true);
+    }
+    //Generate new types
     var options = new GeneratorOptions // create the options object
     {
         BaseOutputDirectory = @"../ui/src/generated",
         TypeNameConverters = [],
         FileNameConverters = [new NoOpFileNameConverter()],
-        CsNullableTranslation = TypeGen.Core.StrictNullTypeUnionFlags.Optional
+        CsNullableTranslation = TypeGen.Core.StrictNullTypeUnionFlags.Optional,
     }; 
     var generator = new Generator(options); // create the generator instance
     var assembly = Assembly.GetExecutingAssembly(); // get the assembly to generate files for
     generator.Generate(assembly);
+    //create barrel file
+    var files = Directory.GetFiles(outputDir, "*.ts", SearchOption.TopDirectoryOnly)
+        .Where(f => !f.EndsWith("index.ts"))
+        .Select(Path.GetFileNameWithoutExtension);
+    var lines = files.Select(f => $"export * from './{f}';");
+    File.WriteAllLines(Path.Combine(outputDir, "index.ts"), lines);
 
     app.UseSwagger();
     app.UseSwaggerUI();

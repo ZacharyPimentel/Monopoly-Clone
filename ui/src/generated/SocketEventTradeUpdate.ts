@@ -5,7 +5,7 @@
 
 import { TradeUpdateParams } from "./TradeUpdateParams";
 
-export interface SocketEventTradeUpdateParams {
+export interface SocketEventTradeUpdate {
     tradeId: number;
     tradeUpdateParams: TradeUpdateParams;
 }

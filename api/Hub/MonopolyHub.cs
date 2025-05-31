@@ -77,6 +77,19 @@ namespace api.hub
         }
 
         //=======================================================
+        // Helper Methods for validating socket events
+        //=======================================================
+        private void ValidateGameId(Guid gameId)
+        {
+            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            if (gameId != currentSocketPlayer.GameId)
+            {
+                //TODO : add an error event in the socket
+                throw new Exception("You aren't currently in this game");
+            }
+        }
+
+        //=======================================================
         // Player 
         //=======================================================
         public async Task PlayerReconnect(Guid playerId)
@@ -101,8 +114,9 @@ namespace api.hub
             var games = await gameRepository.Search(new GameWhereParams { });
             await SendToAll("game:updateAll", games);
         }
-        public async Task PlayerCreate(PlayerCreateParams playerCreateParams)
+        public async Task PlayerCreate(SocketEventPlayerCreate playerCreateParams)
         {
+            ValidateGameId(playerCreateParams.GameId);
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             var newPlayer = await playerRepository.CreateAndReturnAsync(playerCreateParams);
             currentSocketPlayer.PlayerId = newPlayer.Id;
@@ -124,7 +138,7 @@ namespace api.hub
             var games = await gameRepository.Search(new GameWhereParams { });
             await SendToAll("game:updateAll", games);
         }
-        public async Task PlayerUpdate(SocketEventPlayerUpdateParams playerUpdateParams)
+        public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
             await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -392,7 +406,7 @@ namespace api.hub
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             await SendToSelf("trade:list", trades);
         }
-        public async Task TradeUpdate(SocketEventTradeUpdateParams socketEventData)
+        public async Task TradeUpdate(SocketEventTradeUpdate socketEventData)
         {
 
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
