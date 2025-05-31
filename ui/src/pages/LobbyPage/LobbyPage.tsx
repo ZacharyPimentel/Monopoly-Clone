@@ -4,6 +4,7 @@ import { GameCreateModal } from "./modal/CreateGameModal";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
 import { LobbyGame } from "../../types/websocket/Game";
+import { WebSocketEvents } from "@generated/WebSocketEvents";
 
 
 
@@ -18,14 +19,14 @@ export const LobbyPage = () => {
         const gameListCallback = (games:LobbyGame[]) => setGames(games);
         const gameCreateCallback = (gameId:string) => navigate(`/game/${gameId}`);
 
-        listen('game:updateAll',gameListCallback)
-        listen('game:create',gameCreateCallback);
+        listen(WebSocketEvents.GameUpdateAll,gameListCallback)
+        listen(WebSocketEvents.GameCreate,gameCreateCallback);
 
         invoke.game.getAll();
         
         return () => {
-            stopListen('game:updateAll',gameListCallback)
-            stopListen('game:create',gameCreateCallback)
+            stopListen(WebSocketEvents.GameUpdateAll,gameListCallback)
+            stopListen(WebSocketEvents.GameCreate,gameCreateCallback)
         }
     },[])
 

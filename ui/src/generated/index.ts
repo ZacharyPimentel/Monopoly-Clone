@@ -19,3 +19,4 @@ export * from './TradeProperty';
 export * from './TradePropertyWhereParams';
 export * from './TradeUpdateParams';
 export * from './TradeWhereParams';
+export * from './WebSocketEvents';

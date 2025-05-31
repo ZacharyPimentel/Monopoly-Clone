@@ -4,6 +4,8 @@ namespace api.hub
     using api.DTO.Entity;
     using api.DTO.Websocket;
     using api.Entity;
+    using api.Enumerable;
+    using api.Helper;
     using api.Interface;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
@@ -44,8 +46,8 @@ namespace api.hub
                     Message = $"{gamePlayer.PlayerName} has disconnected.",
                 });
                 var latestLogs = await gameLogRepository.GetLatestFive(gamePlayer.GameId);
-                await SendToGroup("player:updateGroup", groupPlayers);
-                await SendToGroup("gameLog:update", latestLogs);
+                await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
+                await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
             }
             gameState.RemovePlayer(Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);
@@ -53,27 +55,27 @@ namespace api.hub
         //=======================================================
         // Methods for message delivery (self, group, or all)
         //=======================================================
-        private async Task SendToSelf(string eventName, object? data)
+        private async Task SendToSelf(WebSocketEvents eventEnum, object? data)
         {
-            await Clients.Caller.SendAsync(eventName, data);
+            await Clients.Caller.SendAsync(((int)eventEnum).ToString(), data);
         }
-        private async Task SendToGroup(string eventName, object? data)
+        private async Task SendToGroup(WebSocketEvents eventEnum, object? data)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             if (currentSocketPlayer.GameId is Guid gameId)
             {
-                await Clients.Group(gameId.ToString()).SendAsync(eventName, data);
+                await Clients.Group(gameId.ToString()).SendAsync(((int)eventEnum).ToString(), data);
             }
             else
             {
                 throw new Exception("Tried to send data to a group where the GameId was not found.");
             }
 
-            await Clients.Caller.SendAsync(eventName, data);
+            await Clients.Caller.SendAsync(((int)eventEnum).ToString(), data);
         }
-        private async Task SendToAll(string eventName, object data)
+        private async Task SendToAll(WebSocketEvents eventEnum, object data)
         {
-            await Clients.All.SendAsync(eventName, data);
+            await Clients.All.SendAsync(((int)eventEnum).ToString(), data);
         }
 
         //=======================================================
@@ -106,13 +108,13 @@ namespace api.hub
                 Message = $"{currentPlayer.PlayerName} has reconnected."
             });
             var latestLogs = await gameLogRepository.GetLatestFive(currentPlayer.GameId);
-            await SendToGroup("gameLog:update", latestLogs);
-            await SendToSelf("player:update", socketPlayer);
-            await SendToGroup("player:updateGroup", allPlayers);
+            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+            await SendToSelf(WebSocketEvents.PlayerUpdate, socketPlayer);
+            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
 
             //trigger updated player counts in lobby
             var games = await gameRepository.Search(new GameWhereParams { });
-            await SendToAll("game:updateAll", games);
+            await SendToAll(WebSocketEvents.GameUpdateAll, games);
         }
         public async Task PlayerCreate(SocketEventPlayerCreate playerCreateParams)
         {
@@ -130,13 +132,13 @@ namespace api.hub
                 Message = $"{newPlayer.PlayerName} has joined the game."
             });
             var latestLogs = await gameLogRepository.GetLatestFive(newPlayer.GameId);
-            await SendToGroup("gameLog:update", latestLogs);
-            await SendToSelf("player:update", currentSocketPlayer);
-            await SendToGroup("player:updateGroup", groupPlayers);
+            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+            await SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
+            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
 
             //trigger updated player counts in lobby
             var games = await gameRepository.Search(new GameWhereParams { });
-            await SendToAll("game:updateAll", games);
+            await SendToAll(WebSocketEvents.GameUpdateAll, games);
         }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
@@ -189,14 +191,14 @@ namespace api.hub
                 }
 
                 Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
-                await SendToGroup("game:update", updatedGame);
+                await SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
             }
             var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
             {
                 GameId = currentSocketPlayer.GameId
             });
 
-            await SendToGroup("player:updateGroup", updatedGroupPlayers);
+            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
         }
 
         //=======================================================
@@ -205,12 +207,12 @@ namespace api.hub
         public async Task GameGetAll()
         {
             var games = await gameRepository.GetAllAsync();
-            await SendToSelf("game:updateAll", games);
+            await SendToSelf(WebSocketEvents.GameUpdateAll, games);
         }
         public async Task GameGetById(Guid gameId)
         {
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToSelf("game:update", game);
+            await SendToSelf(WebSocketEvents.GameUpdate, game);
         }
         public async Task GameCreate(GameCreateParams gameCreateParams)
         {
@@ -219,9 +221,9 @@ namespace api.hub
             await lastDiceRollRepository.CreateAsync(new { GameId = newGame.Id });
             await gamePropertyRepository.CreateForNewGameAsync(newGame.Id);
             await gameCardRepository.CreateForNewGameAsync(newGame.Id);
-            await SendToSelf("game:create", newGame.Id);;
+            await SendToSelf(WebSocketEvents.GameCreate, newGame.Id);;
             var games = await gameRepository.GetAllAsync();
-            await SendToAll("game:updateAll", games);
+            await SendToAll(WebSocketEvents.GameUpdateAll, games);
         }
         public async Task GameJoin(Guid gameId)
         {
@@ -231,18 +233,18 @@ namespace api.hub
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
             if (game == null)
             {
-                await SendToSelf("game:update", game);
+                await SendToSelf(WebSocketEvents.GameUpdate, game);
                 return;
             }
             var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             Console.WriteLine(trades);
-            await SendToSelf("game:update", game);
-            await SendToSelf("player:update", currentSocketPlayer);
-            await SendToSelf("player:updateGroup", groupPlayers);
-            await SendToSelf("gameLog:update", latestLogs);
-            await SendToSelf("trade:update", trades);
+            await SendToSelf(WebSocketEvents.GameUpdate, game);
+            await SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
+            await SendToSelf(WebSocketEvents.GameUpdateGroup, groupPlayers);
+            await SendToSelf(WebSocketEvents.GameLogUpdate, latestLogs);
+            await SendToSelf(WebSocketEvents.TradeUpdate, trades);
             await BoardSpaceGetAll(gameId);
         }
         public async Task GameLeave(string gameId)
@@ -253,18 +255,18 @@ namespace api.hub
                 await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
                 var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
-                await SendToGroup("player:updateGroup", groupPlayers);
+                await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
                 currentSocketPlayer.GameId = null;
                 currentSocketPlayer.PlayerId = null;
                 var games = await gameRepository.Search(new GameWhereParams { });
-                await SendToAll("game:updateAll", games);
+                await SendToAll(WebSocketEvents.GameUpdateAll, games);
             }
         }
         public async Task GameUpdate(Guid gameId, GameUpdateParams gameUpdateParams)
         {
             await gameRepository.UpdateAsync(gameId, gameUpdateParams);
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup("game:Update", game);
+            await SendToGroup(WebSocketEvents.GameUpdate, game);
         }
         public async Task GameEndTurn()
         {
@@ -330,14 +332,14 @@ namespace api.hub
 
             var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup("player:updateGroup", groupPlayers);
-            await SendToGroup("game:update", updatedGame);
+            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
+            await SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         }
         public async Task BoardSpaceGetAll(Guid gameId)
         {
             var boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
 
-            await SendToSelf("boardSpace:update", boardSpaces);
+            await SendToSelf(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
         }
 
         //=======================================================
@@ -348,7 +350,7 @@ namespace api.hub
             await gamePropertyRepository.UpdateAsync(gamePropertyId, updateParams);
             GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
             var boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameProperty.GameId);
-            await SendToGroup("boardSpace:update", boardSpaces);
+            await SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
         }
 
         //=======================================================
@@ -362,7 +364,7 @@ namespace api.hub
                 Message = message
             });
             var latestLogs = await gameLogRepository.GetLatestFive(gameId);
-            await SendToGroup("gameLog:update", latestLogs);
+            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
         }
 
         //=======================================================
@@ -378,7 +380,7 @@ namespace api.hub
             );
 
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup("game:update", game);
+            await SendToGroup(WebSocketEvents.GameUpdate, game);
         }
         public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
         {
@@ -390,7 +392,7 @@ namespace api.hub
             );
 
             Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup("game:update", game);
+            await SendToGroup(WebSocketEvents.GameUpdate, game);
         }
         //=======================================================
         // Trade
@@ -399,12 +401,12 @@ namespace api.hub
         {
             await tradeRepository.CreateFullTradeAsync(tradeCreateParams);
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(tradeCreateParams.GameId);
-            await SendToGroup("trade:update", trades);
+            await SendToGroup(WebSocketEvents.TradeUpdate, trades);
         }
         public async Task TradeSearch(Guid gameId)
         {
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-            await SendToSelf("trade:list", trades);
+            await SendToSelf(WebSocketEvents.TradeList, trades);
         }
         public async Task TradeUpdate(SocketEventTradeUpdate socketEventData)
         {
@@ -418,7 +420,7 @@ namespace api.hub
             if (socketPlayer.GameId is Guid gameId)
             {
                 var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-                await SendToGroup("trade:update", trades);
+                await SendToGroup(WebSocketEvents.TradeUpdate, trades);
             }
         }
         public async Task TradeDecline(int tradeId)
@@ -435,7 +437,7 @@ namespace api.hub
                     Message = $"{gamePlayer.PlayerName} has disconnected."
                 });
                 var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-                await SendToGroup("trade:update", trades);
+                await SendToGroup(WebSocketEvents.TradeUpdate, trades);
             }
         }
     }

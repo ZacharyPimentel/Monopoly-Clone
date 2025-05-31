@@ -14,6 +14,7 @@ import { BoardSpace } from "../../types/controllers/BoardSpace";
 import { GameLog } from "../../types/websocket/GameLog";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { Trade } from "../../types/websocket/Trade";
+import { WebSocketEvents } from "@generated/WebSocketEvents";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -42,22 +43,22 @@ export const GamePage = () => {
             gameDispatch({trades})
         }
 
-        listen('game:update',gameUpdateCallback)
-        listen('player:update',playerUpdateCallback)
-        listen('player:updateGroup',playerUpdateAllCallback)
-        listen('boardSpace:update', boardSpaceUpdateCallback)
-        listen('gameLog:update',logUpdateCallback);
-        listen('trade:update',tradeUpdateCallback);
+        listen(WebSocketEvents.GameUpdate,gameUpdateCallback)
+        listen(WebSocketEvents.PlayerUpdate,playerUpdateCallback)
+        listen(WebSocketEvents.PlayerUpdateGroup,playerUpdateAllCallback)
+        listen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
+        listen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
+        listen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
 
         invoke.game.join(gameId!);
 
         return () => {
-            stopListen('game:update',gameUpdateCallback)
-            stopListen('player:update',playerUpdateCallback)
-            stopListen('player:updateGroup',playerUpdateAllCallback)
-            stopListen('boardSpace:update', boardSpaceUpdateCallback)
-            stopListen('gameLog:update',logUpdateCallback);
-            stopListen('trade:update',tradeUpdateCallback);
+            stopListen(WebSocketEvents.GameUpdate,gameUpdateCallback)
+            stopListen(WebSocketEvents.PlayerUpdate,playerUpdateCallback)
+            stopListen(WebSocketEvents.PlayerUpdateGroup,playerUpdateAllCallback)
+            stopListen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
+            stopListen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
+            stopListen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
             invoke.game.leave(gameId!);
         }
     },[])

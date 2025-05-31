@@ -90,11 +90,11 @@ export const useWebSocket = () => {
                 }
             }
         },
-        listen: (eventName:string, callback:(data:any) => void) => {
-            globalState.ws.on(eventName,callback)
+        listen: (eventEnum:number, callback:(data:any) => void) => {
+            globalState.ws.on(eventEnum.toString(),callback)
         },
-        stopListen: (eventName:string, callback:(data:any) => void) => {
-            globalState.ws.off(eventName,callback)
+        stopListen: (eventEnum:number, callback:(data:any) => void) => {
+            globalState.ws.off(eventEnum.toString(),callback)
         }
 
     }
