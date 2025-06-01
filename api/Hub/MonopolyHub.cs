@@ -5,15 +5,13 @@ namespace api.hub
     using api.DTO.Websocket;
     using api.Entity;
     using api.Enumerable;
-    using api.Hub.Services;
+    using api.Hub.Service;
     using api.Interface;
-    using api.Socket;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
         IDbConnection db,
-        ISocketContextAccessor socketContext,
         IBoardSpaceRepository boardSpaceRepository,
         IGameLogRepository gameLogRepository,
         IGamePropertyRepository gamePropertyRepository,
@@ -227,24 +225,7 @@ namespace api.hub
         }
         public async Task GameJoin(Guid gameId)
         {
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            currentSocketPlayer.GameId = gameId;
-            await Groups.AddToGroupAsync(Context.ConnectionId, gameId.ToString());
-            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            if (game == null)
-            {
-                await SendToSelf(WebSocketEvents.GameUpdate, game);
-                return;
-            }
-            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
-            var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
-            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-            await SendToSelf(WebSocketEvents.GameUpdate, game);
-            await SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
-            await SendToSelf(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-            await SendToSelf(WebSocketEvents.GameLogUpdate, latestLogs);
-            await SendToSelf(WebSocketEvents.TradeUpdate, trades);
-            await BoardSpaceGetAll(gameId);
+            await gameService.JoinGame(gameId);
         }
         public async Task GameLeave(string gameId)
         {

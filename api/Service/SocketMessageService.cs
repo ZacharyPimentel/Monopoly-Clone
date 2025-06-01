@@ -18,11 +18,18 @@ public class SocketMessageService(
 {
     public async Task SendToSelf(WebSocketEvents eventEnum, object? data)
     {
+        if (socketContext.Current == null)
+        {
+            throw new Exception("Socket context is null in SendToSelf");
+        }
         await socketContext.Current.Clients.Caller.SendAsync(((int)eventEnum).ToString(), data);
     }
     public async Task SendToGroup(WebSocketEvents eventEnum, object? data)
     {
-        if (socketContext.Current == null) return;
+        if (socketContext.Current == null)
+        {
+            throw new Exception("Socket context is null in SendToGroup");
+        }
 
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(socketContext.Current.Context.ConnectionId);
         if (currentSocketPlayer.GameId is Guid gameId)
@@ -38,7 +45,10 @@ public class SocketMessageService(
     }
     public async Task SendToAll(WebSocketEvents eventEnum, object? data)
     {
-        if (socketContext.Current == null) return;
+        if (socketContext.Current == null)
+        {
+            throw new Exception("Socket context is null in SendToAll");
+        }
         await socketContext.Current.Clients.All.SendAsync(((int)eventEnum).ToString(), data);
     }
 }

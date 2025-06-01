@@ -2,7 +2,10 @@ using api.hub;
 using Microsoft.AspNetCore.SignalR;
 
 namespace api.Socket;
-public class SocketContextHubFilter<THub>(ISocketContextAccessor socketContext) : IHubFilter where THub : Microsoft.AspNetCore.SignalR.Hub
+public class SocketContextHubFilter<THub>(
+    ISocketContextAccessor socketContext,
+    IHubContext<THub> hubContext
+) : IHubFilter where THub : MonopolyHub
 {
     public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext invocationContext,
@@ -12,7 +15,8 @@ public class SocketContextHubFilter<THub>(ISocketContextAccessor socketContext) 
         socketContext.Current = new SocketContext<MonopolyHub>
         {
             Context = invocationContext.Context,
-            Clients = invocationContext.Hub.Clients
+            Clients = invocationContext.Hub.Clients,
+            HubContext = hubContext
         };
 
         return await next(invocationContext); // Continue to the hub method
