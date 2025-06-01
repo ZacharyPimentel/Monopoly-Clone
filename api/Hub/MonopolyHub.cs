@@ -5,27 +5,29 @@ namespace api.hub
     using api.DTO.Websocket;
     using api.Entity;
     using api.Enumerable;
-    using api.Helper;
+    using api.Hub.Services;
     using api.Interface;
+    using api.Socket;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
         IDbConnection db,
+        ISocketContextAccessor socketContext,
         IBoardSpaceRepository boardSpaceRepository,
-        IGameCardRepository gameCardRepository,
         IGameLogRepository gameLogRepository,
         IGamePropertyRepository gamePropertyRepository,
         IGameRepository gameRepository,
         ILastDiceRollRepository lastDiceRollRepository,
         IPlayerRepository playerRepository,
         ITradeRepository tradeRepository,
-        ITurnOrderRepository turnOrderRepository
+        ITurnOrderRepository turnOrderRepository,
+        IGameService gameService
     ) : Hub
     {
         //=======================================================
         // Default socket methods for connect / disconnect
-        //=======================================================
+        //===================================================`====
         public override Task OnConnectedAsync()
         {
             var newPlayer = new SocketPlayer { SocketId = Context.ConnectionId };
@@ -97,6 +99,11 @@ namespace api.hub
         public async Task PlayerReconnect(Guid playerId)
         {
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            var playerTryingToReconnectTo = await playerRepository.GetByIdAsync(playerId);
+            if (playerTryingToReconnectTo == null || playerTryingToReconnectTo.Active || socketPlayer.GameId != playerTryingToReconnectTo.GameId)
+            {
+                throw new Exception("Error reconnecting to player");
+            }
             await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = true });
             socketPlayer.PlayerId = playerId;
             var allPlayers = await playerRepository.GetAllWithIconsAsync();
@@ -142,12 +149,12 @@ namespace api.hub
         }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
-            await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
             if (currentSocketPlayer.GameId is not Guid gameId)
             {
                 throw new Exception("Player does not have a GameId when it should be there.");
             }
+            await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
 
             Game currentGame = await gameRepository.GetByIdAsync(gameId);
             var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
@@ -216,14 +223,7 @@ namespace api.hub
         }
         public async Task GameCreate(GameCreateParams gameCreateParams)
         {
-            var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
-            //populate tables for new game
-            await lastDiceRollRepository.CreateAsync(new { GameId = newGame.Id });
-            await gamePropertyRepository.CreateForNewGameAsync(newGame.Id);
-            await gameCardRepository.CreateForNewGameAsync(newGame.Id);
-            await SendToSelf(WebSocketEvents.GameCreate, newGame.Id);;
-            var games = await gameRepository.GetAllAsync();
-            await SendToAll(WebSocketEvents.GameUpdateAll, games);
+            await gameService.CreateGame(gameCreateParams);
         }
         public async Task GameJoin(Guid gameId)
         {
@@ -239,10 +239,9 @@ namespace api.hub
             var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
             var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-            Console.WriteLine(trades);
             await SendToSelf(WebSocketEvents.GameUpdate, game);
             await SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
-            await SendToSelf(WebSocketEvents.GameUpdateGroup, groupPlayers);
+            await SendToSelf(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
             await SendToSelf(WebSocketEvents.GameLogUpdate, latestLogs);
             await SendToSelf(WebSocketEvents.TradeUpdate, trades);
             await BoardSpaceGetAll(gameId);

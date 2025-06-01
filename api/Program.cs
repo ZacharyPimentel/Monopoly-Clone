@@ -2,19 +2,25 @@ using System.Data;
 using System.Reflection;
 using api.Helper;
 using api.hub;
+using api.Hub.Services;
 using api.Interface;
 using api.Repository;
+using api.Service;
+using api.Socket;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Npgsql;
 using TypeGen.Core.Generator;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSignalR(options => {
+builder.Services.AddSignalR(options =>
+{
     options.EnableDetailedErrors = true;
+    options.AddFilter<SocketContextHubFilter<MonopolyHub>>();
 });
 
-builder.Services.AddSingleton(typeof(GameState<>));
+builder.Services.AddSingleton(typeof(GameState<>), typeof(GameState<>));
 
 // Add Cors Policy
 builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>{
@@ -58,10 +64,17 @@ builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 builder.Services.AddScoped<ITradePropertyRepository, TradePropertyRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
-builder.Services.AddScoped<ITurnOrderRepository,TurnOrderRepository>();
-
+builder.Services.AddScoped<ITurnOrderRepository, TurnOrderRepository>();
+//socket context
+builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 //services
 builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddScoped<ISocketMessageService, SocketMessageService>();
+builder.Services.AddScoped<IGameService, GameService>();
+
+bool isRegistered = builder.Services.Any(sd =>
+    sd.ServiceType == typeof(ISocketMessageService));
+
 
 var app = builder.Build();
 
@@ -107,7 +120,7 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 //app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseCors("CorsPolicy");
 app.MapHub<MonopolyHub>("/monopoly");
 app.MapControllers();
-app.UseCors("CorsPolicy");
 app.Run();
