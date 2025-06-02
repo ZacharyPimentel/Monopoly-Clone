@@ -1,0 +1,11 @@
+
+using TypeGen.Core.TypeAnnotations;
+namespace api.DTO.Entity;
+
+[ExportTsInterface]
+public class SocketEventPlayerEdit
+{
+    public required Guid PlayerId { get; set; }
+    public string? PlayerName { get; set; }
+    public int? IconId { get; set; }
+}

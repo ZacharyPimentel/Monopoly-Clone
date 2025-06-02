@@ -4,7 +4,7 @@ import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
-import { SocketEventPlayerUpdate, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
+import { SocketEventPlayerEdit, SocketEventPlayerUpdate, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
 
 export const useWebSocket = () => {
@@ -75,7 +75,10 @@ export const useWebSocket = () => {
                 },
                 create:(playerName:string,iconId:number,gameId:string) => {
                     globalState.ws.invoke('PlayerCreate',{playerName,iconId,gameId})
-                }
+                },
+                edit: (playerEditParams:SocketEventPlayerEdit) => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerEdit),playerEditParams);
+                },
             },
             gameProperty:{
                 update:(gamePropertyId:number,updateParams:Partial<PropertyUpdateParams>) => {

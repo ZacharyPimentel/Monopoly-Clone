@@ -48,12 +48,10 @@ export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
             </div>
             <ActionButtons 
                 confirmCallback={async() => {
-                    invoke.player.update({
+                    invoke.player.edit({
                         playerId:player.id,
-                        playerUpdateParams:{
-                            iconId:selectedIconId,
-                            playerName: name
-                        }
+                        iconId:selectedIconId,
+                        playerName:name
                     })
                 }} 
                 confirmButtonStyle={"success"} 

@@ -3,15 +3,14 @@ using api.DTO.Entity;
 using api.Enumerable;
 using api.hub;
 using api.Interface;
-using api.Service;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
-namespace api.Hub.Service;
-
+namespace api.Service;
 public interface IGameService
 {
     Task CreateGame(GameCreateParams gameCreateParams);
     Task JoinGame(Guid gameId);
+    Task LeaveGame(Guid gameId);
 }
 
 public class GameService(
@@ -28,7 +27,6 @@ public class GameService(
     IBoardSpaceRepository boardSpaceRepository
 ) : IGameService
 {
-
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
     private IHubContext<MonopolyHub> HubContext => socketContextAccessor.RequireContext().HubContext;
     public async Task CreateGame(GameCreateParams gameCreateParams)
@@ -42,7 +40,6 @@ public class GameService(
         var games = await gameRepository.GetAllAsync();
         await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
     }
-
     public async Task JoinGame(Guid gameId)
     {
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
@@ -65,5 +62,20 @@ public class GameService(
         await socketMessageService.SendToSelf(WebSocketEvents.GameLogUpdate, latestLogs);
         await socketMessageService.SendToSelf(WebSocketEvents.TradeUpdate, trades);
         await socketMessageService.SendToSelf(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
+    }
+    public async Task LeaveGame(Guid gameId)
+    {
+        SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
+        if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
+        {
+            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
+            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
+            await HubContext.Groups.RemoveFromGroupAsync(SocketContext.ConnectionId, gameId.ToString());
+            await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
+            currentSocketPlayer.GameId = null;
+            currentSocketPlayer.PlayerId = null;
+            var games = await gameRepository.Search(new GameWhereParams { });
+            await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
+        }
     }
 }

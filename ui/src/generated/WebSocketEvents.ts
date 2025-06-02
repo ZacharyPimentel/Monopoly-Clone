@@ -10,8 +10,9 @@ export enum WebSocketEvents {
     GameUpdateAll = 3,
     GameUpdateGroup = 4,
     GameLogUpdate = 5,
-    PlayerUpdate = 6,
-    PlayerUpdateGroup = 7,
-    TradeList = 8,
-    TradeUpdate = 9,
+    PlayerEdit = 6,
+    PlayerUpdate = 7,
+    PlayerUpdateGroup = 8,
+    TradeList = 9,
+    TradeUpdate = 10,
 }

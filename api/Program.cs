@@ -2,7 +2,6 @@ using System.Data;
 using System.Reflection;
 using api.Helper;
 using api.hub;
-using api.Hub.Service;
 using api.Interface;
 using api.Repository;
 using api.Service;
@@ -71,6 +70,7 @@ builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<ISocketMessageService, SocketMessageService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 bool isRegistered = builder.Services.Any(sd =>
     sd.ServiceType == typeof(ISocketMessageService));

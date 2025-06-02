@@ -5,8 +5,8 @@ namespace api.hub
     using api.DTO.Websocket;
     using api.Entity;
     using api.Enumerable;
-    using api.Hub.Service;
     using api.Interface;
+    using api.Service;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
@@ -20,7 +20,8 @@ namespace api.hub
         IPlayerRepository playerRepository,
         ITradeRepository tradeRepository,
         ITurnOrderRepository turnOrderRepository,
-        IGameService gameService
+        IGameService gameService,
+        IPlayerService playerService
     ) : Hub
     {
         //=======================================================
@@ -98,53 +99,25 @@ namespace api.hub
         {
             var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
             var playerTryingToReconnectTo = await playerRepository.GetByIdAsync(playerId);
-            if (playerTryingToReconnectTo == null || playerTryingToReconnectTo.Active || socketPlayer.GameId != playerTryingToReconnectTo.GameId)
+            if (
+                playerTryingToReconnectTo == null ||
+                playerTryingToReconnectTo.Active ||
+                socketPlayer.GameId != playerTryingToReconnectTo.GameId
+            )
             {
                 throw new Exception("Error reconnecting to player");
             }
-            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = true });
-            socketPlayer.PlayerId = playerId;
-            var allPlayers = await playerRepository.GetAllWithIconsAsync();
-
-            var currentPlayer = allPlayers.First(x => x.Id == playerId);
-            await gameLogRepository.CreateAsync(new GameLogCreateParams
-            {
-                GameId = currentPlayer.GameId,
-                Message = $"{currentPlayer.PlayerName} has reconnected."
-            });
-            var latestLogs = await gameLogRepository.GetLatestFive(currentPlayer.GameId);
-            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
-            await SendToSelf(WebSocketEvents.PlayerUpdate, socketPlayer);
-            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
-
-            //trigger updated player counts in lobby
-            var games = await gameRepository.Search(new GameWhereParams { });
-            await SendToAll(WebSocketEvents.GameUpdateAll, games);
+            await playerService.ReconnectToGame(playerId);
         }
         public async Task PlayerCreate(SocketEventPlayerCreate playerCreateParams)
         {
             ValidateGameId(playerCreateParams.GameId);
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            var newPlayer = await playerRepository.CreateAndReturnAsync(playerCreateParams);
-            currentSocketPlayer.PlayerId = newPlayer.Id;
-            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
-            {
-                GameId = currentSocketPlayer.GameId
-            });
-            await gameLogRepository.CreateAsync(new GameLogCreateParams
-            {
-                GameId = newPlayer.GameId,
-                Message = $"{newPlayer.PlayerName} has joined the game."
-            });
-            var latestLogs = await gameLogRepository.GetLatestFive(newPlayer.GameId);
-            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
-            await SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
-            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-
-            //trigger updated player counts in lobby
-            var games = await gameRepository.Search(new GameWhereParams { });
-            await SendToAll(WebSocketEvents.GameUpdateAll, games);
+            await playerService.CreatePlayer(playerCreateParams);
         }
+        public async Task PlayerEdit(SocketEventPlayerEdit playerEditParams)
+        {
+            await playerService.EditPlayer(playerEditParams);
+        }   
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -160,7 +133,7 @@ namespace api.hub
                 Active = true,
                 GameId = currentGame.Id
             },
-            new {}
+            new { }
             );
 
             //if at least two players are all ready and the game is in lobby, start the game
@@ -179,7 +152,7 @@ namespace api.hub
                         Money = currentGame.StartingMoney
                     },
                     new PlayerWhereParams { Active = true },
-                    new {}
+                    new { }
                 );
 
                 //randomize and set the turn order
@@ -227,20 +200,10 @@ namespace api.hub
         {
             await gameService.JoinGame(gameId);
         }
-        public async Task GameLeave(string gameId)
+        public async Task GameLeave(Guid gameId)
         {
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
-            {
-                await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
-                var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
-                await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-                currentSocketPlayer.GameId = null;
-                currentSocketPlayer.PlayerId = null;
-                var games = await gameRepository.Search(new GameWhereParams { });
-                await SendToAll(WebSocketEvents.GameUpdateAll, games);
-            }
+
+            await gameService.LeaveGame(gameId);
         }
         public async Task GameUpdate(Guid gameId, GameUpdateParams gameUpdateParams)
         {
