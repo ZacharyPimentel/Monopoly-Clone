@@ -4,7 +4,9 @@ using api.Entity;
 using api.Enumerable;
 using api.hub;
 using api.Interface;
+using api.Repository;
 using api.Socket;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,6 +17,7 @@ public interface IPlayerService
     public Task CreatePlayer(SocketEventPlayerCreate playerCreateParams);
     public Task ReconnectToGame(Guid playerId);
     public Task EditPlayer(SocketEventPlayerEdit playerRenameParams);
+    public Task SetPlayerReadyStatus(SocketEventPlayerReady playerReadyParams);
 }
 
 public class PlayerService(
@@ -23,7 +26,8 @@ public class PlayerService(
     ISocketContextAccessor socketContextAccessor,
     IPlayerRepository playerRepository,
     IGameLogRepository gameLogRepository,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    ITurnOrderRepository turnOrderRepository
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -88,5 +92,73 @@ public class PlayerService(
         });
         var allPlayers = await playerRepository.GetAllWithIconsAsync();
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
+    }
+    public async Task SetPlayerReadyStatus(SocketEventPlayerReady playerReadyParams)
+    {
+        if (playerReadyParams.PlayerId != CurrentSocketPlayer.PlayerId)
+        {
+            throw new Exception("You are not the player you're trying to update");
+        }
+        await playerRepository.UpdateAsync(playerReadyParams.PlayerId, new PlayerUpdateParams
+        {
+            IsReadyToPlay = playerReadyParams.IsReadyToPlay
+        });
+
+        if (CurrentSocketPlayer.GameId is not Guid gameId)
+        {
+            throw new Exception("Player does not have a GameId when it should be there.");
+        }
+        Game currentGame = await gameRepository.GetByIdAsync((Guid)CurrentSocketPlayer.GameId);
+        var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
+        {
+            Active = true,
+            GameId = currentGame.Id
+        },
+        new { }
+        );
+
+        //if at least two players are all ready and the game is in lobby, start the game
+        if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
+        {
+            await gameRepository.UpdateAsync(currentGame.Id, new GameUpdateParams
+            {
+                InLobby = false,
+                GameStarted = true
+            });
+            await playerRepository.UpdateManyAsync(
+                new PlayerUpdateParams
+                {
+                    InCurrentGame = true,
+                    IsReadyToPlay = false,
+                    Money = currentGame.StartingMoney
+                },
+                new PlayerWhereParams
+                {
+                    Active = true,
+                    GameId = currentGame.Id
+                },
+                new { }
+            );
+
+            //randomize and set the turn order
+            Random random = new();
+            var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
+            foreach (var (player, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
+            {
+                await turnOrderRepository.CreateAsync(new TurnOrderCreateParams
+                {
+                    PlayerId = player.Id,
+                    GameId = currentGame.Id,
+                    PlayOrder = index + 1
+                });
+            }
+
+            Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
+            await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+        }
+        var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
+        {
+            GameId = CurrentSocketPlayer.GameId
+        });
     }
 }

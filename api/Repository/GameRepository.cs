@@ -29,6 +29,20 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
         var games = await db.QueryAsync<Game>(sql, parameters);
         return games.AsList();
     }
+
+    public async Task<List<Game>> GetAllWithPlayerCountAsync()
+    {
+        var sql = @"
+        SELECT 
+            g.*, COUNT(p.Id) AS ActivePlayerCount
+            FROM Game g
+            LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
+            GROUP BY g.Id
+            ORDER BY g.Id
+        ";
+        var games = await db.QueryAsync<Game>(sql);
+        return games.AsList();
+    }
     public async Task<Game?> GetByIdWithDetailsAsync(Guid gameId)
     {
         //get the current game, join the current player turn from TurnOrder

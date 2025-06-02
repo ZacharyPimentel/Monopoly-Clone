@@ -19,8 +19,9 @@ public class GameWhereParams
     public string? GameName { get; set; }
 }
 
-public interface IGameRepository: IBaseRepository<Game,Guid>
+public interface IGameRepository : IBaseRepository<Game, Guid>
 {
     Task<Game?> GetByIdWithDetailsAsync(Guid id);
     Task<List<Game>> Search(GameWhereParams gameWhereParams);
+    Task<List<Game>> GetAllWithPlayerCountAsync();
 }

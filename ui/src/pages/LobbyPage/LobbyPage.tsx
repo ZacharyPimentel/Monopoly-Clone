@@ -45,7 +45,7 @@ export const LobbyPage = () => {
                             <li className='flex justify-between gap-[20px] items-center flex-wrap'>
                                 <p className='font-bold'>{game.gameName}</p>
                                 <button onClick={() => navigate(`/game/${game.id}`)} className='ml-auto bg-black text-white p-[10px] min-w-[100px]'>Join</button>
-                                <p>{game.activePlayerCount} Active Players</p>
+                                <p>{game.activePlayerCount} Active Player{game.activePlayerCount > 1 && 's'}</p>
                             </li>
                             <hr></hr>
                         </Fragment>)

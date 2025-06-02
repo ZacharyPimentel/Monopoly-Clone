@@ -117,7 +117,12 @@ namespace api.hub
         public async Task PlayerEdit(SocketEventPlayerEdit playerEditParams)
         {
             await playerService.EditPlayer(playerEditParams);
-        }   
+        }
+        public async Task PlayerRead(SocketEventPlayerReady playerReadyParams)
+        {
+            
+            await playerService.SetPlayerReadyStatus(playerReadyParams);
+        }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -184,7 +189,7 @@ namespace api.hub
         //=======================================================
         public async Task GameGetAll()
         {
-            var games = await gameRepository.GetAllAsync();
+            var games = await gameRepository.GetAllWithPlayerCountAsync();
             await SendToSelf(WebSocketEvents.GameUpdateAll, games);
         }
         public async Task GameGetById(Guid gameId)
