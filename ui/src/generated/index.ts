@@ -12,6 +12,7 @@ export * from './Property';
 export * from './PropertyRent';
 export * from './SocketEventPlayerCreate';
 export * from './SocketEventPlayerEdit';
+export * from './SocketEventPlayerReady';
 export * from './SocketEventPlayerUpdate';
 export * from './SocketEventTradeUpdate';
 export * from './Trade';

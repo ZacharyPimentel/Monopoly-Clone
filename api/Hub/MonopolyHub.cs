@@ -118,7 +118,7 @@ namespace api.hub
         {
             await playerService.EditPlayer(playerEditParams);
         }
-        public async Task PlayerRead(SocketEventPlayerReady playerReadyParams)
+        public async Task PlayerReady(SocketEventPlayerReady playerReadyParams)
         {
             
             await playerService.SetPlayerReadyStatus(playerReadyParams);
@@ -132,50 +132,6 @@ namespace api.hub
             }
             await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
 
-            Game currentGame = await gameRepository.GetByIdAsync(gameId);
-            var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
-            {
-                Active = true,
-                GameId = currentGame.Id
-            },
-            new { }
-            );
-
-            //if at least two players are all ready and the game is in lobby, start the game
-            if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
-            {
-                await gameRepository.UpdateAsync(currentGame.Id, new GameUpdateParams
-                {
-                    InLobby = false,
-                    GameStarted = true
-                });
-                await playerRepository.UpdateManyAsync(
-                    new PlayerUpdateParams
-                    {
-                        InCurrentGame = true,
-                        IsReadyToPlay = false,
-                        Money = currentGame.StartingMoney
-                    },
-                    new PlayerWhereParams { Active = true },
-                    new { }
-                );
-
-                //randomize and set the turn order
-                Random random = new();
-                var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
-                foreach (var (player, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
-                {
-                    await turnOrderRepository.CreateAsync(new TurnOrderCreateParams
-                    {
-                        PlayerId = player.Id,
-                        GameId = currentGame.Id,
-                        PlayOrder = index + 1
-                    });
-                }
-
-                Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
-                await SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
-            }
             var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
             {
                 GameId = currentSocketPlayer.GameId

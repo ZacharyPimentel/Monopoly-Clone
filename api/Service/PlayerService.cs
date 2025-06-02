@@ -160,5 +160,6 @@ public class PlayerService(
         {
             GameId = CurrentSocketPlayer.GameId
         });
+        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
     }
 }

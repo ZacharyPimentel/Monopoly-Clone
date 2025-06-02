@@ -1,7 +1,6 @@
 
 using TypeGen.Core.TypeAnnotations;
-namespace api.DTO.Entity;
-
+namespace api.DTO.Websocket;
 [ExportTsInterface]
 public class SocketEventPlayerEdit
 {
