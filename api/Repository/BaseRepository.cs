@@ -39,6 +39,11 @@ public class BaseRepository<T, TKey>(IDbConnection db, string tableName) : IBase
 
         createParams.Add("CreatedAt", DateTime.UtcNow);
 
+        if (Utils.HasProperty<T>("UpdatedAt"))
+        {
+            createParams.Add("UpdatedAt", DateTime.UtcNow);
+        }
+
         //insert with params if they exist
         if (createParams.ParameterNames.Any())
         {
@@ -188,6 +193,11 @@ public class BaseRepository<T, TKey>(IDbConnection db, string tableName) : IBase
 
         updateParams.Add("Id", id);
 
+        if (Utils.HasProperty<T>("UpdatedAt"))
+        {
+            updateParams.Add("UpdatedAt", DateTime.UtcNow);
+        }
+
         //update if params exist
         if (updateParams.ParameterNames.Any())
         {
@@ -205,7 +215,7 @@ public class BaseRepository<T, TKey>(IDbConnection db, string tableName) : IBase
         return false;
     }
 
-    public async Task<bool> UpdateManyAsync<TUpdateParams, TIncludeParams, TExcludeParams>(
+    public async Task<bool> UpdateWhereAsync<TUpdateParams, TIncludeParams, TExcludeParams>(
         TUpdateParams updateInput,
         TIncludeParams? includeParams = null,
         TExcludeParams? excludeParams = null

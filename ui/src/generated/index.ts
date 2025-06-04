@@ -1,4 +1,5 @@
 export * from './BoardSpace';
+export * from './Game';
 export * from './GameProperty';
 export * from './Player';
 export * from './PlayerTrade';

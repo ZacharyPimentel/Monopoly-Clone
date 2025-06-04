@@ -11,7 +11,7 @@ public interface IBaseRepository<T, TKey>
     Task<IEnumerable<T>> SearchAsync<TIncludeParams,TExcludeParams>(TIncludeParams? includeParams,TExcludeParams? excludeParams);
     Task<T> UpdateAndReturnAsync<TInput>(TKey id, TInput updateInput) where TInput : class;
     Task<bool> UpdateAsync<TInput>(TKey id, TInput updateInput) where TInput : class;
-    Task<bool> UpdateManyAsync<TUpdateParams, TIncludeParams, TExcludeParams>(
+    Task<bool> UpdateWhereAsync<TUpdateParams, TIncludeParams, TExcludeParams>(
         TUpdateParams updateParams,
         TIncludeParams? includeParams,
         TExcludeParams? excludeParams

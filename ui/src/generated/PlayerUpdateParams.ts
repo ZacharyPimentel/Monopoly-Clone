@@ -5,16 +5,16 @@
 
 export interface PlayerUpdateParams {
     active?: boolean;
-    playerName?: string;
-    iconId?: number;
-    isReadyToPlay?: boolean;
-    inCurrentGame?: boolean;
-    money?: number;
     boardSpaceId?: number;
-    rollCount?: number;
-    turnComplete?: boolean;
-    inJail?: boolean;
-    rollingForUtilities?: boolean;
-    jailTurnCount?: number;
     getOutOfJailFreeCards?: number;
+    iconId?: number;
+    inCurrentGame?: boolean;
+    inJail?: boolean;
+    isReadyToPlay?: boolean;
+    jailTurnCount?: number;
+    money?: number;
+    playerName?: string;
+    rollCount?: number;
+    rollingForUtilities?: boolean;
+    turnComplete?: boolean;
 }

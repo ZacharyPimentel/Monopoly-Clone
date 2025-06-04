@@ -123,6 +123,10 @@ namespace api.hub
             
             await playerService.SetPlayerReadyStatus(playerReadyParams);
         }
+        public async Task PlayerRollForTurn()
+        {
+            await playerService.RollForTurn();
+        }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -174,70 +178,7 @@ namespace api.hub
         }
         public async Task GameEndTurn()
         {
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-
-            if (currentSocketPlayer.PlayerId is not Guid playerId || currentSocketPlayer.GameId == null)
-            {
-                throw new Exception("Socket player is missing data, PlayerId or GameId");
-            }
-
-            if (currentSocketPlayer.GameId is not Guid gameId)
-            {
-                throw new Exception("Game Id does not exist");
-            }
-            Game? currentGame = await gameRepository.GetByIdWithDetailsAsync(gameId) ?? throw new Exception("Game Doesn't Exist.");
-
-            //keep the visuals of the dice in sync between real rolls and utility rolls
-            if (currentGame.UtilityDiceOne != null && currentGame.UtilityDiceTwo != null)
-            {
-                await lastDiceRollRepository.UpdateManyAsync(
-                    new LastDiceRollUpdateParams
-                    {
-                        DiceOne = currentGame.UtilityDiceOne,
-                        DiceTwo = currentGame.UtilityDiceTwo,
-                    },
-                    new LastDiceRollWhereParams { GameId = currentGame.Id },
-                    new { }
-                );
-            }
-            
-            await turnOrderRepository.UpdateManyAsync(
-                new TurnOrderUpdateParams { HasPlayed = true},
-                new TurnOrderWhereParams
-                {
-                    PlayerId = currentSocketPlayer.PlayerId,
-                    GameId = currentGame.Id,
-                },
-                new {}
-            );
-
-            //check if everyone has taken their turn, reset if so
-            var notPlayedCount = await db.ExecuteScalarAsync<int>(
-                $"SELECT COUNT(*) FROM TurnOrder WHERE HasPlayed = FALSE AND GameId = @GameId",
-                new {GameId = currentGame.Id}
-            );
-
-
-            if (notPlayedCount == 0)
-            {
-                await turnOrderRepository.UpdateManyAsync(
-                    new TurnOrderUpdateParams { HasPlayed = false },
-                    new TurnOrderWhereParams { GameId = currentGame.Id },
-                    new { }
-                );
-                await playerRepository.UpdateManyAsync(
-                    new PlayerUpdateParams { RollCount = 0 },
-                    new PlayerWhereParams { InCurrentGame = true },
-                    new { }
-                );
-            }
-
-            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { TurnComplete = false });
-
-            var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
-            var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-            await SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+            await gameService.EndTurn();
         }
         public async Task BoardSpaceGetAll(Guid gameId)
         {
@@ -277,7 +218,7 @@ namespace api.hub
         public async Task LastDiceRollUpdate(Guid gameId, int diceOne, int diceTwo)
         {
 
-            await lastDiceRollRepository.UpdateManyAsync(
+            await lastDiceRollRepository.UpdateWhereAsync(
                 new LastDiceRollUpdateParams { DiceOne = diceOne, DiceTwo = diceTwo },
                 new LastDiceRollWhereParams { GameId = gameId },
                 new { }
@@ -289,7 +230,7 @@ namespace api.hub
         public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
         {
 
-            await lastDiceRollRepository.UpdateManyAsync(
+            await lastDiceRollRepository.UpdateWhereAsync(
                 new LastDiceRollUpdateParams { UtilityDiceOne = diceOne, UtilityDiceTwo = diceTwo },
                 new LastDiceRollWhereParams { GameId = gameId },
                 new { }

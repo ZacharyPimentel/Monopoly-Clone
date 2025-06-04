@@ -64,24 +64,30 @@ export const useWebSocket = () => {
                 },
             },
             player:{
-                getAll: () => {
-                    globalState.ws.invoke("PlayerGetAll")
-                },
-                update: (updateParams:SocketEventPlayerUpdate) => {
-                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerUpdate),updateParams)
-                },
-                reconnect: (playerId:string) => {
-                    globalState.ws.invoke('PlayerReconnect',playerId)
-                },
                 create:(playerName:string,iconId:number,gameId:string) => {
                     globalState.ws.invoke('PlayerCreate',{playerName,iconId,gameId})
                 },
                 edit: (playerEditParams:SocketEventPlayerEdit) => {
                     globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerEdit),playerEditParams);
                 },
+                endTurn:() => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerEndTurn))
+                },
+                getAll: () => {
+                    globalState.ws.invoke("PlayerGetAll")
+                },
+                reconnect: (playerId:string) => {
+                    globalState.ws.invoke('PlayerReconnect',playerId)
+                },
+                rollForTurn: () => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerRollForTurn))
+                },
                 setReadyStatus: (playerReadyParams:SocketEventPlayerReady) => {
                     globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerReady),playerReadyParams);
-                }
+                },
+                update: (updateParams:SocketEventPlayerUpdate) => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerUpdate),updateParams)
+                },
             },
             gameProperty:{
                 update:(gamePropertyId:number,updateParams:Partial<PropertyUpdateParams>) => {

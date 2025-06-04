@@ -13,9 +13,11 @@ public enum WebSocketEvents
     GameUpdateGroup,
     GameLogUpdate,
     PlayerEdit,
+    PlayerEndTurn,
     PlayerReady,
     PlayerUpdate,
     PlayerUpdateGroup,
+    PlayerRollForTurn,
     TradeList,
     TradeUpdate,
 }

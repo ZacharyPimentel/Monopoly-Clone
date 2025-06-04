@@ -1,5 +1,6 @@
 
 using api.DTO.Entity;
+using api.Entity;
 using api.Enumerable;
 using api.hub;
 using api.Interface;
@@ -9,6 +10,7 @@ namespace api.Service;
 public interface IGameService
 {
     Task CreateGame(GameCreateParams gameCreateParams);
+    Task EndTurn();
     Task JoinGame(Guid gameId);
     Task LeaveGame(Guid gameId);
 }
@@ -24,11 +26,14 @@ public class GameService(
     IPlayerRepository playerRepository,
     IGameLogRepository gameLogRepository,
     ITradeRepository tradeRepository,
-    IBoardSpaceRepository boardSpaceRepository
+    IBoardSpaceRepository boardSpaceRepository,
+    ITurnOrderRepository turnOrderRepository
 ) : IGameService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
     private IHubContext<MonopolyHub> HubContext => socketContextAccessor.RequireContext().HubContext;
+    private SocketPlayer CurrentSocketPlayer => gameState.GetPlayer(SocketContext.ConnectionId);
+
     public async Task CreateGame(GameCreateParams gameCreateParams)
     {
         var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
@@ -39,6 +44,79 @@ public class GameService(
         await socketMessageService.SendToSelf(WebSocketEvents.GameCreate, newGame.Id); ;
         var games = await gameRepository.GetAllAsync();
         await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
+    }
+    public async Task EndTurn()
+    {
+        if (CurrentSocketPlayer.PlayerId is not Guid playerId || CurrentSocketPlayer.GameId == null)
+        {
+            throw new Exception("Socket player is missing data, PlayerId or GameId");
+        }
+
+        if (CurrentSocketPlayer.GameId is not Guid gameId)
+        {
+            throw new Exception("Game Id does not exist");
+        }
+        Player player = await playerRepository.GetByIdAsync((Guid)CurrentSocketPlayer.PlayerId);
+        if (!player.TurnComplete)
+        {
+            throw new Exception("You can't end your turn, it's not finished or it's not your turn.");
+        }
+
+        Game? currentGame = await gameRepository.GetByIdWithDetailsAsync(gameId) ?? throw new Exception("Game Doesn't Exist.");
+
+        //keep the visuals of the dice in sync between real rolls and utility rolls
+        if (currentGame.UtilityDiceOne != null && currentGame.UtilityDiceTwo != null)
+        {
+            await lastDiceRollRepository.UpdateWhereAsync(
+                new LastDiceRollUpdateParams
+                {
+                    DiceOne = currentGame.UtilityDiceOne,
+                    DiceTwo = currentGame.UtilityDiceTwo,
+                },
+                new LastDiceRollWhereParams { GameId = currentGame.Id },
+                new { }
+            );
+        }
+        
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true},
+            new TurnOrderWhereParams
+            {
+                PlayerId = CurrentSocketPlayer.PlayerId,
+                GameId = currentGame.Id,
+            },
+            new {}
+        );
+
+        //check if everyone has taken their turn, reset if so
+        var notPlayedCount = (await turnOrderRepository.SearchAsync(new TurnOrderSearchParams
+            {
+                HasPlayed = false,
+                GameId = currentGame.Id
+            },
+            new{}
+        )).Count();
+
+        if (notPlayedCount == 0)
+        {
+            await turnOrderRepository.UpdateWhereAsync(
+                new TurnOrderUpdateParams { HasPlayed = false },
+                new TurnOrderWhereParams { GameId = currentGame.Id },
+                new { }
+            );
+            await playerRepository.UpdateWhereAsync(
+                new PlayerUpdateParams { RollCount = 0 },
+                new PlayerWhereParams { InCurrentGame = true },
+                new { }
+            );
+        }
+
+        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { TurnComplete = false });
+
+        var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
+        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }
     public async Task JoinGame(Guid gameId)
     {

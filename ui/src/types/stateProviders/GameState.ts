@@ -1,10 +1,10 @@
 import { ReactNode } from "react"
-import { Game } from "../controllers/Game"
 import { Player } from "../controllers/Player"
 import { BoardSpace } from "../controllers/BoardSpace"
 import { SocketPlayer } from "../websocket/Player"
 import { GameLog } from "../websocket/GameLog"
 import { Trade } from "../websocket/Trade"
+import { Game } from "@generated/Game"
 
 export type GameState = {
     players:Player[]

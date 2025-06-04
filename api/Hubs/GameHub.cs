@@ -91,7 +91,7 @@
 //                 InLobby = false,
 //                 GameStarted = true
 //             });
-//             await playerRepository.UpdateMany(
+//             await playerRepository.UpdateWhere(
 //                 new PlayerWhereParams {Active = true},
 //                 new PlayerUpdateParams {
 //                     InCurrentGame = true,
@@ -166,7 +166,7 @@
 //         if(notPlayedCount  == 0)
 //         {
 //             await db.ExecuteAsync("UPDATE TurnOrder Set HasPlayed = FALSE");
-//             await playerRepository.UpdateMany(
+//             await playerRepository.UpdateWhere(
 //                 new PlayerWhereParams {InCurrentGame = true},
 //                 new PlayerUpdateParams { RollCount = 0}
 //             );

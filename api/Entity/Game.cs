@@ -1,3 +1,6 @@
+using TypeGen.Core.TypeAnnotations;
+namespace api.Entity;
+[ExportTsInterface]
 public class Game
 {
     public required Guid Id { get; set; }
@@ -8,12 +11,10 @@ public class Game
     public int StartingMoney { get; set; }
     public int ThemeId { get; set; }
     public bool FullSetDoublePropertyRent { get; set; }
-
-    //Join for PlayerId on TurnOrder with GameId
-    public Guid? CurrentPlayerTurn { get; set; }
-    //Join for game PlayerId on Game when searching games
-    public int? ActivePlayerCount { get; set; } = 0;
-    //Join for LastDiceRoll
+    public Guid? CurrentPlayerTurn { get; set; } //Join for PlayerId on TurnOrder with GameId
+    public int? ActivePlayerCount { get; set; } = 0; //Join for game PlayerId on Game when searching games
+    public bool DiceRollInProgress { get; set; }
+    //Join for LastDiceRoll properties
     public int? DiceOne { get; set; }
     public int? DiceTwo { get; set; }
     public int? UtilityDiceOne { get; set; }

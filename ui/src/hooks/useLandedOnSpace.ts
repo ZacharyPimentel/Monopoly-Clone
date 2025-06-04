@@ -20,8 +20,9 @@ export const useLandedOnSpace = () => {
     const {forceNextCardId} = useGameMasterState()
 
     if(currentBoardSpace === lastBoardSpace) return
-    if(!player || player.turnComplete || player.rollCount === 0 || gameState.rolling)return
+    if(!player || player.turnComplete || player.rollCount === 0 || gameState?.game?.diceRollInProgress || gameState.rolling)return
 
+    
     //=====================
     // Landed On Go
     //=====================

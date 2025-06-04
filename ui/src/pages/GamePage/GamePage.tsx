@@ -5,7 +5,6 @@ import { useGameDispatch, useGameState } from "../../stateProviders/GameStatePro
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { SocketPlayer } from "../../types/websocket/Player";
 import { Player } from "../../types/controllers/Player";
-import { Game } from "../../types/controllers/Game";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,6 +14,7 @@ import { GameLog } from "../../types/websocket/GameLog";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { Trade } from "../../types/websocket/Trade";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
+import { Game } from "@generated/index";
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -29,7 +29,8 @@ export const GamePage = () => {
 
         const playerUpdateCallback = (currentSocketPlayer:SocketPlayer) => gameDispatch({currentSocketPlayer})
         const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
-        const gameUpdateCallback = (game:Game | null) => {
+        const gameUpdateCallback = (game:Game| null) => {
+            console.log('33',game)
             if(!game){
                 navigate('/lobby')
                 return

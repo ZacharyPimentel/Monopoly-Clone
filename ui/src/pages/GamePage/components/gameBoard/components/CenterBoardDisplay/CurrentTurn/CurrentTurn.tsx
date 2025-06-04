@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
-import { DiceRoller } from "./DiceRoller/DiceRoller"
 import { RollButton } from "./RollButton"
 import { EndTurn } from "./EndTurn";
 import { PurchaseButton } from "./PurchaseButton";
 import { usePlayer } from "../../../../../../../hooks/usePlayer";
 import { useLandedOnSpace } from "../../../../../../../hooks/useLandedOnSpace";
 import { PayJailFee } from "./PayJailFee";
+import { DiceRoller } from "./DiceRoller/DiceRoller";
 
 export const CurrentTurn = () => {
 
