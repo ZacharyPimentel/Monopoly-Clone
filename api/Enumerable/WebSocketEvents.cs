@@ -7,6 +7,7 @@ namespace api.Enumerable;
 public enum WebSocketEvents
 {
     BoardSpaceUpdate,
+    Error,
     GameCreate,
     GameUpdate,
     GameUpdateAll,

@@ -14,12 +14,11 @@ namespace api.Service;
 
 public interface IPlayerService
 {
-    public Task 
-    CreatePlayer(PlayerCreateParams playerCreateParams);
+    public Task CreatePlayer(PlayerCreateParams playerCreateParams);
     public Task ReconnectToGame(Guid playerId);
-    public Task EditPlayer(SocketEventPlayerEdit playerRenameParams);
+    public Task EditPlayer(Guid playerId,PlayerUpdateParams playerRenameParams);
     public Task RollForTurn(Player player, Game game);
-    public Task SetPlayerReadyStatus(SocketEventPlayerReady playerReadyParams);
+    public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
 }
 
 public class PlayerService(
@@ -86,13 +85,9 @@ public class PlayerService(
         var games = await gameRepository.Search(new GameWhereParams { });
         await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
     }
-    public async Task EditPlayer(SocketEventPlayerEdit playerRenameParams)
+    public async Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams)
     {
-        if (playerRenameParams.PlayerId != CurrentSocketPlayer.PlayerId)
-        {
-            throw new Exception("You are not the player you're trying to rename");
-        }
-        await playerRepository.UpdateAsync(playerRenameParams.PlayerId, new PlayerUpdateParams
+        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams
         {
             PlayerName = playerRenameParams.PlayerName,
             IconId = playerRenameParams.IconId
@@ -100,34 +95,25 @@ public class PlayerService(
         var allPlayers = await playerRepository.GetAllWithIconsAsync();
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
     }
-    public async Task SetPlayerReadyStatus(SocketEventPlayerReady playerReadyParams)
+    public async Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay)
     {
-        if (playerReadyParams.PlayerId != CurrentSocketPlayer.PlayerId)
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
         {
-            throw new Exception("You are not the player you're trying to update");
-        }
-        await playerRepository.UpdateAsync(playerReadyParams.PlayerId, new PlayerUpdateParams
-        {
-            IsReadyToPlay = playerReadyParams.IsReadyToPlay
+            IsReadyToPlay = isReadyToPlay
         });
 
-        if (CurrentSocketPlayer.GameId is not Guid gameId)
-        {
-            throw new Exception("Player does not have a GameId when it should be there.");
-        }
-        Game currentGame = await gameRepository.GetByIdAsync((Guid)CurrentSocketPlayer.GameId);
         var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
         {
             Active = true,
-            GameId = currentGame.Id
+            GameId = game.Id
         },
         new { }
         );
 
         //if at least two players are all ready and the game is in lobby, start the game
-        if (currentGame.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
+        if (game.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
         {
-            await gameRepository.UpdateAsync(currentGame.Id, new GameUpdateParams
+            await gameRepository.UpdateAsync(game.Id, new GameUpdateParams
             {
                 InLobby = false,
                 GameStarted = true
@@ -137,12 +123,12 @@ public class PlayerService(
                 {
                     InCurrentGame = true,
                     IsReadyToPlay = false,
-                    Money = currentGame.StartingMoney
+                    Money = game.StartingMoney
                 },
                 new PlayerWhereParams
                 {
                     Active = true,
-                    GameId = currentGame.Id
+                    GameId = game.Id
                 },
                 new { }
             );
@@ -150,22 +136,22 @@ public class PlayerService(
             //randomize and set the turn order
             Random random = new();
             var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
-            foreach (var (player, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
+            foreach (var (shuffledPlayer, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
             {
                 await turnOrderRepository.CreateAsync(new TurnOrderCreateParams
                 {
-                    PlayerId = player.Id,
-                    GameId = currentGame.Id,
+                    PlayerId = shuffledPlayer.Id,
+                    GameId = game.Id,
                     PlayOrder = index + 1
                 });
             }
 
-            Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(currentGame.Id);
+            Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
             await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         }
         var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
         {
-            GameId = CurrentSocketPlayer.GameId
+            GameId = game.Id
         });
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
     }

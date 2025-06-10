@@ -4,7 +4,6 @@
  */
 
 export interface SocketEventPlayerEdit {
-    playerId: string;
     playerName?: string;
     iconId?: number;
 }

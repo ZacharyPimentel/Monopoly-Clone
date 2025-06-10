@@ -1,4 +1,8 @@
+using System.Net.WebSockets;
+using api.DTO.Websocket;
 using api.Entity;
+using api.Enumerable;
+using api.Helper;
 using api.hub;
 using api.Interface;
 using api.Service.GuardService;
@@ -10,7 +14,8 @@ public class GuardService(
     GameState<MonopolyHub> gameState,
     ISocketContextAccessor socketContextAccessor,
     IPlayerRepository playerRepository,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    ISocketMessageService socketMessageService
 ) : IGuardService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -20,29 +25,72 @@ public class GuardService(
 
     public Player GetPlayer()
     {
-        if (Player == null) throw new Exception("Player doesn't exist");
+        if (Player == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerDoesNotExist);
+            socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage );
+            throw new Exception(errorMessage);
+        }
         return Player;
     }
     public Game GetGame()
     {
-        if (Game == null) throw new Exception("Game doesn't exist");
+        if (Game == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameDoesNotExist);
+            throw new Exception(errorMessage);
+        }
         return Game;
+    }
+
+    public async Task HandleGuardError(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch(Exception error)
+        {
+            await socketMessageService.SendToSelf(WebSocketEvents.Error, error.Message);
+        }
     }
     public IGuardService SocketConnectionHasPlayerId()
     {
-        if (CurrentSocketPlayer.PlayerId == null) throw new Exception("Socket connection has no player id");
+        if (CurrentSocketPlayer.PlayerId == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionMissingPlayerId);
+            throw new Exception(errorMessage);
+        }
         return this;
     }
     public IGuardService SocketConnectionDoesNotHavePlayerId()
     {
-        if (CurrentSocketPlayer.PlayerId != null) throw new Exception("Socket connection has a player id");
+        if (CurrentSocketPlayer.PlayerId != null) {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionHasPlayerId);
+            throw new Exception(errorMessage);
+        }
         return this;
     }
     public IGuardService SocketConnectionHasGameId()
     {
-        if (CurrentSocketPlayer.GameId == null) throw new Exception("Socket connection has no game id");
+        if (CurrentSocketPlayer.GameId == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionMissingGameId);
+
+            throw new Exception(errorMessage);
+        }
         return this;
     }
+    public IGuardService SocketConnectionDoesNotHaveGameId()
+    {
+        if (CurrentSocketPlayer.GameId != null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionHasGameId);
+            throw new Exception(errorMessage);
+        } 
+        return this;
+    }
+
     public async Task<IGuardClause> Init(Guid? playerId, Guid? gameId)
     {
 
@@ -56,7 +104,7 @@ public class GuardService(
             Game = await gameRepository.GetByIdWithDetailsAsync(gameIdGuid);
         }
 
-        return new GuardClause(Player,Game);
+        return new GuardClause(Player, Game);
     }
 
 }

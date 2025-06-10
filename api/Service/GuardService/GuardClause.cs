@@ -1,4 +1,6 @@
 using api.Entity;
+using api.Enumerable;
+using api.Helper;
 using api.Service.GuardService;
 namespace api.Service.GuardService;
 
@@ -6,12 +8,20 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
 {
     private static Player ValidatePlayerExists(Player? player)
     {
-        if (player is not Player validatedPlayer) throw new Exception("Can't complete guard check, player doesn't exist");
+        if (player is not Player validatedPlayer)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerDoesNotExist);
+            throw new Exception(errorMessage);
+        }
         return validatedPlayer;
     }
     private static Game ValidateGameExists(Game? game)
     {
-        if (game is not Game validatedGame) throw new Exception("Can't complete guard check, game doesn't exist");
+        if (game is not Game validatedGame)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameDoesNotExist);
+            throw new Exception(errorMessage);
+        }
         return validatedGame;
     }
     private static (Player, Game) ValidatePlayerAndGameExists(Player? player, Game? game)
@@ -34,7 +44,11 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     {
         (player, game) = ValidatePlayerAndGameExists(player, game);
 
-        if (game.CurrentPlayerTurn != player.Id) throw new Exception("It's not this player's turn");
+        if (game.CurrentPlayerTurn != player.Id)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.NotPlayerTurn);
+            throw new Exception(errorMessage);
+        }
 
         return new GuardClause(player, game);
     }

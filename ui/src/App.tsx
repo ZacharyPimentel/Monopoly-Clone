@@ -5,6 +5,7 @@ import { GlobalModal } from "./globalComponents/GlobalModal/GlobalModal"
 import { GlobalStateProvider } from "./stateProviders/GlobalStateProvider"
 import { LobbyPage } from "./pages/LobbyPage/LobbyPage"
 import { GameMasterStateProvider } from "./stateProviders/GameMasterStateProvider"
+import { ToastContainer } from "react-toastify"
 
 export const App = () => {
   return (
@@ -14,6 +15,7 @@ export const App = () => {
           <GameStateProvider>
             <GameMasterStateProvider>
             <GlobalModal/>
+            <ToastContainer/>
               <Routes>
                 <Route path='lobby' element={<>
                   <LobbyPage/>

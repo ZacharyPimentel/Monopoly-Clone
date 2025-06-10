@@ -1,4 +1,5 @@
 using System.Data;
+using api.DTO.Entity;
 using api.Entity;
 using api.Interface;
 using Dapper;

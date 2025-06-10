@@ -144,9 +144,12 @@ public class GameService(
     public async Task LeaveGame(Guid gameId)
     {
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
-        if (currentSocketPlayer.PlayerId is Guid playerId && currentSocketPlayer.GameId != null)
+        if (currentSocketPlayer.GameId != null)
         {
-            await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
+            if (currentSocketPlayer.PlayerId is Guid playerId)
+            {
+                await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = false });
+            }
             var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = currentSocketPlayer.GameId });
             await HubContext.Groups.RemoveFromGroupAsync(SocketContext.ConnectionId, gameId.ToString());
             await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);

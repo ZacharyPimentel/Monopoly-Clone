@@ -15,6 +15,8 @@ import { GameMasterMenu } from "./components/GameMasterMenu";
 import { Trade } from "../../types/websocket/Trade";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
 import { Game } from "@generated/index";
+import {toast} from 'react-toastify';
+
 export const GamePage = () => {
 
     const gameDispatch = useGameDispatch();
@@ -30,7 +32,6 @@ export const GamePage = () => {
         const playerUpdateCallback = (currentSocketPlayer:SocketPlayer) => gameDispatch({currentSocketPlayer})
         const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
         const gameUpdateCallback = (game:Game| null) => {
-            console.log('33',game)
             if(!game){
                 navigate('/lobby')
                 return
@@ -43,6 +44,10 @@ export const GamePage = () => {
             console.log(trades)
             gameDispatch({trades})
         }
+        const errorCallback = (message:string) => {
+            toast(message,{type:'error'})
+            navigate('/lobby')
+        }
 
         listen(WebSocketEvents.GameUpdate,gameUpdateCallback)
         listen(WebSocketEvents.PlayerUpdate,playerUpdateCallback)
@@ -50,6 +55,7 @@ export const GamePage = () => {
         listen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
         listen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
         listen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
+        listen(WebSocketEvents.Error, errorCallback)
 
         invoke.game.join(gameId!);
 
@@ -60,6 +66,7 @@ export const GamePage = () => {
             stopListen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
             stopListen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
             stopListen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
+            stopListen(WebSocketEvents.Error,errorCallback)
             invoke.game.leave(gameId!);
         }
     },[])

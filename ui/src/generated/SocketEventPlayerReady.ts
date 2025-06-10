@@ -4,6 +4,5 @@
  */
 
 export interface SocketEventPlayerReady {
-    playerId: string;
     isReadyToPlay: boolean;
 }

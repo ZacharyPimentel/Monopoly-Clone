@@ -23,7 +23,8 @@ namespace api.hub
         ITurnOrderRepository turnOrderRepository,
         IGameService gameService,
         IPlayerService playerService,
-        IGuardService guardService
+        IGuardService guardService,
+        ISocketMessageService socketMessageService
     ) : Hub
     {
         //=======================================================
@@ -114,30 +115,64 @@ namespace api.hub
                 GameId = guardService.GetGame().Id    
             });
         }
-        public async Task PlayerEdit(SocketEventPlayerEdit playerEditParams)
+        public async Task PlayerEdit(SocketEventPlayerEdit editParams)
         {
-            await playerService.EditPlayer(playerEditParams);
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .Init(currentSocketPlayer.PlayerId);
+                guards.PlayerExists();
+                
+                await playerService.EditPlayer(guardService.GetPlayer().Id, new PlayerUpdateParams
+                {
+                    PlayerName = editParams.PlayerName,
+                    IconId = editParams.IconId
+                });
+            });
         }
         public async Task PlayerReady(SocketEventPlayerReady playerReadyParams)
         {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
 
-            await playerService.SetPlayerReadyStatus(playerReadyParams);
+                guards
+                    .PlayerExists()
+                    .GameExists();
+            });
+            await playerService.SetPlayerReadyStatus(
+                guardService.GetPlayer(),
+                guardService.GetGame(),
+                playerReadyParams.IsReadyToPlay
+            );
         }
         public async Task PlayerRollForTurn()
         {
             var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            IGuardClause guards = await guardService
-                .SocketConnectionHasPlayerId()
-                .SocketConnectionHasGameId()
-                .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
 
-            guards
-                .PlayerIsInCorrectGame()
-                .IsCurrentTurn()
-                .PlayerAllowedToRoll();
+            await guardService.HandleGuardError(async() =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+
+                guards
+                    .PlayerExists()
+                    .GameExists()
+                    .PlayerIsInCorrectGame()
+                    .IsCurrentTurn()
+                    .PlayerAllowedToRoll();
+
+                await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame());
+            });
             
-
-            await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame());
         }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
@@ -175,12 +210,30 @@ namespace api.hub
         }
         public async Task GameJoin(Guid gameId)
         {
-            await gameService.JoinGame(gameId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionDoesNotHavePlayerId()
+                .   SocketConnectionDoesNotHaveGameId()
+                .Init(null,gameId);
+
+                guards.GameExists();
+            
+                await gameService.JoinGame(gameId);
+            });
         }
         public async Task GameLeave(Guid gameId)
         {
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .Init(null,gameId);
 
-            await gameService.LeaveGame(gameId);
+                guards.GameExists();
+            
+                await gameService.LeaveGame(gameId);
+            });
         }
         public async Task GameUpdate(Guid gameId, GameUpdateParams gameUpdateParams)
         {
