@@ -9,6 +9,7 @@ public enum WebSocketEvents
     BoardSpaceUpdate,
     Error,
     GameCreate,
+    GameRulesUpdate,
     GameUpdate,
     GameUpdateAll,
     GameUpdateGroup,

@@ -8,4 +8,5 @@ public interface IGuardClause
     public IGuardClause PlayerExists();
     public IGuardClause GameExists();
     public IGuardClause PlayerAllowedToRoll();
+    public IGuardClause GameNotStarted();
 }

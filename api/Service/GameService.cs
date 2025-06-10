@@ -1,5 +1,6 @@
 
 using api.DTO.Entity;
+using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
@@ -8,12 +9,14 @@ using api.Interface;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
 namespace api.Service;
+
 public interface IGameService
 {
     Task CreateGame(GameCreateParams gameCreateParams);
     Task EndTurn();
     Task JoinGame(Guid gameId);
     Task LeaveGame(Guid gameId);
+    Task UpdateRules(Guid GameId, SocketEventRulesUpdate rulesUpdateParams);
 }
 
 public class GameService(
@@ -88,24 +91,24 @@ public class GameService(
                 new { }
             );
         }
-        
+
         await turnOrderRepository.UpdateWhereAsync(
-            new TurnOrderUpdateParams { HasPlayed = true},
+            new TurnOrderUpdateParams { HasPlayed = true },
             new TurnOrderWhereParams
             {
                 PlayerId = CurrentSocketPlayer.PlayerId,
                 GameId = currentGame.Id,
             },
-            new {}
+            new { }
         );
 
         //check if everyone has taken their turn, reset if so
         var notPlayedCount = (await turnOrderRepository.SearchAsync(new TurnOrderSearchParams
-            {
-                HasPlayed = false,
-                GameId = currentGame.Id
-            },
-            new{}
+        {
+            HasPlayed = false,
+            GameId = currentGame.Id
+        },
+            new { }
         )).Count();
 
         if (notPlayedCount == 0)
@@ -170,4 +173,15 @@ public class GameService(
             await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
         }
     }
+    public async Task UpdateRules(Guid gameId, SocketEventRulesUpdate rulesUpdateParams)
+    {
+        await gameRepository.UpdateAsync(gameId, new GameUpdateParams
+        {
+            StartingMoney = rulesUpdateParams.StartingMoney,
+            FullSetDoublePropertyRent = rulesUpdateParams.FullSetDoublePropertyRent
+        });
+        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+    }
+
 }

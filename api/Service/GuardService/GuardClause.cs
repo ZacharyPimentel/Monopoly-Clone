@@ -52,6 +52,16 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
 
         return new GuardClause(player, game);
     }
+    public IGuardClause GameNotStarted()
+    {
+        Game validatedGame = ValidateGameExists(game);
+        if (validatedGame.GameStarted == true)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameStarted);
+            throw new Exception(errorMessage);
+        }
+        return new GuardClause(player, game);
+    }
     public IGuardClause PlayerIsInactive()
     {
         Player validatedPlayer = ValidatePlayerExists(player);

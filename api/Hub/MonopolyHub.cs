@@ -256,11 +256,24 @@ namespace api.hub
                 await gameService.LeaveGame(gameId);
             });
         }
-        public async Task GameUpdate(Guid gameId, GameUpdateParams gameUpdateParams)
+        public async Task GameRulesUpdate(SocketEventRulesUpdate rulesUpdateParams)
         {
-            await gameRepository.UpdateAsync(gameId, gameUpdateParams);
-            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup(WebSocketEvents.GameUpdate, game);
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+
+                guards
+                    .PlayerExists()
+                    .GameExists()
+                    .PlayerIsInCorrectGame()
+                    .GameNotStarted();
+
+                await gameService.UpdateRules(guardService.GetGame().Id,rulesUpdateParams);
+            });
         }
         public async Task GameEndTurn()
         {

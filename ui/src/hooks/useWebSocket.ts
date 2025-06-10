@@ -4,7 +4,7 @@ import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
-import { SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
+import { SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
 
 export const useWebSocket = () => {
@@ -28,9 +28,6 @@ export const useWebSocket = () => {
                 getAll: () => {
                     globalState.ws.invoke('GameGetAll');
                 },
-                getLobbies: () => {
-                    globalState.ws.invoke("GameGetLobbies");
-                },
                 create: (gameName:string,themeId:number) => {
                     globalState.ws.invoke('GameCreate',{gameName,themeId});
                 },
@@ -40,8 +37,8 @@ export const useWebSocket = () => {
                 leave: (gameId:string) => {
                     globalState.ws.invoke('GameLeave',gameId);
                 },
-                update: (gameId:string,gameUpdateParams:GameUpdateParams) => {
-                    globalState.ws.invoke('GameUpdate',gameId,gameUpdateParams);
+                updateRules: (rulesUpdateParams:SocketEventRulesUpdate) => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.GameRulesUpdate),rulesUpdateParams);
                 },
                 endTurn: () => {
                     globalState.ws.invoke('GameEndTurn');

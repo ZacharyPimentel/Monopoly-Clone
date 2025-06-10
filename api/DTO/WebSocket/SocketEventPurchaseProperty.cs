@@ -1,4 +1,3 @@
-using api.DTO.Entity;
 using TypeGen.Core.TypeAnnotations;
 namespace api.DTO.Websocket;
 [ExportTsInterface]

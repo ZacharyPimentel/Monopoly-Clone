@@ -17,7 +17,7 @@ export const Rules = () => {
                     <select 
                         disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
                         value={gameState.game?.startingMoney} 
-                        onChange={(e) => invoke.game.update(gameState.gameId,{startingMoney:parseInt(e.target.value)})}
+                        onChange={(e) => invoke.game.updateRules({startingMoney:parseInt(e.target.value)})}
                     >
                         {startingMoneyOptions.map(option => {
                             return <option key={option} value={option}>{option}</option>
@@ -31,7 +31,7 @@ export const Rules = () => {
                         checked={gameState.game?.fullSetDoublePropertyRent || false} 
                         type='checkbox' 
                         className='scale-[1.5]'
-                        onChange={(e) => invoke.game.update(gameState.gameId,{fullSetDoublePropertyRent:e.target.checked})}
+                        onChange={(e) => invoke.game.updateRules({fullSetDoublePropertyRent:e.target.checked})}
                         disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
                     />
                 </li>
