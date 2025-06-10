@@ -4,7 +4,7 @@ import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
-import { SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
+import { SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
 
 export const useWebSocket = () => {
@@ -75,6 +75,9 @@ export const useWebSocket = () => {
                 },
                 getAll: () => {
                     globalState.ws.invoke("PlayerGetAll")
+                },
+                purchaseProperty: (purchaseParams:SocketEventPurchaseProperty) => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerPurchaseProperty),purchaseParams)
                 },
                 reconnect: (playerId:string) => {
                     globalState.ws.invoke('PlayerReconnect',playerId)

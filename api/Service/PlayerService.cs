@@ -3,6 +3,7 @@ using api.DTO.Entity;
 using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
+using api.Helper;
 using api.hub;
 using api.Interface;
 using api.Service.GameLogic;
@@ -16,9 +17,10 @@ public interface IPlayerService
 {
     public Task CreatePlayer(PlayerCreateParams playerCreateParams);
     public Task ReconnectToGame(Guid playerId);
-    public Task EditPlayer(Guid playerId,PlayerUpdateParams playerRenameParams);
+    public Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams);
     public Task RollForTurn(Player player, Game game);
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
+    public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
 }
 
 public class PlayerService(
@@ -33,7 +35,8 @@ public class PlayerService(
     IBoardSpaceRepository boardSpaceRepository,
     IJailService jailService,
     IBoardMovementService boardMovementService,
-    IDiceRollService diceRollService
+    IDiceRollService diceRollService,
+    IGamePropertyRepository gamePropertyRepository
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -155,7 +158,7 @@ public class PlayerService(
         });
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
     }
-    public async Task RollForTurn(Player player,Game game)
+    public async Task RollForTurn(Player player, Game game)
     {
         var stopWatch = Stopwatch.StartNew();
         //send to the group that rolling is in progress before final save at the end
@@ -167,10 +170,13 @@ public class PlayerService(
         await diceRollService.RecordGameDiceRoll(game.Id, dieOne, dieTwo);
 
         //Handle jail logic
-        if (player.InJail) {
+        if (player.InJail)
+        {
             jailService.RunJailTurnLogic(player, dieOne, dieTwo);
-        } else {
-        //Handle player movement logic
+        }
+        else
+        {
+            //Handle player movement logic
             boardMovementService.MovePlayerWithDiceRoll(player, dieOne, dieTwo);
         }
 
@@ -191,5 +197,31 @@ public class PlayerService(
         Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+    }
+
+    public async Task PurchaseProperty(Player player, Game game, int gamePropertyId)
+    {
+        GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
+
+        if (player.BoardSpaceId != gameProperty.BoardSpaceId)
+        {
+            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerBoardSpaceMismatch);
+            throw new Exception(errorMessage);
+        }
+        if (gameProperty.PlayerId != null)
+        {
+            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PropertyAlreadyOwned);
+            throw new Exception(errorMessage);
+        }
+
+        await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams { PlayerId = player.Id });
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { Money = player.Money - gameProperty.PurchasePrice });
+        IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
+        var gamePlayers = await playerRepository.SearchWithIconsAsync(
+            new PlayerWhereParams { GameId = game.Id },
+            new PlayerWhereParams { }
+        );
+        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
     }
 }

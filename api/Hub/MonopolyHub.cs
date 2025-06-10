@@ -174,6 +174,29 @@ namespace api.hub
             });
             
         }
+        public async Task PlayerPurchaseProperty(SocketEventPurchaseProperty purchasePropertyParams)
+        {
+            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+
+                guards
+                    .GameExists()
+                    .PlayerExists()
+                    .PlayerIsInCorrectGame()
+                    .IsCurrentTurn();
+
+                await playerService.PurchaseProperty(
+                    guardService.GetPlayer(),
+                    guardService.GetGame(),
+                    purchasePropertyParams.GamePropertyId
+                );
+            });
+        }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -214,8 +237,8 @@ namespace api.hub
             {
                 IGuardClause guards = await guardService
                     .SocketConnectionDoesNotHavePlayerId()
-                .   SocketConnectionDoesNotHaveGameId()
-                .Init(null,gameId);
+                    .SocketConnectionDoesNotHaveGameId()
+                    .Init(null,gameId);
 
                 guards.GameExists();
             

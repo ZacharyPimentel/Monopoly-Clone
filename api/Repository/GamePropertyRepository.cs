@@ -20,4 +20,27 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
         var result = await db.ExecuteAsync(gamePropertySql, new { GameId = gameId });
         return result > 0;
     }
+
+    public async Task<GameProperty> GetByIdWithDetailsAsync(int gamePropertyId)
+    {
+        var sql = @"
+            SELECT
+                gp.Id,
+                gp.PlayerId,
+                gp.GameId,
+                gp.UpgradeCount,
+                gp.PropertyId,
+                gp.Mortgaged,
+                p.BoardSpaceId,
+                p.PurchasePrice,
+                p.Id
+            FROM 
+                GameProperty gp
+            JOIN Property p ON p.Id = gp.PropertyId
+            WHERE
+                gp.Id = @GamePropertyId
+        ";
+        GameProperty result = await db.QuerySingleAsync<GameProperty>(sql, new { GamePropertyId = gamePropertyId });
+        return result;
+    }
 }

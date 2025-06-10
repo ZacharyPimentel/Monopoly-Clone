@@ -4,7 +4,7 @@ using api.Interface;
 using Dapper;
 namespace api.Repository;
 
-public class BoardSpaceRepository(IDbConnection db,IGameRepository gameRepository) : BaseRepository<BoardSpace, int>(db, "BoardSpace"), IBoardSpaceRepository
+public class BoardSpaceRepository(IDbConnection db, IGameRepository gameRepository) : BaseRepository<BoardSpace, int>(db, "BoardSpace"), IBoardSpaceRepository
 {
     public async Task<List<BoardSpace>> GetAllForGameWithDetailsAsync(Guid gameId)
     {

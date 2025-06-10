@@ -10,4 +10,6 @@ export interface GameProperty {
     propertyId: number;
     upgradeCount: number;
     mortgaged: boolean;
+    boardSpaceId?: number;
+    purchasePrice?: number;
 }

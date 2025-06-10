@@ -5,6 +5,7 @@ import { Player, PlayerUpdateParams, PlayerWhereParams } from "../types/controll
 import { PlayerIcon } from "../types/controllers/PlayerIcon";
 import { Theme } from "../types/controllers/Theme";
 import { useHttp } from "./useHttp";
+import { WebSocketEvents } from "@generated/WebSocketEvents";
 
 export const useApi = () => {
 
@@ -22,7 +23,7 @@ export const useApi = () => {
             },
             update: async(playerId:string,updateParams:Partial<PlayerUpdateParams>) => {
                 return await request.patch(`${apiUrl}/player/${playerId}`,updateParams)
-            }
+            },
         },
         playerIcon:{
             getAll: async():Promise<PlayerIcon[]> => {
