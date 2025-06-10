@@ -55,7 +55,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
                 WHERE HasPlayed = false
                 ORDER BY PlayOrder
                 LIMIT 1
-            )wwww
+            )
             SELECT g.*, f.PlayerId AS CurrentPlayerTurn, ldr.DiceOne, ldr.DiceTwo, ldr.UtilityDiceOne, ldr.UtilityDiceTwo
             FROM Game as g
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId

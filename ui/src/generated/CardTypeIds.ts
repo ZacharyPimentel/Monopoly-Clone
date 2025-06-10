@@ -3,7 +3,8 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export interface SocketEventPlayerCreate {
-    playerName: string;
-    iconId: number;
+export enum CardTypeIds {
+    Null = 0,
+    Chance = 1,
+    CommunityChest = 2,
 }

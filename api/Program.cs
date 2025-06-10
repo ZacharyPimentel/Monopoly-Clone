@@ -5,6 +5,8 @@ using api.hub;
 using api.Interface;
 using api.Repository;
 using api.Service;
+using api.Service.GameLogic;
+using api.Service.GuardService;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
@@ -71,6 +73,10 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<ISocketMessageService, SocketMessageService>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IJailService, JailService>();
+builder.Services.AddScoped<IBoardMovementService, BoardMovementService>();
+builder.Services.AddScoped<IDiceRollService, DiceRollService>();
+builder.Services.AddScoped<IGuardService, GuardService>();
 
 bool isRegistered = builder.Services.Any(sd =>
     sd.ServiceType == typeof(ISocketMessageService));

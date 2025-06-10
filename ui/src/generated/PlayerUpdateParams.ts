@@ -16,5 +16,5 @@ export interface PlayerUpdateParams {
     playerName?: string;
     rollCount?: number;
     rollingForUtilities?: boolean;
-    turnComplete?: boolean;
+    canRoll?: boolean;
 }

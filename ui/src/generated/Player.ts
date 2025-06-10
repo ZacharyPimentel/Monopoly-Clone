@@ -13,7 +13,7 @@ export interface Player {
     isReadyToPlay: boolean;
     inCurrentGame: boolean;
     rollCount: number;
-    turnComplete: boolean;
+    canRoll: boolean;
     inJail: boolean;
     gameId: string;
     rollingForUtilities: boolean;

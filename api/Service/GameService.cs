@@ -57,7 +57,7 @@ public class GameService(
             throw new Exception("Game Id does not exist");
         }
         Player player = await playerRepository.GetByIdAsync((Guid)CurrentSocketPlayer.PlayerId);
-        if (!player.TurnComplete)
+        if (!player.CanRoll)
         {
             throw new Exception("You can't end your turn, it's not finished or it's not your turn.");
         }
@@ -111,7 +111,7 @@ public class GameService(
             );
         }
 
-        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { TurnComplete = false });
+        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { CanRoll = false });
 
         var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
         var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);

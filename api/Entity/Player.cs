@@ -13,7 +13,7 @@ public class Player
     public bool IsReadyToPlay { get; set; } = false;
     public bool InCurrentGame { get; set; } = false;
     public int RollCount { get; set; } = 0;
-    public bool TurnComplete { get; set; } = true;
+    public bool CanRoll { get; set; } = true;
     public bool InJail { get; set; } = false;
     public required Guid GameId { get; set; }
     public bool RollingForUtilities { get; set; } = false;

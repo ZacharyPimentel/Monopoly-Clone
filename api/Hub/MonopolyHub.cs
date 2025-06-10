@@ -7,6 +7,7 @@ namespace api.hub
     using api.Enumerable;
     using api.Interface;
     using api.Service;
+    using api.Service.GuardService;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
@@ -21,7 +22,8 @@ namespace api.hub
         ITradeRepository tradeRepository,
         ITurnOrderRepository turnOrderRepository,
         IGameService gameService,
-        IPlayerService playerService
+        IPlayerService playerService,
+        IGuardService guardService
     ) : Hub
     {
         //=======================================================
@@ -80,39 +82,37 @@ namespace api.hub
         }
 
         //=======================================================
-        // Helper Methods for validating socket events
-        //=======================================================
-        private void ValidateGameId(Guid gameId)
-        {
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if (gameId != currentSocketPlayer.GameId)
-            {
-                //TODO : add an error event in the socket
-                throw new Exception("You aren't currently in this game");
-            }
-        }
-
-        //=======================================================
         // Player 
         //=======================================================
         public async Task PlayerReconnect(Guid playerId)
         {
-            var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            var playerTryingToReconnectTo = await playerRepository.GetByIdAsync(playerId);
-            if (
-                playerTryingToReconnectTo == null ||
-                playerTryingToReconnectTo.Active ||
-                socketPlayer.GameId != playerTryingToReconnectTo.GameId
-            )
-            {
-                throw new Exception("Error reconnecting to player");
-            }
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            IGuardClause guards = await guardService
+                .SocketConnectionDoesNotHavePlayerId()
+                .Init(playerId,currentSocketPlayer.GameId);
+
+            guards
+                .PlayerIsInactive()
+                .PlayerIsInCorrectGame();          
+
             await playerService.ReconnectToGame(playerId);
         }
         public async Task PlayerCreate(SocketEventPlayerCreate playerCreateParams)
         {
-            ValidateGameId(playerCreateParams.GameId);
-            await playerService.CreatePlayer(playerCreateParams);
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+
+            IGuardClause guards = await guardService
+                .SocketConnectionDoesNotHavePlayerId()
+                .Init(null,currentSocketPlayer.GameId);
+
+            guards.GameExists();
+
+            await playerService.CreatePlayer( new PlayerCreateParams
+            {
+                PlayerName = playerCreateParams.PlayerName,
+                IconId = playerCreateParams.IconId,
+                GameId = guardService.GetGame().Id    
+            });
         }
         public async Task PlayerEdit(SocketEventPlayerEdit playerEditParams)
         {
@@ -120,12 +120,24 @@ namespace api.hub
         }
         public async Task PlayerReady(SocketEventPlayerReady playerReadyParams)
         {
-            
+
             await playerService.SetPlayerReadyStatus(playerReadyParams);
         }
         public async Task PlayerRollForTurn()
         {
-            await playerService.RollForTurn();
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            IGuardClause guards = await guardService
+                .SocketConnectionHasPlayerId()
+                .SocketConnectionHasGameId()
+                .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+
+            guards
+                .PlayerIsInCorrectGame()
+                .IsCurrentTurn()
+                .PlayerAllowedToRoll();
+            
+
+            await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame());
         }
         public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
         {

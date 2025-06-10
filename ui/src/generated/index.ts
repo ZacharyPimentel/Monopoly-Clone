@@ -1,4 +1,7 @@
 export * from './BoardSpace';
+export * from './BoardSpaceCategories';
+export * from './CardActionIds';
+export * from './CardTypeIds';
 export * from './Game';
 export * from './GameProperty';
 export * from './Player';

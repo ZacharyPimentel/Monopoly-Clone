@@ -17,7 +17,7 @@ public class PlayerUpdateParams
     public string? PlayerName { get; set; }
     public int? RollCount { get; set; }
     public bool? RollingForUtilities { get; set; }
-    public bool? TurnComplete { get; set; }
+    public bool? CanRoll { get; set; }
     public static PlayerUpdateParams FromPlayer(Player player)
     {
         return new PlayerUpdateParams
@@ -34,7 +34,7 @@ public class PlayerUpdateParams
             PlayerName = player.PlayerName,
             RollCount = player.RollCount,
             RollingForUtilities = player.RollingForUtilities,
-            TurnComplete = player.TurnComplete,
+            CanRoll = player.CanRoll,
         };
     }
 }

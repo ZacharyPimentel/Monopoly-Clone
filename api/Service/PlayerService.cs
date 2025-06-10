@@ -5,20 +5,20 @@ using api.Entity;
 using api.Enumerable;
 using api.hub;
 using api.Interface;
-using api.Repository;
+using api.Service.GameLogic;
 using api.Socket;
 using Dapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace api.Service;
 
 public interface IPlayerService
 {
-    public Task CreatePlayer(SocketEventPlayerCreate playerCreateParams);
+    public Task 
+    CreatePlayer(PlayerCreateParams playerCreateParams);
     public Task ReconnectToGame(Guid playerId);
     public Task EditPlayer(SocketEventPlayerEdit playerRenameParams);
-    public Task RollForTurn();
+    public Task RollForTurn(Player player, Game game);
     public Task SetPlayerReadyStatus(SocketEventPlayerReady playerReadyParams);
 }
 
@@ -30,7 +30,11 @@ public class PlayerService(
     IGameLogRepository gameLogRepository,
     IGameRepository gameRepository,
     ITurnOrderRepository turnOrderRepository,
-    ILastDiceRollRepository lastDiceRollRepository
+    ILastDiceRollRepository lastDiceRollRepository,
+    IBoardSpaceRepository boardSpaceRepository,
+    IJailService jailService,
+    IBoardMovementService boardMovementService,
+    IDiceRollService diceRollService
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -38,7 +42,7 @@ public class PlayerService(
 
     private SocketPlayer CurrentSocketPlayer => gameState.GetPlayer(SocketContext.ConnectionId);
 
-    public async Task CreatePlayer(SocketEventPlayerCreate playerCreateParams)
+    public async Task CreatePlayer(PlayerCreateParams playerCreateParams)
     {
         var newPlayer = await playerRepository.CreateAndReturnAsync(playerCreateParams);
         CurrentSocketPlayer.PlayerId = newPlayer.Id;
@@ -165,93 +169,26 @@ public class PlayerService(
         });
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
     }
-    public async Task RollForTurn()
+    public async Task RollForTurn(Player player,Game game)
     {
-        //validate that this call to roll for turn is allowed
-        Guid gameId = CurrentSocketPlayer.GameId ?? throw new Exception("You aren't in a game");
-        Guid playerId = CurrentSocketPlayer.PlayerId ?? throw new Exception("You aren't a player");
-        Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-        if (game != null && game.CurrentPlayerTurn != playerId) throw new Exception("It's not your turn");
-
         var stopWatch = Stopwatch.StartNew();
-
-        //send to the group that rolling is in progress
+        //send to the group that rolling is in progress before final save at the end
         game.DiceRollInProgress = true;
-        await gameRepository.UpdateAsync(game!.Id, new GameUpdateParams { DiceRollInProgress = true });
+        await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, game);
 
-        Player player = await playerRepository.GetByIdAsync(playerId);
-
-        int diceOne = new Random().Next(1, 7);
-        int diceTwo = new Random().Next(1, 7);
-
-        await lastDiceRollRepository.UpdateWhereAsync(
-        new LastDiceRollUpdateParams { DiceOne = diceOne, DiceTwo = diceTwo },
-        new LastDiceRollWhereParams { GameId = game!.Id },
-        new { }
-        );
+        (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
+        await diceRollService.RecordGameDiceRoll(game.Id, dieOne, dieTwo);
 
         //Handle jail logic
-        if (player.InJail)
-        {
-            //leave jail (movement handled below in normal movement block)
-            if (diceOne == diceTwo)
-            {
-                player.JailTurnCount = 0;
-                player.InJail = false;
-            }
-            //update jail turn count
-            else
-            {
-                //This is player's 3rd roll in jail and should be freed
-                if (player.JailTurnCount + 1 == 3)
-                {
-                    player.JailTurnCount = 0;
-                    player.InJail = false;
-                }
-                //add one to player jail turn count
-                else
-                {
-                    player.JailTurnCount += player.JailTurnCount + 1;
-                }
-
-                return;
-            }
+        if (player.InJail) {
+            jailService.RunJailTurnLogic(player, dieOne, dieTwo);
+        } else {
+        //Handle player movement logic
+            boardMovementService.MovePlayerWithDiceRoll(player, dieOne, dieTwo);
         }
 
-        //if doubles was rolled 3 times, go straight to jail
-        if (player.RollCount + 1 == 3 && diceOne == diceTwo)
-        {
-            player.InJail = true;
-            player.BoardSpaceId = 11;  // 11 is the space for jail
-            player.RollCount = 3;
-            player.TurnComplete = true;
-        }
-
-        //move normally otherwise
-        int newBoardPosition = player.BoardSpaceId + diceOne + diceTwo;
-        bool passedGo = false;
-        //handle setting correct position when going over GO
-        if (newBoardPosition > 39)
-        {
-            newBoardPosition %= 40;
-            if (newBoardPosition > 0) passedGo = true;
-        }
-        if (newBoardPosition == 0) newBoardPosition = 1;
-
-        if (passedGo)
-        {
-            player.Money += player.Money + 200;
-        }
-
-        player.BoardSpaceId = newBoardPosition;
-        player.RollCount += player.RollCount + 1;
-        if (diceOne != diceTwo)
-        {
-            player.TurnComplete = true;
-        }
-
-        await playerRepository.UpdateAsync(playerId, PlayerUpdateParams.FromPlayer(player));
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
         var gamePlayers = await playerRepository.SearchWithIconsAsync(
             new PlayerWhereParams { GameId = game.Id },
             new PlayerWhereParams { }
@@ -262,11 +199,11 @@ public class PlayerService(
         //wait one second while dice roll animation finishes
         stopWatch.Stop();
 
-        //wait for at least one second for animations to finish.
+        //wait for at least 500ms for animations to finish.
         await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
 
-        game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, game);
+        Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
     }
 }
