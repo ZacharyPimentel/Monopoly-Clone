@@ -13,7 +13,7 @@ namespace api.Service;
 public interface IGameService
 {
     Task CreateGame(GameCreateParams gameCreateParams);
-    Task EndTurn();
+    Task EndTurn(Player player, Game game);
     Task JoinGame(Guid gameId);
     Task LeaveGame(Guid gameId);
     Task UpdateRules(Guid GameId, SocketEventRulesUpdate rulesUpdateParams);
@@ -59,35 +59,19 @@ public class GameService(
         var games = await gameRepository.GetAllAsync();
         await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
     }
-    public async Task EndTurn()
+    public async Task EndTurn(Player player, Game game)
     {
-        if (CurrentSocketPlayer.PlayerId is not Guid playerId || CurrentSocketPlayer.GameId == null)
-        {
-            throw new Exception("Socket player is missing data, PlayerId or GameId");
-        }
-
-        if (CurrentSocketPlayer.GameId is not Guid gameId)
-        {
-            throw new Exception("Game Id does not exist");
-        }
-        Player player = await playerRepository.GetByIdAsync((Guid)CurrentSocketPlayer.PlayerId);
-        if (!player.CanRoll)
-        {
-            throw new Exception("You can't end your turn, it's not finished or it's not your turn.");
-        }
-
-        Game? currentGame = await gameRepository.GetByIdWithDetailsAsync(gameId) ?? throw new Exception("Game Doesn't Exist.");
 
         //keep the visuals of the dice in sync between real rolls and utility rolls
-        if (currentGame.UtilityDiceOne != null && currentGame.UtilityDiceTwo != null)
+        if (game.UtilityDiceOne != null && game.UtilityDiceTwo != null)
         {
             await lastDiceRollRepository.UpdateWhereAsync(
                 new LastDiceRollUpdateParams
                 {
-                    DiceOne = currentGame.UtilityDiceOne,
-                    DiceTwo = currentGame.UtilityDiceTwo,
+                    DiceOne = game.UtilityDiceOne,
+                    DiceTwo = game.UtilityDiceTwo,
                 },
-                new LastDiceRollWhereParams { GameId = currentGame.Id },
+                new LastDiceRollWhereParams { GameId = game.Id },
                 new { }
             );
         }
@@ -97,7 +81,7 @@ public class GameService(
             new TurnOrderWhereParams
             {
                 PlayerId = CurrentSocketPlayer.PlayerId,
-                GameId = currentGame.Id,
+                GameId = game.Id,
             },
             new { }
         );
@@ -106,7 +90,7 @@ public class GameService(
         var notPlayedCount = (await turnOrderRepository.SearchAsync(new TurnOrderSearchParams
         {
             HasPlayed = false,
-            GameId = currentGame.Id
+            GameId = game.Id
         },
             new { }
         )).Count();
@@ -115,7 +99,7 @@ public class GameService(
         {
             await turnOrderRepository.UpdateWhereAsync(
                 new TurnOrderUpdateParams { HasPlayed = false },
-                new TurnOrderWhereParams { GameId = currentGame.Id },
+                new TurnOrderWhereParams { GameId = game.Id },
                 new { }
             );
             await playerRepository.UpdateWhereAsync(
@@ -125,10 +109,10 @@ public class GameService(
             );
         }
 
-        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { CanRoll = false });
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false });
 
-        var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
-        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id });
+        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }

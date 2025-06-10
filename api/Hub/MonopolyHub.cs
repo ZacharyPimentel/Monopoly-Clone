@@ -277,7 +277,23 @@ namespace api.hub
         }
         public async Task GameEndTurn()
         {
-            await gameService.EndTurn();
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+
+                guards
+                    .PlayerExists()
+                    .GameExists()
+                    .IsCurrentTurn()
+                    .PlayerNotAllowedToRoll();
+                
+                await gameService.EndTurn(guardService.GetPlayer(),guardService.GetGame());
+            });
+            
         }
         public async Task BoardSpaceGetAll(Guid gameId)
         {

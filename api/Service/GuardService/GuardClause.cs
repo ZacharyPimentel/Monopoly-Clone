@@ -65,7 +65,11 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     public IGuardClause PlayerIsInactive()
     {
         Player validatedPlayer = ValidatePlayerExists(player);
-        if (validatedPlayer.Active) throw new Exception("This player is active");
+        if (validatedPlayer.Active)
+        {
+            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerActive);
+            throw new Exception(errorMessage);
+        }
         return new GuardClause(player, game);
     }
     public IGuardClause PlayerIsInCorrectGame()
@@ -77,7 +81,21 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     public IGuardClause PlayerAllowedToRoll()
     {
         (player, game) = ValidatePlayerAndGameExists(player, game);
-        if (game.CurrentPlayerTurn != player.Id) throw new Exception("This player is not allowed to roll");
+        if (!player.CanRoll)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerNotAllowedToRoll);
+            throw new Exception(errorMessage);
+        }
+        return new GuardClause(player, game);
+    }
+    public IGuardClause PlayerNotAllowedToRoll()
+    {
+        (player, game) = ValidatePlayerAndGameExists(player, game);
+        if (player.CanRoll)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerAllowedToRoll);
+            throw new Exception(errorMessage);
+        }
         return new GuardClause(player, game);
     }
 }

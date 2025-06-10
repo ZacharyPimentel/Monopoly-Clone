@@ -1,5 +1,5 @@
-import { useGameState } from "../../../../../stateProviders/GameStateProvider"
-import { useWebSocket } from "../../../../../hooks/useWebSocket";
+import { useGameState } from "@stateProviders/GameStateProvider"
+import { useWebSocket } from "@hooks/useWebSocket";
 
 export const Rules = () => {
 
