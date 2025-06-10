@@ -5,6 +5,7 @@ import { useWebSocket } from "../../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
 import { LobbyGame } from "../../types/websocket/Game";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
+import { toast } from "react-toastify";
 
 
 
@@ -18,15 +19,20 @@ export const LobbyPage = () => {
     useEffect( () => {
         const gameListCallback = (games:LobbyGame[]) => setGames(games);
         const gameCreateCallback = (gameId:string) => navigate(`/game/${gameId}`);
+        const errorCallback = (message:string) => {
+            toast(message,{type:'error'})
+        }
 
         listen(WebSocketEvents.GameUpdateAll,gameListCallback)
         listen(WebSocketEvents.GameCreate,gameCreateCallback);
+        listen(WebSocketEvents.Error,errorCallback);
 
         invoke.game.getAll();
         
         return () => {
             stopListen(WebSocketEvents.GameUpdateAll,gameListCallback)
             stopListen(WebSocketEvents.GameCreate,gameCreateCallback)
+            stopListen(WebSocketEvents.Error,errorCallback);
         }
     },[])
 

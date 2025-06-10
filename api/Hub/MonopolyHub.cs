@@ -222,14 +222,12 @@ namespace api.hub
             var games = await gameRepository.GetAllWithPlayerCountAsync();
             await SendToSelf(WebSocketEvents.GameUpdateAll, games);
         }
-        public async Task GameGetById(Guid gameId)
-        {
-            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToSelf(WebSocketEvents.GameUpdate, game);
-        }
         public async Task GameCreate(GameCreateParams gameCreateParams)
         {
-            await gameService.CreateGame(gameCreateParams);
+            await guardService.HandleGuardError(async () =>
+            {
+                await gameService.CreateGame(gameCreateParams);
+            });
         }
         public async Task GameJoin(Guid gameId)
         {

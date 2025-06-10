@@ -28,9 +28,6 @@ export const useWebSocket = () => {
                 getAll: () => {
                     globalState.ws.invoke('GameGetAll');
                 },
-                getById: (gameId:string) => {
-                    globalState.ws.invoke('GameGetById',gameId)
-                },
                 getLobbies: () => {
                     globalState.ws.invoke("GameGetLobbies");
                 },

@@ -2,6 +2,7 @@
 using api.DTO.Entity;
 using api.Entity;
 using api.Enumerable;
+using api.Helper;
 using api.hub;
 using api.Interface;
 using api.Socket;
@@ -36,6 +37,16 @@ public class GameService(
 
     public async Task CreateGame(GameCreateParams gameCreateParams)
     {
+        IEnumerable<Game> gamesWithName = await gameRepository.SearchAsync(
+            new GameWhereParams { GameName = gameCreateParams.GameName },
+            new { }
+        );
+
+        if (gamesWithName.Any())
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameNameExists);
+            throw new Exception(errorMessage);
+        }
         var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
         //populate tables for new game
         await lastDiceRollRepository.CreateAsync(new { GameId = newGame.Id });

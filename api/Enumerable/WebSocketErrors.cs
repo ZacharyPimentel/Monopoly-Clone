@@ -6,6 +6,9 @@ public enum WebSocketErrors
     [Description("Game does not exist.")]
     GameDoesNotExist,
 
+    [Description("Game with this name already exists.")]
+    GameNameExists,
+
     [Description("It is not this player's turn.")]
     NotPlayerTurn,
 
