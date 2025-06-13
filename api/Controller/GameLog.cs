@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 public class GameLogController(IDbConnection db) : ControllerBase {
 
     [HttpGet]
-    public async Task<ActionResult<Card>> GetGameLogs(string gameId){
+    public async Task<ActionResult<Card>> GetGameLogs(Guid gameId){
 
         var gameLogsGetSql = @"
             SELECT * FROM GAMELOG WHERE GameID=@GameId

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import TotoroFamily from './assets/totorofamily.svg?react';
 import { CenterBoardDisplay } from "./components/CenterBoardDisplay/CenterBoardDisplay";
 import { GameTile } from "./components/gameTile/GameTile";
@@ -6,11 +6,15 @@ import { GameTile } from "./components/gameTile/GameTile";
 export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
+
+    const tileRefs = useRef<Record<number,HTMLDivElement | null>>({})
+
     return (
-        <div ref={gameBoardRef} className='p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
+        <div ref={gameBoardRef} className='border border-red p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
+            <div className="w-[10px] h-[10px] absolute bg-[red] z-[30]"></div>
             <div className='flex w-full'>
                 {/* Top Left Square */}
-                <div className='aspect-square min-w-[10%]'>
+                <div ref={(el) => (tileRefs.current[1] = el)} className='aspect-square min-w-[10%]'>
                     <GameTile position={1} />
                 </div>
 
@@ -19,13 +23,15 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile sideClass={'tile-top'} position={2+index} /></div>
+                            <div key={index} className='flex-1' ref={(el) => (tileRefs.current[2+index] = el)}>
+                                <GameTile sideClass={'tile-top'} position={2+index} />
+                            </div>
                         )
                     })}
 
                 </div>
                 {/* Top Right Square */}
-                <div className='aspect-square min-w-[10%]'>
+                <div ref={(el) => (tileRefs.current[11] = el)} className='aspect-square min-w-[10%]'>
                     <GameTile position={11} />
                 </div>
             </div>
@@ -36,7 +42,9 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile sideClass="tile-left" position={32+index} /></div>
+                            <div ref={(el) => (tileRefs.current[32+index] = el)}  key={index} className='flex-1'>
+                                <GameTile sideClass="tile-left" position={32+index} />
+                            </div>
                         )
                     })}
                 </div>
@@ -56,7 +64,9 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile sideClass="tile-right" position={12+index} /></div>
+                            <div key={index} className='flex-1' ref={(el) => (tileRefs.current[12+index] = el)} >
+                                <GameTile sideClass="tile-right" position={12+index} />
+                            </div>
                         )
                     })}
                 </div>
@@ -64,7 +74,7 @@ export const GameBoard = () => {
             
             <div className='flex w-full'>
                 {/* Bottom Left Square */}
-                <div className='aspect-square min-w-[10%]'>
+                <div className='aspect-square min-w-[10%]' ref={(el) => (tileRefs.current[31] = el)} >
                     <GameTile position={31} />
                 </div>
 
@@ -73,12 +83,14 @@ export const GameBoard = () => {
                     {Array.from(new Array(9)).map( (_,index:number) => {
                         return(
                             /* position = the zero index plus one, plus the amount of positions prior */
-                            <div key={index} className='flex-1'><GameTile sideClass="tile-bottom" position={22+index} /></div>
+                            <div key={index} className='flex-1' ref={(el) => (tileRefs.current[22+index] = el)} >
+                                <GameTile sideClass="tile-bottom" position={22+index} />
+                            </div>
                         )
                     })}
                 </div>
                 {/* Bottom Right Square */}
-                <div className='aspect-square min-w-[10%]'>
+                <div className='aspect-square min-w-[10%]' ref={(el) => (tileRefs.current[21] = el)} >
                     <GameTile position={21} />
                 </div>
             </div>

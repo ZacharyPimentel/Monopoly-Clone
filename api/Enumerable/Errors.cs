@@ -1,8 +1,20 @@
 
 using System.ComponentModel;
 namespace api.Enumerable;
-public enum WebSocketErrors
+public enum Errors
 {
+    [Description("Card does not exist.")]
+    CardDoesNotExist,
+    
+    [Description("Card is missing it's advance to space id.")]
+    CardMissingAdvanceToSpaceId,
+    
+    [Description("Card is missing it's payment amount.")]
+    CardMissingPaymentAmount,
+
+    [Description("Game card does not exist.")]
+    GameCardDoesNotExist,
+
     [Description("Game does not exist.")]
     GameDoesNotExist,
 
@@ -11,6 +23,9 @@ public enum WebSocketErrors
 
     [Description("Game has already started.")]
     GameStarted,
+
+    [Description("This board space doesn't have an associated property.")]
+    NoBoardSpaceProperty,
 
     [Description("It is not this player's turn.")]
     NotPlayerTurn,

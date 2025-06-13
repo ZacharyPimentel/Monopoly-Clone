@@ -13,7 +13,7 @@ export const CurrentTurn = () => {
     const gameState = useGameState();
     const {player,currentBoardSpace} = usePlayer();
 
-    useLandedOnSpace();
+    //useLandedOnSpace();
 
     const allowedToRoll = useMemo( () => {
         if(!player)return false
@@ -33,6 +33,8 @@ export const CurrentTurn = () => {
         }
         return allowed
     },[player])
+
+    console.log(currentBoardSpace?.property)
     
     return (
         <div className='flex flex-col gap-[50px]'>

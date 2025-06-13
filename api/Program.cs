@@ -77,6 +77,8 @@ builder.Services.AddScoped<IJailService, JailService>();
 builder.Services.AddScoped<IBoardMovementService, BoardMovementService>();
 builder.Services.AddScoped<IDiceRollService, DiceRollService>();
 builder.Services.AddScoped<IGuardService, GuardService>();
+builder.Services.AddScoped<ISpaceLandingService, SpaceLandingService>();
+builder.Services.AddScoped<ICardService, CardService>();
 
 bool isRegistered = builder.Services.Any(sd =>
     sd.ServiceType == typeof(ISocketMessageService));

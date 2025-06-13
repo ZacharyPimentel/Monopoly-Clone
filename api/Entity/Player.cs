@@ -10,6 +10,7 @@ public class Player
     public bool Active { get; set; } = true;
     public int Money { get; set; }
     public int BoardSpaceId { get; set; }
+    public int PreviousBoardSpaceId { get; set; }
     public bool IsReadyToPlay { get; set; } = false;
     public bool InCurrentGame { get; set; } = false;
     public int RollCount { get; set; } = 0;

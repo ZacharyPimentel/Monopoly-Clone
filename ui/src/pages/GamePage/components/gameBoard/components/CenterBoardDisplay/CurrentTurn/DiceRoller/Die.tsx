@@ -16,7 +16,6 @@ const numberRotationMap: Record<number, { x: number; y: number }> = {
 };
 
 export const Die:React.FC<{dieNumber:number}> = ({dieNumber}) => {
-  console.log(dieNumber)
   const [rolling, setRolling] = useState(false);
   const diceRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -48,7 +47,6 @@ export const Die:React.FC<{dieNumber:number}> = ({dieNumber}) => {
   };
 
   const stopRoll = (targetnumber:number) => {
-    console.log(targetnumber)
     setRolling(false);
     if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
 

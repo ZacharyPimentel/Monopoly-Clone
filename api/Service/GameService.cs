@@ -47,7 +47,7 @@ public class GameService(
 
         if (gamesWithName.Any())
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameNameExists);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameNameExists);
             throw new Exception(errorMessage);
         }
         var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
@@ -109,6 +109,8 @@ public class GameService(
             );
         }
 
+        TurnOrder nextTurn = await turnOrderRepository.GetNextTurnByGameAsync(game.Id);
+        await playerRepository.UpdateAsync(nextTurn.PlayerId, new PlayerUpdateParams { CanRoll = true });
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false });
 
         var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id });

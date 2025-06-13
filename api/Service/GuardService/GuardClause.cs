@@ -10,7 +10,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     {
         if (player is not Player validatedPlayer)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerDoesNotExist);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);
             throw new Exception(errorMessage);
         }
         return validatedPlayer;
@@ -19,7 +19,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     {
         if (game is not Game validatedGame)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameDoesNotExist);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameDoesNotExist);
             throw new Exception(errorMessage);
         }
         return validatedGame;
@@ -46,7 +46,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
 
         if (game.CurrentPlayerTurn != player.Id)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.NotPlayerTurn);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.NotPlayerTurn);
             throw new Exception(errorMessage);
         }
 
@@ -57,7 +57,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
         Game validatedGame = ValidateGameExists(game);
         if (validatedGame.GameStarted == true)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameStarted);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameStarted);
             throw new Exception(errorMessage);
         }
         return new GuardClause(player, game);
@@ -67,7 +67,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
         Player validatedPlayer = ValidatePlayerExists(player);
         if (validatedPlayer.Active)
         {
-            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerActive);
+            string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerActive);
             throw new Exception(errorMessage);
         }
         return new GuardClause(player, game);
@@ -83,7 +83,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
         (player, game) = ValidatePlayerAndGameExists(player, game);
         if (!player.CanRoll)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerNotAllowedToRoll);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerNotAllowedToRoll);
             throw new Exception(errorMessage);
         }
         return new GuardClause(player, game);
@@ -93,7 +93,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
         (player, game) = ValidatePlayerAndGameExists(player, game);
         if (player.CanRoll)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerAllowedToRoll);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerAllowedToRoll);
             throw new Exception(errorMessage);
         }
         return new GuardClause(player, game);

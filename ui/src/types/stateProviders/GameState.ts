@@ -1,6 +1,5 @@
 import { ReactNode } from "react"
-import { Player } from "../controllers/Player"
-import { BoardSpace } from "../controllers/BoardSpace"
+import { Player, BoardSpace } from "@generated/index";
 import { SocketPlayer } from "../websocket/Player"
 import { GameLog } from "../websocket/GameLog"
 import { Trade } from "../websocket/Trade"

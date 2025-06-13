@@ -10,6 +10,7 @@ export interface Player {
     active: boolean;
     money: number;
     boardSpaceId: number;
+    previousBoardSpaceId: number;
     isReadyToPlay: boolean;
     inCurrentGame: boolean;
     rollCount: number;

@@ -1,72 +1,46 @@
 import { GameInformation } from "./components/GameInformation/GameInformation";
 import { GameBoard } from "./components/GameBoard/GameBoard";
 import { useEffect } from "react";
-import { useGameDispatch, useGameState } from "../../stateProviders/GameStateProvider";
+import { useGameState } from "../../stateProviders/GameStateProvider";
 import { useWebSocket } from "../../hooks/useWebSocket";
-import { SocketPlayer } from "../../types/websocket/Player";
-import { Player } from "../../types/controllers/Player";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "./modal/PlayerCreateModal";
-import { BoardSpace } from "../../types/controllers/BoardSpace";
-import { GameLog } from "../../types/websocket/GameLog";
 import { GameMasterMenu } from "./components/GameMasterMenu";
-import { Trade } from "../../types/websocket/Trade";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { Game } from "@generated/index";
-import {toast} from 'react-toastify';
+import { useWebSocketCallback } from "@hooks/useWebSocketCallback";
 
 export const GamePage = () => {
 
-    const gameDispatch = useGameDispatch();
     const globalDispatch = useGlobalDispatch()
     const gameState = useGameState();
     const {listen,invoke,stopListen} = useWebSocket()
     const {gameId} = useParams();
-    const navigate = useNavigate();
+    const websocketCallback = useWebSocketCallback();
 
     //updates the socket group on the server to receive game events
     useEffect( () => {
 
-        const playerUpdateCallback = (currentSocketPlayer:SocketPlayer) => gameDispatch({currentSocketPlayer})
-        const playerUpdateAllCallback = (players:Player[]) => gameDispatch({players})
-        const gameUpdateCallback = (game:Game| null) => {
-            if(!game){
-                navigate('/lobby')
-                return
-            }
-            gameDispatch({game, gameId:game.id})
-        }
-        const boardSpaceUpdateCallback = (boardSpaces:BoardSpace[]) => gameDispatch({boardSpaces})
-        const logUpdateCallback = (gameLogs:GameLog[]) => gameDispatch({gameLogs})
-        const tradeUpdateCallback = (trades:Trade[]) => {
-            console.log(trades)
-            gameDispatch({trades})
-        }
-        const errorCallback = (message:string) => {
-            toast(message,{type:'error'})
-            navigate('/lobby')
-        }
-
-        listen(WebSocketEvents.GameUpdate,gameUpdateCallback)
-        listen(WebSocketEvents.PlayerUpdate,playerUpdateCallback)
-        listen(WebSocketEvents.PlayerUpdateGroup,playerUpdateAllCallback)
-        listen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
-        listen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
-        listen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
-        listen(WebSocketEvents.Error, errorCallback)
+        listen(WebSocketEvents.GameUpdate,websocketCallback.gameUpdateCallback)
+        listen(WebSocketEvents.PlayerUpdate,websocketCallback.playerUpdateCallback)
+        listen(WebSocketEvents.PlayerUpdateGroup,websocketCallback.playerUpdateAllCallback)
+        listen(WebSocketEvents.BoardSpaceUpdate, websocketCallback.boardSpaceUpdateCallback)
+        listen(WebSocketEvents.GameLogUpdate,websocketCallback.logUpdateCallback);
+        listen(WebSocketEvents.TradeUpdate,websocketCallback.tradeUpdateCallback);
+        listen(WebSocketEvents.Error, websocketCallback.errorCallback)
 
         invoke.game.join(gameId!);
 
+
         return () => {
-            stopListen(WebSocketEvents.GameUpdate,gameUpdateCallback)
-            stopListen(WebSocketEvents.PlayerUpdate,playerUpdateCallback)
-            stopListen(WebSocketEvents.PlayerUpdateGroup,playerUpdateAllCallback)
-            stopListen(WebSocketEvents.BoardSpaceUpdate, boardSpaceUpdateCallback)
-            stopListen(WebSocketEvents.GameLogUpdate,logUpdateCallback);
-            stopListen(WebSocketEvents.TradeUpdate,tradeUpdateCallback);
-            stopListen(WebSocketEvents.Error,errorCallback)
+            stopListen(WebSocketEvents.GameUpdate)
+            stopListen(WebSocketEvents.PlayerUpdate)
+            stopListen(WebSocketEvents.PlayerUpdateGroup)
+            stopListen(WebSocketEvents.BoardSpaceUpdate)
+            stopListen(WebSocketEvents.GameLogUpdate);
+            stopListen(WebSocketEvents.TradeUpdate);
+            stopListen(WebSocketEvents.Error)
             invoke.game.leave(gameId!);
         }
     },[])

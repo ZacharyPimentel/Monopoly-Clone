@@ -1,6 +1,8 @@
 using System.Data;
 using api.DTO.Entity;
 using api.Entity;
+using api.Enumerable;
+using api.Helper;
 using api.Interface;
 using Dapper;
 
@@ -45,7 +47,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
         var games = await db.QueryAsync<Game>(sql);
         return games.AsList();
     }
-    public async Task<Game?> GetByIdWithDetailsAsync(Guid gameId)
+    public async Task<Game> GetByIdWithDetailsAsync(Guid gameId)
     {
         //get the current game, join the current player turn from TurnOrder
         var sql = @"
@@ -63,6 +65,12 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
             Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId
                 WHERE g.Id = @Id
         ";
-        return await db.QuerySingleOrDefaultAsync<Game>(sql, new { Id = gameId });
+
+        Game? game = await db.QuerySingleOrDefaultAsync<Game>(sql, new { Id = gameId });
+        if (game == null) {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameDoesNotExist);
+            throw new Exception(errorMessage);
+        }
+        return game;
     }
 }

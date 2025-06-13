@@ -12,19 +12,18 @@ namespace api.hub
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
-        IDbConnection db,
         IBoardSpaceRepository boardSpaceRepository,
         IGameLogRepository gameLogRepository,
-        IGamePropertyRepository gamePropertyRepository,
+        //IGamePropertyRepository gamePropertyRepository,
         IGameRepository gameRepository,
-        ILastDiceRollRepository lastDiceRollRepository,
+        //ILastDiceRollRepository lastDiceRollRepository,
         IPlayerRepository playerRepository,
         ITradeRepository tradeRepository,
-        ITurnOrderRepository turnOrderRepository,
+        //ITurnOrderRepository turnOrderRepository,
         IGameService gameService,
         IPlayerService playerService,
-        IGuardService guardService,
-        ISocketMessageService socketMessageService
+        IGuardService guardService
+        //ISocketMessageService socketMessageService
     ) : Hub
     {
         //=======================================================
@@ -77,10 +76,10 @@ namespace api.hub
 
             await Clients.Caller.SendAsync(((int)eventEnum).ToString(), data);
         }
-        private async Task SendToAll(WebSocketEvents eventEnum, object data)
-        {
-            await Clients.All.SendAsync(((int)eventEnum).ToString(), data);
-        }
+        // private async Task SendToAll(WebSocketEvents eventEnum, object data)
+        // {
+        //     await Clients.All.SendAsync(((int)eventEnum).ToString(), data);
+        // }
 
         //=======================================================
         // Player 
@@ -197,22 +196,22 @@ namespace api.hub
                 );
             });
         }
-        public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
-        {
-            SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if (currentSocketPlayer.GameId is not Guid gameId)
-            {
-                throw new Exception("Player does not have a GameId when it should be there.");
-            }
-            await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
+        // public async Task PlayerUpdate(SocketEventPlayerUpdate playerUpdateParams)
+        // {
+        //     SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+        //     if (currentSocketPlayer.GameId is not Guid gameId)
+        //     {
+        //         throw new Exception("Player does not have a GameId when it should be there.");
+        //     }
+        //     await playerRepository.UpdateAsync(playerUpdateParams.PlayerId, playerUpdateParams.PlayerUpdateParams);
 
-            var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
-            {
-                GameId = currentSocketPlayer.GameId
-            });
+        //     var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
+        //     {
+        //         GameId = currentSocketPlayer.GameId
+        //     });
 
-            await SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
-        }
+        //     await SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
+        // }
 
         //=======================================================
         // Game
@@ -305,55 +304,55 @@ namespace api.hub
         //=======================================================
         // Property
         //=======================================================
-        public async Task GamePropertyUpdate(int gamePropertyId, GamePropertyUpdateParams updateParams)
-        {
-            await gamePropertyRepository.UpdateAsync(gamePropertyId, updateParams);
-            GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
-            var boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameProperty.GameId);
-            await SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
-        }
+        // public async Task GamePropertyUpdate(int gamePropertyId, GamePropertyUpdateParams updateParams)
+        // {
+        //     await gamePropertyRepository.UpdateAsync(gamePropertyId, updateParams);
+        //     GameProperty gameProperty = await gamePropertyRepository.GetByIdAsync(gamePropertyId);
+        //     var boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameProperty.GameId);
+        //     await SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
+        // }
 
         //=======================================================
         // GameLog
         //=======================================================
-        public async Task GameLogCreate(Guid gameId, string message)
-        {
-            await gameLogRepository.CreateAsync(new GameLogCreateParams
-            {
-                GameId = gameId,
-                Message = message
-            });
-            var latestLogs = await gameLogRepository.GetLatestFive(gameId);
-            await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
-        }
+        // public async Task GameLogCreate(Guid gameId, string message)
+        // {
+        //     await gameLogRepository.CreateAsync(new GameLogCreateParams
+        //     {
+        //         GameId = gameId,
+        //         Message = message
+        //     });
+        //     var latestLogs = await gameLogRepository.GetLatestFive(gameId);
+        //     await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+        // }
 
         //=======================================================
         // Last Dice Roll
         //=======================================================
-        public async Task LastDiceRollUpdate(Guid gameId, int diceOne, int diceTwo)
-        {
+        // public async Task LastDiceRollUpdate(Guid gameId, int diceOne, int diceTwo)
+        // {
 
-            await lastDiceRollRepository.UpdateWhereAsync(
-                new LastDiceRollUpdateParams { DiceOne = diceOne, DiceTwo = diceTwo },
-                new LastDiceRollWhereParams { GameId = gameId },
-                new { }
-            );
+        //     await lastDiceRollRepository.UpdateWhereAsync(
+        //         new LastDiceRollUpdateParams { DiceOne = diceOne, DiceTwo = diceTwo },
+        //         new LastDiceRollWhereParams { GameId = gameId },
+        //         new { }
+        //     );
 
-            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup(WebSocketEvents.GameUpdate, game);
-        }
-        public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
-        {
+        //     Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        //     await SendToGroup(WebSocketEvents.GameUpdate, game);
+        // }
+        // public async Task LastUtilityDiceRollUpdate(Guid gameId, int? diceOne, int? diceTwo)
+        // {
 
-            await lastDiceRollRepository.UpdateWhereAsync(
-                new LastDiceRollUpdateParams { UtilityDiceOne = diceOne, UtilityDiceTwo = diceTwo },
-                new LastDiceRollWhereParams { GameId = gameId },
-                new { }
-            );
+        //     await lastDiceRollRepository.UpdateWhereAsync(
+        //         new LastDiceRollUpdateParams { UtilityDiceOne = diceOne, UtilityDiceTwo = diceTwo },
+        //         new LastDiceRollWhereParams { GameId = gameId },
+        //         new { }
+        //     );
 
-            Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
-            await SendToGroup(WebSocketEvents.GameUpdate, game);
-        }
+        //     Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        //     await SendToGroup(WebSocketEvents.GameUpdate, game);
+        // }
         //=======================================================
         // Trade
         //=======================================================

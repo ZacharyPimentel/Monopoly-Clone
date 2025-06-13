@@ -40,8 +40,6 @@ public class SocketMessageService(
         {
             throw new Exception("Tried to send data to a group where the GameId was not found.");
         }
-
-        await socketContext.Current.Clients.Caller.SendAsync(((int)eventEnum).ToString(), data);
     }
     public async Task SendToAll(WebSocketEvents eventEnum, object? data)
     {

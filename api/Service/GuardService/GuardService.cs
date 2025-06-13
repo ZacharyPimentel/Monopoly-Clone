@@ -27,7 +27,7 @@ public class GuardService(
     {
         if (Player == null)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerDoesNotExist);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);
             socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage );
             throw new Exception(errorMessage);
         }
@@ -37,7 +37,7 @@ public class GuardService(
     {
         if (Game == null)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.GameDoesNotExist);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameDoesNotExist);
             throw new Exception(errorMessage);
         }
         return Game;
@@ -58,7 +58,7 @@ public class GuardService(
     {
         if (CurrentSocketPlayer.PlayerId == null)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionMissingPlayerId);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionMissingPlayerId);
             throw new Exception(errorMessage);
         }
         return this;
@@ -66,7 +66,7 @@ public class GuardService(
     public IGuardService SocketConnectionDoesNotHavePlayerId()
     {
         if (CurrentSocketPlayer.PlayerId != null) {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionHasPlayerId);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionHasPlayerId);
             throw new Exception(errorMessage);
         }
         return this;
@@ -75,7 +75,7 @@ public class GuardService(
     {
         if (CurrentSocketPlayer.GameId == null)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionMissingGameId);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionMissingGameId);
 
             throw new Exception(errorMessage);
         }
@@ -85,7 +85,7 @@ public class GuardService(
     {
         if (CurrentSocketPlayer.GameId != null)
         {
-            var errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.SocketConnectionHasGameId);
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionHasGameId);
             throw new Exception(errorMessage);
         } 
         return this;

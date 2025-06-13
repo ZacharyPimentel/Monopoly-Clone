@@ -6,10 +6,57 @@ import { PropertyUpdateParams } from "../types/controllers/Property";
 import { GameUpdateParams } from "../types/websocket/Game";
 import { SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type Queue = {
+    [key:number]:{
+        processing:boolean,
+        callbackFunctions:Function[]
+    }
+}
 
 export const useWebSocket = () => {
     const globalState = useGlobalState();
     const gameState = useGameState();
+
+    const queuedCallbacks = useRef<Queue>({});
+    const socketHandlers = useRef<Map<number, (data: any) => void>>(new Map());
+
+    const processQueueMessage = useCallback((eventEnum:number) => {
+        if(!queuedCallbacks.current)return
+        
+        const queue = queuedCallbacks.current[eventEnum]
+        if(queue.processing)return
+        const nextCallback = queue.callbackFunctions.shift();
+        if(nextCallback){
+            queue.processing = true;
+            nextCallback();
+            setTimeout( () => {
+                queue.processing = false;
+                processQueueMessage(eventEnum)
+            },500)
+        }
+    },[queuedCallbacks])
+
+    const handleSocketEvent = useCallback ((eventEnum: number, callback: (data: any) => void) => {
+        const queueHandler = (data:any) => {
+            if (!queuedCallbacks.current[eventEnum]) {
+                queuedCallbacks.current[eventEnum] = {
+                    processing: false,
+                    callbackFunctions: []
+                };
+            }
+            //add socket event callback to the queue
+            queuedCallbacks.current && queuedCallbacks.current[eventEnum].callbackFunctions.push(() => callback(data))
+            //process the queue
+            processQueueMessage(eventEnum);
+        }
+        // Save the wrapped handler so we can unregister it later
+        socketHandlers.current.set(eventEnum, queueHandler);
+
+        return queueHandler;
+    },[]);
+
     return {
         invoke:{
             //game events not tied to a table
@@ -101,11 +148,18 @@ export const useWebSocket = () => {
             }
         },
         listen: (eventEnum:number, callback:(data:any) => void) => {
-            globalState.ws.on(eventEnum.toString(),callback)
-        },
-        stopListen: (eventEnum:number, callback:(data:any) => void) => {
-            globalState.ws.off(eventEnum.toString(),callback)
-        }
+            
+            const queueFunction = handleSocketEvent(eventEnum,callback)
 
+            globalState.ws.on(eventEnum.toString(), queueFunction)
+                
+        },
+        stopListen: (eventEnum:number) => {
+            const handler = socketHandlers.current.get(eventEnum);
+            if(handler){
+                globalState.ws.off(eventEnum.toString(),handler)
+            }
+            socketHandlers.current.delete(eventEnum); // Clean up
+        },
     }
 }

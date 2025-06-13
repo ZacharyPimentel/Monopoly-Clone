@@ -1,38 +1,30 @@
-import { Fragment, useEffect, useState } from "react";
-import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider"
+import { Fragment, useEffect } from "react";
+import { useGlobalDispatch, useGlobalState } from "../../stateProviders/GlobalStateProvider"
 import { GameCreateModal } from "./modal/CreateGameModal";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
-import { LobbyGame } from "../../types/websocket/Game";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { toast } from "react-toastify";
-
-
+import { useWebSocketCallback } from "@hooks/useWebSocketCallback";
 
 export const LobbyPage = () => {
 
     const globalDispatch = useGlobalDispatch();
     const {listen,stopListen,invoke} = useWebSocket();
-    const [games,setGames] = useState<LobbyGame[]>([])
     const navigate = useNavigate();
+    const globalState = useGlobalState();
+    const websocketCallback = useWebSocketCallback();
 
     useEffect( () => {
-        const gameListCallback = (games:LobbyGame[]) => setGames(games);
-        const gameCreateCallback = (gameId:string) => navigate(`/game/${gameId}`);
-        const errorCallback = (message:string) => {
-            toast(message,{type:'error'})
-        }
-
-        listen(WebSocketEvents.GameUpdateAll,gameListCallback)
-        listen(WebSocketEvents.GameCreate,gameCreateCallback);
-        listen(WebSocketEvents.Error,errorCallback);
+        listen(WebSocketEvents.GameUpdateAll,websocketCallback.gameListCallback)
+        listen(WebSocketEvents.GameCreate,websocketCallback.gameCreateCallback);
+        listen(WebSocketEvents.Error,websocketCallback.errorCallback);
 
         invoke.game.getAll();
         
         return () => {
-            stopListen(WebSocketEvents.GameUpdateAll,gameListCallback)
-            stopListen(WebSocketEvents.GameCreate,gameCreateCallback)
-            stopListen(WebSocketEvents.Error,errorCallback);
+            stopListen(WebSocketEvents.GameUpdateAll)
+            stopListen(WebSocketEvents.GameCreate)
+            stopListen(WebSocketEvents.Error);
         }
     },[])
 
@@ -46,17 +38,17 @@ export const LobbyPage = () => {
                 <p>Existing Games:</p>
                 <hr></hr>
                 <ul className='flex flex-col gap-[20px]'>
-                    {games.length > 0 && games.map( (game) => {
+                    {globalState.availableGames.length > 0 && globalState.availableGames.map( (game) => {
                         return (<Fragment key={game.id}>
                             <li className='flex justify-between gap-[20px] items-center flex-wrap'>
                                 <p className='font-bold'>{game.gameName}</p>
                                 <button onClick={() => navigate(`/game/${game.id}`)} className='ml-auto bg-black text-white p-[10px] min-w-[100px]'>Join</button>
-                                <p>{game.activePlayerCount} Active Player{game.activePlayerCount > 1 && 's'}</p>
+                                <p>{game.activePlayerCount} Active Player{game.activePlayerCount !== 1 && 's'}</p>
                             </li>
                             <hr></hr>
                         </Fragment>)
                     })}
-                    {games.length === 0 && (
+                    {globalState.availableGames.length === 0 && (
                         <p className='italic opacity-[0.5]'>No lobbies found.</p>
                     )}
                 </ul>

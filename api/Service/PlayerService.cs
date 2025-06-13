@@ -36,7 +36,8 @@ public class PlayerService(
     IJailService jailService,
     IBoardMovementService boardMovementService,
     IDiceRollService diceRollService,
-    IGamePropertyRepository gamePropertyRepository
+    IGamePropertyRepository gamePropertyRepository,
+    ISpaceLandingService spaceLandingService
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -126,6 +127,7 @@ public class PlayerService(
                 {
                     InCurrentGame = true,
                     IsReadyToPlay = false,
+                    CanRoll = true,
                     Money = game.StartingMoney
                 },
                 new PlayerWhereParams
@@ -141,12 +143,20 @@ public class PlayerService(
             var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
             foreach (var (shuffledPlayer, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
             {
-                await turnOrderRepository.CreateAsync(new TurnOrderCreateParams
+                TurnOrderCreateParams turnOrderCreateParams = new()
                 {
                     PlayerId = shuffledPlayer.Id,
                     GameId = game.Id,
                     PlayOrder = index + 1
-                });
+                };
+
+                //if the first player, set them to be allowed to roll
+                if (index == 0)
+                {
+                    await playerRepository.UpdateAsync(shuffledPlayer.Id, new PlayerUpdateParams { CanRoll = true });
+                }
+                
+                await turnOrderRepository.CreateAsync(turnOrderCreateParams);
             }
 
             Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
@@ -160,7 +170,7 @@ public class PlayerService(
     }
     public async Task RollForTurn(Player player, Game game)
     {
-        var stopWatch = Stopwatch.StartNew();
+        // var stopWatch = Stopwatch.StartNew();
         //send to the group that rolling is in progress before final save at the end
         game.DiceRollInProgress = true;
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
@@ -186,17 +196,22 @@ public class PlayerService(
             new PlayerWhereParams { }
         );
         //update rolling to be finished
-        await gameRepository.UpdateAsync(game!.Id, new GameUpdateParams { DiceRollInProgress = false });
+        await gameRepository.UpdateAsync(game!.Id, new GameUpdateParams { DiceRollInProgress = false, MovementInProgress = true });
+        Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
 
         //wait one second while dice roll animation finishes
-        stopWatch.Stop();
+        //stopWatch.Stop();
 
         //wait for at least 500ms for animations to finish.
-        await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
 
-        Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        //await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
+
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+
+        //run all the logic needed to handle the space that was landed on
+        //includes sending out socket events
+        await spaceLandingService.HandleLandedOnSpace(gamePlayers, updatedGame);
     }
 
     public async Task PurchaseProperty(Player player, Game game, int gamePropertyId)
@@ -205,23 +220,31 @@ public class PlayerService(
 
         if (player.BoardSpaceId != gameProperty.BoardSpaceId)
         {
-            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PlayerBoardSpaceMismatch);
+            string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerBoardSpaceMismatch);
             throw new Exception(errorMessage);
         }
         if (gameProperty.PlayerId != null)
         {
-            string errorMessage = EnumExtensions.GetEnumDescription(WebSocketErrors.PropertyAlreadyOwned);
+            string errorMessage = EnumExtensions.GetEnumDescription(Errors.PropertyAlreadyOwned);
             throw new Exception(errorMessage);
         }
 
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams { PlayerId = player.Id });
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { Money = player.Money - gameProperty.PurchasePrice });
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = game.Id,
+            Message = $"{player.PlayerName} purchased {gameProperty.BoardSpaceName}"
+        });
+
         IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
         var gamePlayers = await playerRepository.SearchWithIconsAsync(
             new PlayerWhereParams { GameId = game.Id },
             new PlayerWhereParams { }
         );
+        IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(game.Id);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
         await socketMessageService.SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
     }
 }

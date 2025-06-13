@@ -15,6 +15,7 @@ export interface Game {
     currentPlayerTurn?: string;
     activePlayerCount?: number;
     diceRollInProgress: boolean;
+    movementInProgress: boolean;
     diceOne?: number;
     diceTwo?: number;
     utilityDiceOne?: number;

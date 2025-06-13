@@ -1,9 +1,12 @@
 using api.Entity;
+using api.Enumerable;
+using api.Helper;
 namespace api.Service.GameLogic;
 
 public interface IBoardMovementService
 {
     public void MovePlayerWithDiceRoll(Player player, int dieOne, int dieTwo);
+    public void MovePlayerWithDrawnCard(Player player, Card card);
 }
 
 public class BoardMovementService : IBoardMovementService
@@ -16,7 +19,7 @@ public class BoardMovementService : IBoardMovementService
             player.InJail = true;
             player.BoardSpaceId = 11;  // 11 is the space for jail
             player.RollCount = 3;
-            player.CanRoll = true;
+            player.CanRoll = false;
         }
 
         //move normally otherwise
@@ -39,7 +42,20 @@ public class BoardMovementService : IBoardMovementService
         player.RollCount += player.RollCount + 1;
         if (dieOne != dieTwo)
         {
-            player.CanRoll = true;
+            player.CanRoll = false;
         }
+    }
+
+    public void MovePlayerWithDrawnCard(Player player, Card card)
+    {
+        if (card.AdvanceToSpaceId is not int validatedAdvanceToSpaceId)
+        {
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.CardMissingAdvanceToSpaceId));
+        }
+
+        player.BoardSpaceId = validatedAdvanceToSpaceId;
+        bool passedGo = validatedAdvanceToSpaceId >= player.BoardSpaceId;
+        if (passedGo) player.Money += 200;
+
     }
 }

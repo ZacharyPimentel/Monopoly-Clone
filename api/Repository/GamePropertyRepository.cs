@@ -31,16 +31,34 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 gp.UpgradeCount,
                 gp.PropertyId,
                 gp.Mortgaged,
+                p.Id,
                 p.BoardSpaceId,
                 p.PurchasePrice,
-                p.Id
+                g.Id,
+                bst.BoardSpaceName
             FROM 
                 GameProperty gp
             JOIN Property p ON p.Id = gp.PropertyId
+            JOIN Game g ON gp.GameId = g.Id
+            JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
             WHERE
                 gp.Id = @GamePropertyId
+            AND
+                gp.GameId = g.Id
         ";
-        GameProperty result = await db.QuerySingleAsync<GameProperty>(sql, new { GamePropertyId = gamePropertyId });
-        return result;
+        var result = await db.QueryAsync<GameProperty, Property, Game, BoardSpaceTheme, GameProperty>(
+            sql,
+            (gp,p,g,bst) =>
+            {
+                gp.BoardSpaceName = bst.BoardSpaceName;
+                gp.BoardSpaceId = p.BoardSpaceId;
+                gp.PurchasePrice = p.PurchasePrice;
+                return gp;
+            },
+            new { GamePropertyId = gamePropertyId },
+            splitOn:"Id,Id,BoardSpaceName"
+        );
+
+        return result.Single();
     }
 }

@@ -18,4 +18,5 @@ public class TurnOrderWhereParams
 
 public interface ITurnOrderRepository : IBaseRepository<TurnOrder, Guid>
 {
+    public Task<TurnOrder> GetNextTurnByGameAsync(Guid GameId);
 }
