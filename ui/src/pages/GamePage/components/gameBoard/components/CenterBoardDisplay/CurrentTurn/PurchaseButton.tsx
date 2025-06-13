@@ -1,11 +1,9 @@
-import { useWebSocket } from "../../../../../../../hooks/useWebSocket"
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
+import { useWebSocket } from "@hooks/useWebSocket"
 import { Player,Property } from "@generated/index"
 
 export const PurchaseButton:React.FC<{property:Property,player:Player,spaceName:string}> = ({property,player,spaceName}) => {
     
     const {invoke} = useWebSocket();
-    const {gameId} = useGameState()
 
     return (
         <button
