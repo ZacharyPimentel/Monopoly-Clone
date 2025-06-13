@@ -1,15 +1,22 @@
+using api.DTO.Entity;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
+using api.Interface;
 namespace api.Service.GameLogic;
 
 public interface IBoardMovementService
 {
     public void MovePlayerWithDiceRoll(Player player, int dieOne, int dieTwo);
-    public void MovePlayerWithDrawnCard(Player player, Card card);
+    public Task AdvanceToSpaceWithCard(Player player, Card card);
+    public Task MovePlayerBackThreeSpaces(Player player);
+    public Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces);
+    public Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces);
 }
 
-public class BoardMovementService : IBoardMovementService
+public class BoardMovementService(
+    IPlayerRepository playerRepository
+) : IBoardMovementService
 {
     public void MovePlayerWithDiceRoll(Player player, int dieOne, int dieTwo)
     {
@@ -46,7 +53,7 @@ public class BoardMovementService : IBoardMovementService
         }
     }
 
-    public void MovePlayerWithDrawnCard(Player player, Card card)
+    public async Task AdvanceToSpaceWithCard(Player player, Card card)
     {
         if (card.AdvanceToSpaceId is not int validatedAdvanceToSpaceId)
         {
@@ -54,8 +61,58 @@ public class BoardMovementService : IBoardMovementService
         }
 
         player.BoardSpaceId = validatedAdvanceToSpaceId;
-        bool passedGo = validatedAdvanceToSpaceId >= player.BoardSpaceId;
+        bool passedGo = validatedAdvanceToSpaceId <= player.BoardSpaceId;
         if (passedGo) player.Money += 200;
-
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
     }
+
+    public async Task MovePlayerBackThreeSpaces(Player player)
+    {
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
+        {
+            BoardSpaceId = player.BoardSpaceId -= 3
+        });
+    }
+    public async Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces)
+    {
+        IEnumerable<BoardSpace> railRoads = boardspaces.Where(bs => bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard);
+        BoardSpace? closestRailroad = railRoads.Where(rr => rr.Id > player.BoardSpaceId).FirstOrDefault();
+        bool passedGo = false;
+        if (closestRailroad != null)
+        {
+            passedGo = closestRailroad.Id <= player.BoardSpaceId;
+            if (passedGo) player.Money += 200;
+            player.BoardSpaceId = closestRailroad.Id;
+        }
+        else
+        {
+            passedGo = railRoads.First().Id <= player.BoardSpaceId;
+            if (passedGo) player.Money += 200;
+            player.BoardSpaceId = railRoads.First().Id;
+        }
+
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
+    }
+
+    public async Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces)
+    {
+        IEnumerable<BoardSpace> utilities = boardspaces.Where(bs => bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Utility);
+        BoardSpace? closestUtility = utilities.Where(rr => rr.Id > player.BoardSpaceId).FirstOrDefault();
+        bool passedGo = false;
+        if (closestUtility != null)
+        {
+            passedGo = closestUtility.Id <= player.BoardSpaceId;
+            if (passedGo) player.Money += 200;
+            player.BoardSpaceId = closestUtility.Id;
+        }
+        else
+        {
+            passedGo = utilities.First().Id <= player.BoardSpaceId;
+            if (passedGo) player.Money += 200;
+            player.BoardSpaceId = utilities.First().Id;
+        }
+
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
+    }
+
 }

@@ -1,3 +1,4 @@
+using api.DTO.Entity;
 using api.Entity;
 using api.hub;
 using api.Interface;
@@ -11,6 +12,8 @@ public interface IJailService
 {
     public void RunJailTurnLogic(Player player, int dieOne, int dieTwo);
     public Task PayOutOfJail();
+
+    public Task SendPlayerToJail(Player player);
 }
 
 public class JailService(
@@ -52,5 +55,12 @@ public class JailService(
     public async Task PayOutOfJail()
     {
         Guid? playerId = CurrentSocketPlayer.PlayerId;
+    }
+
+    public async Task SendPlayerToJail(Player player)
+    {
+        player.BoardSpaceId = 11; //jail space
+        player.CanRoll = false;
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
     }
 }

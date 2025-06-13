@@ -240,5 +240,18 @@ public class SpaceLandingService(
         }
 
         await cardService.HandlePulledCard(card, context);
+
+        //if the card had movement involved, need to handle landed on space again
+        if (
+            card.CardActionId == (int)CardActionIds.AdvanceToSpace ||
+            card.CardActionId == (int)CardActionIds.BackThreeSpaces ||
+            card.CardActionId == (int)CardActionIds.AdvanceToRailroad ||
+            card.CardActionId == (int)CardActionIds.AdvanceToUtility
+        )
+        {
+            IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
+            await HandleLandedOnSpace(players, context.Game);
+        }
+        
     }   
 }

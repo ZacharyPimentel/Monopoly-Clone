@@ -111,7 +111,7 @@ public class GameService(
 
         TurnOrder nextTurn = await turnOrderRepository.GetNextTurnByGameAsync(game.Id);
         await playerRepository.UpdateAsync(nextTurn.PlayerId, new PlayerUpdateParams { CanRoll = true });
-        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false });
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false, RollCount = 0 });
 
         var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id });
         var updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);

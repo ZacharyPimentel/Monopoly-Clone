@@ -1,7 +1,6 @@
 import { useWebSocket } from "../../../../../../../hooks/useWebSocket"
 import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
-import { Player } from "../../../../../../../types/controllers/Player"
-import { Property } from "../../../../../../../types/controllers/Property"
+import { Player,Property } from "@generated/index"
 
 export const PurchaseButton:React.FC<{property:Property,player:Player,spaceName:string}> = ({property,player,spaceName}) => {
     

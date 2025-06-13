@@ -170,7 +170,7 @@ public class PlayerService(
     }
     public async Task RollForTurn(Player player, Game game)
     {
-        // var stopWatch = Stopwatch.StartNew();
+        var stopWatch = Stopwatch.StartNew();
         //send to the group that rolling is in progress before final save at the end
         game.DiceRollInProgress = true;
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
@@ -200,11 +200,10 @@ public class PlayerService(
         Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
 
         //wait one second while dice roll animation finishes
-        //stopWatch.Stop();
+        stopWatch.Stop();
 
         //wait for at least 500ms for animations to finish.
-
-        //await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
+        await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
 
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
