@@ -26,7 +26,8 @@ public class CardService(
     IPlayerRepository playerRepository,
     IBoardMovementService boardMovementService,
     ISocketMessageService socketMessageService,
-    IJailService jailService
+    IJailService jailService,
+    IGameLogRepository gameLogRepository
 ) : ICardService
 {
     public async Task HandlePulledCard(Card card, SpaceLandingServiceContext context)
@@ -80,6 +81,7 @@ public class CardService(
         {
             Money = context.CurrentPlayer.Money - paymentAmount
         });
+        await socketMessageService.SendGamePlayers(context.Game.Id);
     }
 
     public async Task ReceiveFromBank(Card card, SpaceLandingServiceContext context)
@@ -94,35 +96,46 @@ public class CardService(
         {
             Money = context.CurrentPlayer.Money + receiveAmount
         });
+        await socketMessageService.SendGamePlayers(context.Game.Id);
     }
 
     public async Task AdvanceToSpace(Card card, SpaceLandingServiceContext context)
     {
-        await boardMovementService.AdvanceToSpaceWithCard(context.CurrentPlayer, card);
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
-    }
+        await boardMovementService.AdvanceToSpaceWithCard(context.CurrentPlayer, card, context.Game);
+        var movedToSpace = context.BoardSpaces.First(bs => bs.Id == card.AdvanceToSpaceId);
+        string message = $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}.";
 
+        message = movedToSpace.Id == 1
+            ? $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName} and collected $200."
+            : $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}."
+        ;
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = context.Game.Id,
+            Message = message
+        });
+        await socketMessageService.SendGamePlayers(context.Game.Id);
+    }
+ 
     public async Task BackThreeSpaces(Card card, SpaceLandingServiceContext context)
     {
         await boardMovementService.MovePlayerBackThreeSpaces(context.CurrentPlayer);
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendGamePlayers(context.Game.Id);
+
     }
 
     public async Task GoToJail(Card card, SpaceLandingServiceContext context)
     {
         await jailService.SendPlayerToJail(context.CurrentPlayer);
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendGamePlayers(context.Game.Id);
     }
 
     public async Task ReceiveGetOutOfJailFreeCard(Card card, SpaceLandingServiceContext context)
     {
         context.CurrentPlayer.GetOutOfJailFreeCards += 1;
         await playerRepository.UpdateAsync(context.CurrentPlayer.Id, PlayerUpdateParams.FromPlayer(context.CurrentPlayer));
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendGamePlayers(context.Game.Id);
+
     }
     public async Task ReceiveFromPlayers(Card card, SpaceLandingServiceContext context)
     {
@@ -149,16 +162,15 @@ public class CardService(
         {
             Money = context.CurrentPlayer.Money + totalPaid
         });
-
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendGamePlayers(context.Game.Id);
+        await socketMessageService.SendLatestGameLogs(context.Game.Id);
     }
 
     public async Task AdvanceToRailroad(SpaceLandingServiceContext context)
     {
         await boardMovementService.MovePlayerToNearestRailroad(context.CurrentPlayer, context.BoardSpaces);
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.CurrentPlayer.GameId });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendGamePlayers(context.Game.Id);
+        await socketMessageService.SendLatestGameLogs(context.Game.Id);
     }
 
     public async Task AdvanceToUtility(SpaceLandingServiceContext context)

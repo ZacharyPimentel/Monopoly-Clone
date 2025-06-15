@@ -19,6 +19,8 @@ public interface IPlayerService
     public Task ReconnectToGame(Guid playerId);
     public Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams);
     public Task RollForTurn(Player player, Game game);
+    public Task RollForUtilities(Player player, Game game);
+
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
     public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
 }
@@ -37,7 +39,8 @@ public class PlayerService(
     IBoardMovementService boardMovementService,
     IDiceRollService diceRollService,
     IGamePropertyRepository gamePropertyRepository,
-    ISpaceLandingService spaceLandingService
+    ISpaceLandingService spaceLandingService,
+    IGameCardRepository gameCardRepository
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -127,7 +130,7 @@ public class PlayerService(
                 {
                     InCurrentGame = true,
                     IsReadyToPlay = false,
-                    CanRoll = true,
+                    CanRoll = false,
                     Money = game.StartingMoney
                 },
                 new PlayerWhereParams
@@ -180,14 +183,16 @@ public class PlayerService(
         await diceRollService.RecordGameDiceRoll(game.Id, dieOne, dieTwo);
 
         //Handle jail logic
+        string jailMessage = string.Empty;
+        string rollMessage = string.Empty;
         if (player.InJail)
         {
-            jailService.RunJailTurnLogic(player, dieOne, dieTwo);
+            jailMessage = jailService.RunJailTurnLogic(player, game, dieOne, dieTwo);
         }
         else
         {
             //Handle player movement logic
-            boardMovementService.MovePlayerWithDiceRoll(player, dieOne, dieTwo);
+            rollMessage = boardMovementService.MovePlayerWithDiceRoll(player, game, dieOne, dieTwo);
         }
 
         await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
@@ -207,10 +212,95 @@ public class PlayerService(
 
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        if (jailMessage != string.Empty)
+        {
+            await socketMessageService.CreateAndSendLatestGameLogs(game.Id, jailMessage);
+        }
+        if (rollMessage != string.Empty)
+        {
+            await socketMessageService.CreateAndSendLatestGameLogs(game.Id, rollMessage);
+        }
 
         //run all the logic needed to handle the space that was landed on
         //includes sending out socket events
         await spaceLandingService.HandleLandedOnSpace(gamePlayers, updatedGame);
+    }
+
+    public async Task RollForUtilities(Player player, Game game)
+    {
+        if (!player.RollingForUtilities)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerNotRollingForUtilities);
+            throw new Exception(errorMessage);
+        }
+
+        var stopWatch = Stopwatch.StartNew();
+        //send to the group that rolling is in progress before final save at the end
+        game.DiceRollInProgress = true;
+        await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, game);
+        (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
+        await diceRollService.RecordGameUtilityDiceRoll(game.Id, dieOne, dieTwo);
+        IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
+        BoardSpace currentSpace = boardSpaces.First(bs => bs.Id == player.BoardSpaceId);
+
+        if (currentSpace.Property?.PlayerId is not Guid propertyOwnerId)
+        {
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyNotOwned));
+        }
+
+        int ownerNumberOfUtilties = boardSpaces.Where(bs =>
+            bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Utility &&
+            bs.Property?.PlayerId == propertyOwnerId
+        ).Count();
+
+
+        GameCard? lastPlayedCard = await gameCardRepository.GetLastPlayedGameCard(game.Id);
+        bool needsToPay10x= false;
+        //if the last card was advance to utility, need to pay owner 10x regardless of how many utilities are owned.
+        if (lastPlayedCard != null && lastPlayedCard?.Card?.CardActionId == (int)CardActionIds.AdvanceToUtility)
+        {
+            needsToPay10x = true;
+        }
+
+            int amountToPay = 0;
+        if (ownerNumberOfUtilties == 1)
+        {
+            //4x multiplier
+            amountToPay = (dieOne + dieTwo) * 4;
+        }
+        if (ownerNumberOfUtilties == 2 || needsToPay10x)
+        {
+            //10x multiplier
+            amountToPay = (dieOne + dieTwo) * 10;
+        }
+
+        Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
+        await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams
+        {
+            Money = propertyOwner.Money + amountToPay
+        });
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
+        {
+            Money = player.Money - amountToPay
+        });
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = game.Id,
+            Message = $"{player.PlayerName} paid {propertyOwner.PlayerName} ${amountToPay}."
+        });
+        //update rolling to be finished
+        await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = false});
+        Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+
+        //wait one second while dice roll animation finishes
+        stopWatch.Stop();
+
+        //wait for at least 500ms for animations to finish.
+        await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
+
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+        await socketMessageService.SendGamePlayers(game.Id);
     }
 
     public async Task PurchaseProperty(Player player, Game game, int gamePropertyId)
@@ -228,6 +318,11 @@ public class PlayerService(
             throw new Exception(errorMessage);
         }
 
+        if (player.Money - gameProperty.PurchasePrice < 0)
+        {
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.NotEnoughMoney));
+        }
+
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams { PlayerId = player.Id });
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { Money = player.Money - gameProperty.PurchasePrice });
         await gameLogRepository.CreateAsync(new GameLogCreateParams
@@ -236,14 +331,7 @@ public class PlayerService(
             Message = $"{player.PlayerName} purchased {gameProperty.BoardSpaceName}"
         });
 
-        IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
-        var gamePlayers = await playerRepository.SearchWithIconsAsync(
-            new PlayerWhereParams { GameId = game.Id },
-            new PlayerWhereParams { }
-        );
-        IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(game.Id);
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
-        await socketMessageService.SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+        await socketMessageService.SendGamePlayers(game.Id);
+        await socketMessageService.SendGameBoardSpaces(game.Id);
     }
 }

@@ -15,12 +15,13 @@ public class SpaceLandingServiceContext
     public required Player CurrentPlayer { get; set; }
     public required IEnumerable<BoardSpace> BoardSpaces { get; set; }
     public required BoardSpace LandedOnSpace { get; set; }
-
+    public bool CameFromCard { get; set; }
 }
 
 public interface ISpaceLandingService
 {
-    public Task HandleLandedOnSpace(IEnumerable<Player> players, Game game);
+    public Task HandleLandedOnGo(SpaceLandingServiceContext context);
+    public Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false);
     public Task HandleLandedOnProperty(SpaceLandingServiceContext context);
     public Task HandleLandedOnRailroad(SpaceLandingServiceContext context);
     public Task HandleLandedOnGoToJail(SpaceLandingServiceContext context);
@@ -32,10 +33,13 @@ public class SpaceLandingService(
     IBoardSpaceRepository boardSpaceRepository,
     IPlayerRepository playerRepository,
     IGameCardRepository gameCardRepository,
-    ICardService cardService
+    ICardService cardService,
+    IJailService jailService,
+    IGameLogRepository gameLogRepository,
+    ISocketMessageService socketMessageService
 ) : ISpaceLandingService
 {
-    public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game)
+    public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
     {
         IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
 
@@ -47,12 +51,14 @@ public class SpaceLandingService(
             Game = game,
             CurrentPlayer = currentPlayer,
             LandedOnSpace = boardSpaces.First(bs => bs.Id == currentPlayer.BoardSpaceId),
-            BoardSpaces = boardSpaces
+            BoardSpaces = boardSpaces,
+            CameFromCard = cameFromCard
         };
 
         switch (context.LandedOnSpace.BoardSpaceCategoryId)
         {
             case (int)BoardSpaceCategories.Go:
+                await HandleLandedOnGo(context);
                 break;
 
             case (int)BoardSpaceCategories.Property:
@@ -93,6 +99,11 @@ public class SpaceLandingService(
         
     }
 
+    public async Task HandleLandedOnGo(SpaceLandingServiceContext context)
+    {
+        await Task.CompletedTask;
+    }
+
     public async Task HandleLandedOnProperty(SpaceLandingServiceContext context)
     {
         if (context.LandedOnSpace.Property is not Property landedOnProperty)
@@ -109,15 +120,21 @@ public class SpaceLandingService(
             //if someone else owns the property, pay them
             else
             {
+                Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
                 //if the property is mortgaged, don't pay so nothing happens
                 if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true) return;
                 //calculate payment amount and pay the owner
                 else
                 {
-                    Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
                     PropertyRent rentInfo = landedOnProperty.PropertyRents.First(pr => pr.UpgradeNumber == landedOnProperty.UpgradeCount);
                     await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - rentInfo.Rent });
                     await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + rentInfo.Rent });
+                    await gameLogRepository.CreateAsync(new GameLogCreateParams
+                    {
+                        GameId = context.Game.Id,
+                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${rentInfo.Rent}"
+                    });
+                    await socketMessageService.SendGamePlayers(context.Game.Id);
                     return;
                 }
             }
@@ -147,17 +164,21 @@ public class SpaceLandingService(
                 else
                 {
                     Player propertyOwner = await playerRepository.GetByIdAsync(railroadOwnerId);
-                    int numberOfOwnedRailroads = context.BoardSpaces
-                        .Select(bs =>
-                            bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard &&
-                            bs.Property?.PlayerId == railroadOwnerId
-                    ).Count();
+                    int numberOfOwnedRailroads = context.BoardSpaces.Count(bs =>
+                        bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard &&
+                        bs.Property?.PlayerId == railroadOwnerId
+                    );
 
                     int paymentAmount = 25 * (int)Math.Pow(2, numberOfOwnedRailroads - 1);
-
+                    if (context.CameFromCard) paymentAmount *= 2; //card says you pay double if owned
                     await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - paymentAmount });
                     await playerRepository.UpdateAsync(railroadOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + paymentAmount });
-
+                    await gameLogRepository.CreateAsync(new GameLogCreateParams
+                    {
+                        GameId = context.Game.Id,
+                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${paymentAmount}"
+                    });
+                    await socketMessageService.SendGamePlayers(context.Game.Id);
                     return;
                 }
             }
@@ -188,6 +209,12 @@ public class SpaceLandingService(
                 else
                 {
                     await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { RollingForUtilities = true });
+                    await gameLogRepository.CreateAsync( new GameLogCreateParams
+                    {
+                        GameId = context.Game.Id,
+                        Message = $"{context.CurrentPlayer.PlayerName} landed on {context.LandedOnSpace.BoardSpaceName}, roll for payment amount."
+                    });
+                    await socketMessageService.SendGamePlayers(context.Game.Id);
                     return;
                 }
             }
@@ -198,12 +225,11 @@ public class SpaceLandingService(
 
     public async Task HandleLandedOnGoToJail(SpaceLandingServiceContext context)
     {
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            BoardSpaceId = 11, //this is the id for jail
-            CanRoll = false
-        });
-        return;
+        await jailService.SendPlayerToJail(context.CurrentPlayer);
+        IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
+        await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id,$"{context.CurrentPlayer.PlayerName} was sent to jail.");
+        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup,players);
+        await HandleLandedOnSpace(players, context.Game);
     }
 
     public async Task HandleLandedOnPayTaxes(SpaceLandingServiceContext context)
@@ -224,6 +250,13 @@ public class SpaceLandingService(
             Money = context.CurrentPlayer.Money - paymentAmount,
         });
 
+        await gameLogRepository.CreateAsync( new GameLogCreateParams
+        {
+            GameId = context.Game.Id,
+            Message = $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} in taxes."
+        });
+
+        await socketMessageService.SendGamePlayers(context.Game.Id);
         return;
     }
 
@@ -233,12 +266,12 @@ public class SpaceLandingService(
         if (context.LandedOnSpace.BoardSpaceCategoryId == (int)BoardSpaceCategories.Chance)
         {
             card = await gameCardRepository.PullCardForGame(context.Game.Id, CardTypeIds.Chance);
-        }
+         }
         else
         {
             card = await gameCardRepository.PullCardForGame(context.Game.Id, CardTypeIds.CommunityChest);
         }
-
+        await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id, card.CardDescription);
         await cardService.HandlePulledCard(card, context);
 
         //if the card had movement involved, need to handle landed on space again
@@ -250,7 +283,7 @@ public class SpaceLandingService(
         )
         {
             IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
-            await HandleLandedOnSpace(players, context.Game);
+            await HandleLandedOnSpace(players, context.Game, true);
         }
         
     }   

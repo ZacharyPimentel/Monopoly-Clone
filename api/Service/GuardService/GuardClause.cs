@@ -98,4 +98,15 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
         }
         return new GuardClause(player, game);
     }
+    public IGuardClause PlayerInJail()
+    {
+        Player validatedPlayer = ValidatePlayerExists(player);
+        if (!validatedPlayer.InJail)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.NotInJail);
+            throw new Exception(errorMessage);
+        }
+        return new GuardClause(player, game);
+    }
+
 }

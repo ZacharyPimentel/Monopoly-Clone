@@ -17,7 +17,7 @@ export const CurrentTurn = () => {
                 <PurchaseButton player={player} property={currentBoardSpace.property} spaceName={currentBoardSpace.boardSpaceName}/>
             )}
             {
-                player.canRoll
+                player.canRoll || player.rollingForUtilities
                     ?   <RollButton/>
                     :   <EndTurn/>
             }

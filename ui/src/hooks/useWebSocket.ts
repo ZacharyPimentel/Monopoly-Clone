@@ -117,6 +117,9 @@ export const useWebSocket = () => {
                 getAll: () => {
                     globalState.ws.invoke("PlayerGetAll")
                 },
+                payOutOfJail: () => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PayOutOfJail));
+                },
                 purchaseProperty: (purchaseParams:SocketEventPurchaseProperty) => {
                     globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerPurchaseProperty),purchaseParams)
                 },
@@ -125,6 +128,9 @@ export const useWebSocket = () => {
                 },
                 rollForTurn: () => {
                     globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerRollForTurn))
+                },
+                rollForUtilities: () => {
+                    globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerRollForUtilties))
                 },
                 setReadyStatus: (playerReadyParams:SocketEventPlayerReady) => {
                     globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerReady),playerReadyParams);

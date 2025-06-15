@@ -10,4 +10,5 @@ public interface IGuardClause
     public IGuardClause PlayerIsInactive();
     public IGuardClause PlayerIsInCorrectGame();
     public IGuardClause PlayerNotAllowedToRoll();
+    public IGuardClause PlayerInJail();
 }

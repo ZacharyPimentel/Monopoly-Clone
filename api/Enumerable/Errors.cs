@@ -24,8 +24,17 @@ public enum Errors
     [Description("Game has already started.")]
     GameStarted,
 
+    [Description("Player is in jail.")]
+    InJail,
+
     [Description("This board space doesn't have an associated property.")]
     NoBoardSpaceProperty,
+
+    [Description("Player doesn't have enough money to do this.")]
+    NotEnoughMoney,
+
+    [Description("Player is not in jail.")]
+    NotInJail,
 
     [Description("It is not this player's turn.")]
     NotPlayerTurn,
@@ -48,8 +57,14 @@ public enum Errors
     [Description("Player is not able to continue rolling.")]
     PlayerNotAllowedToRoll,
 
+    [Description("Player is not rolling for utilities.")]
+    PlayerNotRollingForUtilities,
+
     [Description("Property is already owned by another player.")]
     PropertyAlreadyOwned,
+
+    [Description("Property is not owned by another player.")]
+    PropertyNotOwned,
 
     [Description("Socket Connection already has a player id.")]
     SocketConnectionHasPlayerId,

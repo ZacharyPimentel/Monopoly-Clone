@@ -7,6 +7,7 @@ namespace api.hub
     using api.Enumerable;
     using api.Interface;
     using api.Service;
+    using api.Service.GameLogic;
     using api.Service.GuardService;
     using Dapper;
     using Microsoft.AspNetCore.SignalR;
@@ -22,7 +23,8 @@ namespace api.hub
         //ITurnOrderRepository turnOrderRepository,
         IGameService gameService,
         IPlayerService playerService,
-        IGuardService guardService
+        IGuardService guardService,
+        IJailService jailService
         //ISocketMessageService socketMessageService
     ) : Hub
     {
@@ -171,8 +173,50 @@ namespace api.hub
 
                 await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame());
             });
-            
         }
+        public async Task PayOutOfJail()
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+             await guardService.HandleGuardError(async() =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId);
+
+                guards
+                    .PlayerExists()
+                    .GameExists()
+                    .PlayerIsInCorrectGame()
+                    .IsCurrentTurn()
+                    .PlayerAllowedToRoll()
+                    .PlayerInJail();
+
+                await jailService.PayOutOfJail(guardService.GetPlayer());
+            });
+        }
+        public async Task PlayerRollForUtilties()
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+
+                guards
+                    .PlayerExists()
+                    .GameExists()
+                    .PlayerIsInCorrectGame()
+                    .IsCurrentTurn()
+                    .PlayerNotAllowedToRoll();
+
+                await playerService.RollForUtilities(guardService.GetPlayer(), guardService.GetGame());
+            });
+        }
+
         public async Task PlayerPurchaseProperty(SocketEventPurchaseProperty purchasePropertyParams)
         {
             SocketPlayer currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);

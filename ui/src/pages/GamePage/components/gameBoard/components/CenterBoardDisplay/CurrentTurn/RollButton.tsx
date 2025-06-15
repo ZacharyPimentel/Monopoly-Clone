@@ -22,7 +22,7 @@ export const RollButton = () => {
             onClick={() => {
                 setRollInProgress(true);
                 if(player.rollingForUtilities){
-
+                    invoke.player.rollForUtilities();
                 }else{
                     invoke.player.rollForTurn();
                 }
