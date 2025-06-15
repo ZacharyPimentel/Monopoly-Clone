@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { usePlayer } from "../../../../../../../hooks/usePlayer";
-import { useGameState, useGameDispatch } from "../../../../../../../stateProviders/GameStateProvider";
-import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace"
+import { usePlayer } from "@hooks/usePlayer";
+import { useGameState, useGameDispatch } from "@stateProviders/GameStateProvider";
+import { BoardSpace } from "@generated/index"
 
 export const CommunityChestTile:React.FC<{space:BoardSpace}> = ({space}) => {
 

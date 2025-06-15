@@ -1,5 +1,5 @@
 import { useGameState } from "@stateProviders/GameStateProvider"
-import { BoardSpace } from "@types/controllers/BoardSpace";
+import { BoardSpace } from "@generated/index"
 
 export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
 

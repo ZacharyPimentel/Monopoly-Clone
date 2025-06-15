@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useGameDispatch, useGameState } from "../../../../../../../stateProviders/GameStateProvider"
-import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace"
-import { usePlayer } from "../../../../../../../hooks/usePlayer";
+import { useGameDispatch, useGameState } from "@stateProviders/GameStateProvider"
+import { BoardSpace } from "@generated/index"
+import { usePlayer } from "@hooks/usePlayer";
 
 export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
 

@@ -1,5 +1,5 @@
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
-import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace";
+import { useGameState } from "@stateProviders/GameStateProvider";
+import { BoardSpace } from "@generated/index"
 
 export const Railroad:React.FC<{space:BoardSpace,sideClass:string}> = ({space,sideClass}) => {
 

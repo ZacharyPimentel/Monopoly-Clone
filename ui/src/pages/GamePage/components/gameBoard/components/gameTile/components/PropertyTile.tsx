@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
+import { useGameState } from "@stateProviders/GameStateProvider";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 

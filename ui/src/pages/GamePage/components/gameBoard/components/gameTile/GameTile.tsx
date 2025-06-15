@@ -1,6 +1,5 @@
-import { useMemo } from "react";
-import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
-import { BoardSpaceCategory } from "../../../../../../types/enums/BoardSpaceCategory";
+import { useGameState } from "@stateProviders/GameStateProvider";
+import { BoardSpaceCategories } from "@generated/index";
 import { ChanceTile } from "./components/ChanceTile";
 import { CommunityChestTile } from "./components/CommunityChestTile";
 import { GoToJail } from "./components/GoToJail";
@@ -20,31 +19,31 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
     if(!space)return null
 
     switch (space.boardSpaceCategoryId) {
-        case BoardSpaceCategory.Go:
+        case BoardSpaceCategories.Go:
             gameTileComponent = <StartTile space={space}/>
             break;
-        case BoardSpaceCategory.Jail:
+        case BoardSpaceCategories.Jail:
             gameTileComponent = <Jail space={space}/>
             break
-        case BoardSpaceCategory.FreeParking:
+        case BoardSpaceCategories.FreeParking:
             gameTileComponent = <Vacation space={space}/>
             break;
-        case BoardSpaceCategory.GoToJail:
+        case BoardSpaceCategories.GoToJail:
             gameTileComponent = <GoToJail space={space}/>
             break
-        case BoardSpaceCategory.Chance:
+        case BoardSpaceCategories.Chance:
             gameTileComponent = <ChanceTile space={space}/>
             break
-        case BoardSpaceCategory.CommunityChest:
+        case BoardSpaceCategories.CommunityChest:
             gameTileComponent = <CommunityChestTile space={space}/>
             break
-        case BoardSpaceCategory.Railroard:
+        case BoardSpaceCategories.Railroard:
             gameTileComponent = <Railroad sideClass={sideClass} space={space}/>
             break
-        case BoardSpaceCategory.Utility:
+        case BoardSpaceCategories.Utility:
             gameTileComponent = <UtilityTile sideClass={sideClass} space={space}/>
             break
-        case BoardSpaceCategory.PayTaxes:
+        case BoardSpaceCategories.PayTaxes:
             gameTileComponent = <TaxTile space={space}/>
             break
         default:
@@ -56,7 +55,7 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
         <div className={`flex hover:scale-[1.05] hover:z-[1] w-full h-full duration-[0.3s] relative`}>
             <div className='absolute w-full h-full group'>
                 <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-5px] z-[1]`}>
-                    {space.boardSpaceCategoryId !== BoardSpaceCategory.Jail && 
+                    {space.boardSpaceCategoryId !== BoardSpaceCategories.Jail && 
                         gameState.players.filter((player) => player.inCurrentGame).map((player) => {
                         if(player.boardSpaceId !== position)return null
                         const isThisPlayersTurn = gameState.game?.currentPlayerTurn === player.id;

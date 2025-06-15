@@ -1,4 +1,4 @@
-import { BoardSpace } from "../../../../../../../types/controllers/BoardSpace"
+import { BoardSpace } from "@generated/index"
 
 export const Vacation:React.FC<{space:BoardSpace}> = ({space}) => {
     return (
