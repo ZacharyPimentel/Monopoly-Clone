@@ -182,7 +182,7 @@ namespace api.hub
                 IGuardClause guards = await guardService
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
-                    .Init(currentSocketPlayer.PlayerId);
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
 
                 guards
                     .PlayerExists()
@@ -210,8 +210,7 @@ namespace api.hub
                     .PlayerExists()
                     .GameExists()
                     .PlayerIsInCorrectGame()
-                    .IsCurrentTurn()
-                    .PlayerNotAllowedToRoll();
+                    .IsCurrentTurn();
 
                 await playerService.RollForUtilities(guardService.GetPlayer(), guardService.GetGame());
             });

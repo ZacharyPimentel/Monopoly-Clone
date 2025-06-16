@@ -14,7 +14,7 @@ INSERT INTO Card (Id, AdvanceToSpaceId, Amount, CardTypeId, CardActionId) VALUES
 (13, NULL, 15, 1, 1),
 (14, 6, NULL, 1, 3),
 (15, NULL, 50, 1, 11),
-(16, NULL, NULL, 1, 2),
+(16, NULL, 150, 1, 2),
 (17, 1, NULL, 2, 3),
 (18, NULL, 200, 2, 2),
 (19, NULL, 50, 2, 1),
