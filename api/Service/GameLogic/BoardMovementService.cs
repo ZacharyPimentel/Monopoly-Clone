@@ -12,11 +12,13 @@ public interface IBoardMovementService
     public Task MovePlayerBackThreeSpaces(Player player);
     public Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces);
     public Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces);
+    public Task ToggleOffGameMovement(Guid gameId);
 }
 
 public class BoardMovementService(
     IPlayerRepository playerRepository,
-    ISocketMessageService socketMessageService
+    ISocketMessageService socketMessageService,
+    IGameRepository gameRepository
 ) : IBoardMovementService
 {
     public string MovePlayerWithDiceRoll(Player player, Game game, int dieOne, int dieTwo)
@@ -27,6 +29,7 @@ public class BoardMovementService(
         if (player.RollCount + 1 == 3 && dieOne == dieTwo)
         {
             player.InJail = true;
+            player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = 11;  // 11 is the space for jail
             player.RollCount = 3;
             player.CanRoll = false;
@@ -54,6 +57,7 @@ public class BoardMovementService(
 
         if (passedGo) player.Money += 200;
 
+        player.PreviousBoardSpaceId = player.BoardSpaceId;
         player.BoardSpaceId = newBoardPosition;
         player.RollCount += 1;
         if (dieOne != dieTwo)
@@ -70,6 +74,7 @@ public class BoardMovementService(
             throw new Exception(EnumExtensions.GetEnumDescription(Errors.CardMissingAdvanceToSpaceId));
         }
         bool passedGo = validatedAdvanceToSpaceId <= player.BoardSpaceId;
+        player.PreviousBoardSpaceId = player.BoardSpaceId;
         player.BoardSpaceId = validatedAdvanceToSpaceId;
         if (passedGo)
         {
@@ -86,6 +91,7 @@ public class BoardMovementService(
     {
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
         {
+            PreviousBoardSpaceId = player.BoardSpaceId,
             BoardSpaceId = player.BoardSpaceId -= 3
         });
     }
@@ -98,6 +104,7 @@ public class BoardMovementService(
         {
             passedGo = closestRailroad.Id <= player.BoardSpaceId;
             if (passedGo) player.Money += 200;
+            player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = closestRailroad.Id;
         }
         else
@@ -119,16 +126,29 @@ public class BoardMovementService(
         {
             passedGo = closestUtility.Id <= player.BoardSpaceId;
             if (passedGo) player.Money += 200;
+            player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = closestUtility.Id;
         }
         else
         {
             passedGo = utilities.First().Id <= player.BoardSpaceId;
             if (passedGo) player.Money += 200;
+            player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = utilities.First().Id;
         }
 
         await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
     }
+
+    public async Task ToggleOffGameMovement(Guid gameId)
+    {
+        await gameRepository.UpdateAsync(gameId, new GameUpdateParams
+        {
+            MovementInProgress = false
+        });
+        Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+    }
+
 
 }

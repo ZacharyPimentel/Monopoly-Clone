@@ -6,6 +6,7 @@
 export interface PlayerUpdateParams {
     active?: boolean;
     boardSpaceId?: number;
+    previousBoardSpaceId?: number;
     getOutOfJailFreeCards?: number;
     iconId?: number;
     inCurrentGame?: boolean;

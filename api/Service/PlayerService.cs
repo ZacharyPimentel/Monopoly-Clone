@@ -207,11 +207,10 @@ public class PlayerService(
         //wait one second while dice roll animation finishes
         stopWatch.Stop();
 
-        //wait for at least 500ms for animations to finish.
-        await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
-
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+        //wait for at least 1000ms for dice roll to play.
+        await Task.Delay(Math.Max(0, 1000 - (int)stopWatch.ElapsedMilliseconds));
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         if (jailMessage != string.Empty)
         {
             await socketMessageService.CreateAndSendLatestGameLogs(game.Id, jailMessage);

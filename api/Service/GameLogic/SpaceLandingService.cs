@@ -36,7 +36,8 @@ public class SpaceLandingService(
     ICardService cardService,
     IJailService jailService,
     IGameLogRepository gameLogRepository,
-    ISocketMessageService socketMessageService
+    ISocketMessageService socketMessageService,
+    IBoardMovementService boardMovementService
 ) : ISpaceLandingService
 {
     public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
@@ -74,9 +75,11 @@ public class SpaceLandingService(
                 break;
 
             case (int)BoardSpaceCategories.Jail:
+                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                 break;
 
             case (int)BoardSpaceCategories.FreeParking:
+                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                 break;
 
             case (int)BoardSpaceCategories.GoToJail:
@@ -95,13 +98,11 @@ public class SpaceLandingService(
                 await HandleLandedOnChanceOrCommunityChest(context);
                 break;
         }
-        
-        
     }
 
     public async Task HandleLandedOnGo(SpaceLandingServiceContext context)
     {
-        await Task.CompletedTask;
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
     }
 
     public async Task HandleLandedOnProperty(SpaceLandingServiceContext context)
@@ -116,13 +117,21 @@ public class SpaceLandingService(
         if (context.LandedOnSpace.Property.PlayerId is Guid propertyOwnerId)
         {
             // if current player owns the property, do nothing
-            if (propertyOwnerId == context.CurrentPlayer.Id) return;
+            if (propertyOwnerId == context.CurrentPlayer.Id)
+            {
+                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                return;
+            }
             //if someone else owns the property, pay them
             else
             {
                 Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
                 //if the property is mortgaged, don't pay so nothing happens
-                if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true) return;
+                if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true)
+                {
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    return;
+                }
                 //calculate payment amount and pay the owner
                 else
                 {
@@ -134,12 +143,14 @@ public class SpaceLandingService(
                         GameId = context.Game.Id,
                         Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${rentInfo.Rent}"
                     });
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                     await socketMessageService.SendGamePlayers(context.Game.Id);
                     return;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         return;
     }
 
@@ -154,12 +165,20 @@ public class SpaceLandingService(
         if (context.LandedOnSpace.Property.PlayerId is Guid railroadOwnerId)
         {
             // if current player owns the railroad, do nothing
-            if (railroadOwnerId == context.CurrentPlayer.Id) return;
+            if (railroadOwnerId == context.CurrentPlayer.Id)
+            {
+                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                return;
+            }
             //if someone else owns the railroad, pay them
             else
             {
                 //if the property is mortgaged, don't pay so nothing happens
-                if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true) return;
+                if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true)
+                {
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    return;
+                }
                 //calculate payment amount and pay the owner
                 else
                 {
@@ -173,6 +192,7 @@ public class SpaceLandingService(
                     if (context.CameFromCard) paymentAmount *= 2; //card says you pay double if owned
                     await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - paymentAmount });
                     await playerRepository.UpdateAsync(railroadOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + paymentAmount });
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                     await gameLogRepository.CreateAsync(new GameLogCreateParams
                     {
                         GameId = context.Game.Id,
@@ -184,6 +204,7 @@ public class SpaceLandingService(
             }
         }
         // Nothing needs to happen, front end can handle the next step
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         return;
     }
 
@@ -199,27 +220,37 @@ public class SpaceLandingService(
         if (context.LandedOnSpace.Property.PlayerId is Guid utilityOwnerId)
         {
             // if current player owns the railroad, do nothing
-            if (utilityOwnerId == context.CurrentPlayer.Id) return;
+            if (utilityOwnerId == context.CurrentPlayer.Id)
+            {
+                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                return;
+            }
             //if someone else owns the railroad, pay them
             else
             {
                 //if the property is mortgaged, don't pay so nothing happens
-                if (landedOnUtility.Mortgaged is bool mortgaged && mortgaged == true) return;
+                if (landedOnUtility.Mortgaged is bool mortgaged && mortgaged == true)
+                {
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    return;
+                }
                 //set up the player to roll for payment
                 else
                 {
                     await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { RollingForUtilities = true });
-                    await gameLogRepository.CreateAsync( new GameLogCreateParams
+                    await gameLogRepository.CreateAsync(new GameLogCreateParams
                     {
                         GameId = context.Game.Id,
                         Message = $"{context.CurrentPlayer.PlayerName} landed on {context.LandedOnSpace.BoardSpaceName}, roll for payment amount."
                     });
+                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                     await socketMessageService.SendGamePlayers(context.Game.Id);
                     return;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         return;
     }
 
@@ -229,6 +260,7 @@ public class SpaceLandingService(
         IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
         await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id,$"{context.CurrentPlayer.PlayerName} was sent to jail.");
         await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup,players);
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         await HandleLandedOnSpace(players, context.Game);
     }
 
@@ -255,7 +287,7 @@ public class SpaceLandingService(
             GameId = context.Game.Id,
             Message = $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} in taxes."
         });
-
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         await socketMessageService.SendGamePlayers(context.Game.Id);
         return;
     }
@@ -273,7 +305,7 @@ public class SpaceLandingService(
         }
         await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id, card.CardDescription);
         await cardService.HandlePulledCard(card, context);
-
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         //if the card had movement involved, need to handle landed on space again
         if (
             card.CardActionId == (int)CardActionIds.AdvanceToSpace ||

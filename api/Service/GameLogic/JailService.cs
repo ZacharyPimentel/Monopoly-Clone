@@ -87,6 +87,7 @@ public class JailService(
 
     public async Task SendPlayerToJail(Player player)
     {
+        player.PreviousBoardSpaceId = player.BoardSpaceId;
         player.BoardSpaceId = 11; //jail space
         player.CanRoll = false;
         player.InJail = true;

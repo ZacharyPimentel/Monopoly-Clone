@@ -7,6 +7,7 @@ public class PlayerUpdateParams
 {
     public bool? Active { get; set; }
     public int? BoardSpaceId { get; set; }
+    public int? PreviousBoardSpaceId { get; set; }
     public int? GetOutOfJailFreeCards { get; set; }
     public int? IconId { get; set; }
     public bool? InCurrentGame { get; set; }
@@ -23,6 +24,7 @@ public class PlayerUpdateParams
         return new PlayerUpdateParams
         {
             Active = player.Active,
+            PreviousBoardSpaceId = player.PreviousBoardSpaceId,
             BoardSpaceId = player.BoardSpaceId,
             GetOutOfJailFreeCards = player.GetOutOfJailFreeCards,
             IconId = player.IconId,

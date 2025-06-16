@@ -56,19 +56,33 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
             <div className='absolute w-full h-full group'>
                 <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-5px] z-[1]`}>
                     {space.boardSpaceCategoryId !== BoardSpaceCategories.Jail && 
-                        gameState.players.filter((player) => player.inCurrentGame).map((player) => {
-                        if(player.boardSpaceId !== position)return null
-                        const isThisPlayersTurn = gameState.game?.currentPlayerTurn === player.id;
-                        return (
-                            <div key={player.id} className='relative' >
-                                <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
-                                <img 
-                                    className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' 
-                                    src={player.iconUrl}
-                                />
-                            </div>
-                        )
-                    })}
+                        gameState.players
+                            .filter((player) => player.inCurrentGame)
+                            //Filter out current player if movement is in progress
+                            .filter((player) => {
+                                if(gameState?.game?.movementInProgress){
+                                    if(player.id == gameState?.game?.currentPlayerTurn){
+                                        return false
+                                    }
+                                    return true
+                                }else{
+                                    return true
+                                }
+                            })
+                            .map((player) => {
+                                if(player.boardSpaceId !== position)return null
+                                const isThisPlayersTurn = gameState.game?.currentPlayerTurn === player.id;
+                                return (
+                                    <div key={player.id} className='relative' >
+                                        <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
+                                        <img 
+                                            className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' 
+                                            src={player.iconUrl}
+                                        />
+                                    </div>
+                                )
+                            }
+                    )}
                 </ul>
                 {gameTileComponent}
             </div>

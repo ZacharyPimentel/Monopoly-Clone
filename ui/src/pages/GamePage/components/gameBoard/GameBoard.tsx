@@ -1,17 +1,25 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TotoroFamily from './assets/totorofamily.svg?react';
 import { CenterBoardDisplay } from "./components/CenterBoardDisplay/CenterBoardDisplay";
 import { GameTile } from "./components/gameTile/GameTile";
+import { useGameState } from "@stateProviders/GameStateProvider";
+import { PlayerMovementContainer } from "./components/PlayerMovementContainer";
+import { useCurrentPlayer } from "@hooks/useCurrentPlayer";
 
 export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
-
+    const {game,players} = useGameState();
     const tileRefs = useRef<Record<number,HTMLDivElement | null>>({})
+    const [movementCoordinates,setMovementCoordinates] = useState<any>(null)
+    const currentPlayer = useCurrentPlayer();
 
     return (
         <div ref={gameBoardRef} className='border border-red p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
             <div className="w-[10px] h-[10px] absolute bg-[red] z-[30]"></div>
+            {game?.movementInProgress && (
+                <PlayerMovementContainer tileRefs={tileRefs} />
+            )}
             <div className='flex w-full'>
                 {/* Top Left Square */}
                 <div ref={(el) => (tileRefs.current[1] = el)} className='aspect-square min-w-[10%]'>
