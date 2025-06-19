@@ -11,7 +11,8 @@ export const ViewLogsModal = () => {
 
     useEffect( () => {
         (async() => {
-            const logs = await api.gameLog.getAll(gameState.gameId)
+            if(!gameState?.game)return
+            const logs = await api.gameLog.getAll(gameState.game.id)
             setLogs(logs);
         })()
     },[])
