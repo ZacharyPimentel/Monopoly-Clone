@@ -13,6 +13,7 @@ public interface IBoardMovementService
     public Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces);
     public Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces);
     public Task ToggleOffGameMovement(Guid gameId);
+    public Task ToggleOnGameMovement(Guid gameId);
 }
 
 public class BoardMovementService(
@@ -146,9 +147,13 @@ public class BoardMovementService(
         {
             MovementInProgress = false
         });
-        Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }
-
+    public async Task ToggleOnGameMovement(Guid gameId)
+    {
+        await gameRepository.UpdateAsync(gameId, new GameUpdateParams
+        {
+            MovementInProgress = true
+        });
+    }
 
 }

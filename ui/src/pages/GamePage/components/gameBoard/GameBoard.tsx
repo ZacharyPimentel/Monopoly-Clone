@@ -11,13 +11,13 @@ export const GameBoard = () => {
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
     const {game,players} = useGameState();
     const tileRefs = useRef<Record<number,HTMLDivElement | null>>({})
-    const [movementCoordinates,setMovementCoordinates] = useState<any>(null)
     const currentPlayer = useCurrentPlayer();
+    const currentPlayerWasInJailLastTurn = currentPlayer?.previousBoardSpaceId !== currentPlayer?.boardSpaceId
 
     return (
         <div ref={gameBoardRef} className='border border-red p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
             <div className="w-[10px] h-[10px] absolute bg-[red] z-[30]"></div>
-            {game?.movementInProgress && (
+            {game?.movementInProgress && currentPlayerWasInJailLastTurn &&(
                 <PlayerMovementContainer tileRefs={tileRefs} />
             )}
             <div className='flex w-full'>

@@ -4,7 +4,6 @@ import { GameCreateModal } from "./modal/CreateGameModal";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { useWebSocketCallback } from "@hooks/useWebSocketCallback";
 
 export const LobbyPage = () => {
 
@@ -12,15 +11,12 @@ export const LobbyPage = () => {
     const {listen,stopListen,invoke} = useWebSocket();
     const navigate = useNavigate();
     const globalState = useGlobalState();
-    const websocketCallback = useWebSocketCallback();
 
     useEffect( () => {
-        listen(WebSocketEvents.GameUpdateAll,websocketCallback.gameListCallback)
-        listen(WebSocketEvents.GameCreate,websocketCallback.gameCreateCallback);
-        listen(WebSocketEvents.Error,websocketCallback.errorCallback);
-
+        listen(WebSocketEvents.GameUpdateAll)
+        listen(WebSocketEvents.GameCreate);
+        listen(WebSocketEvents.Error);
         invoke.game.getAll();
-        
         return () => {
             stopListen(WebSocketEvents.GameUpdateAll)
             stopListen(WebSocketEvents.GameCreate)

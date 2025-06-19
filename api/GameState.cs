@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
+using api.Hubs;
 using Microsoft.AspNetCore.SignalR;
-
+namespace api;
 public class GameState<T>() where T : Hub
 {
     public ConcurrentDictionary<string, HubCallerContext> All { get; } = new();

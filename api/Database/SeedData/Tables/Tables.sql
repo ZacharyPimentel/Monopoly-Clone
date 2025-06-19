@@ -226,3 +226,12 @@ CREATE TABLE IF NOT EXISTS THEMECOLOR(
     Color TEXT,
     Shade INTEGER CHECK (Shade BETWEEN 1 AND 10)
 );
+
+CREATE TABLE IF NOT EXISTS ERRORLOG(
+    ID SERIAL PRIMARY KEY,
+    ErrorMessage TEXT,
+    Source TEXT,
+    StackTrace TEXT,
+    Exception JSONB,
+    CreatedAt TimeStamp NOT NULL
+)

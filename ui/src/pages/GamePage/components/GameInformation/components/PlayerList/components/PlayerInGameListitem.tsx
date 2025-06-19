@@ -1,7 +1,7 @@
-import { usePlayer } from "../../../../../../../hooks/usePlayer";
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
-import { useGlobalDispatch } from "../../../../../../../stateProviders/GlobalStateProvider";
-import { Player } from "../../../../../../../types/controllers/Player"
+import { usePlayer } from "@hooks/usePlayer";
+import { useGameState } from "@stateProviders/GameStateProvider"
+import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
+import { Player } from "@generated/index"
 import { CreateTradeModal } from "../../../../../../../globalComponents/GlobalModal/modalContent/CreateTradeModal";
 
 export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {

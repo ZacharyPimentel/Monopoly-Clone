@@ -5,6 +5,7 @@ using api.Entity;
 using api.Enumerable;
 using api.Helper;
 using api.hub;
+using api.Hubs;
 using api.Interface;
 using api.Service.GameLogic;
 using api.Socket;
@@ -62,9 +63,12 @@ public class PlayerService(
             Message = $"{newPlayer.PlayerName} has joined the game."
         });
         var latestLogs = await gameLogRepository.GetLatestFive(newPlayer.GameId);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Players = groupPlayers,
+            GameLogs = latestLogs
+        });
         await socketMessageService.SendToSelf(WebSocketEvents.PlayerUpdate, CurrentSocketPlayer);
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
 
         //trigger updated player counts in lobby
         var games = await gameRepository.Search(new GameWhereParams { });
@@ -84,9 +88,13 @@ public class PlayerService(
             Message = $"{currentPlayer.PlayerName} has reconnected."
         });
         var latestLogs = await gameLogRepository.GetLatestFive(currentPlayer.GameId);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Players = allPlayers.Where(p => p.GameId == currentPlayer.GameId),
+            GameLogs = latestLogs,
+        });
         await socketMessageService.SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
 
         //trigger updated player counts in lobby
         var games = await gameRepository.Search(new GameWhereParams { });
@@ -94,13 +102,19 @@ public class PlayerService(
     }
     public async Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams)
     {
-        await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams
+        Player player = await playerRepository.UpdateAndReturnAsync(playerId, new PlayerUpdateParams
         {
             PlayerName = playerRenameParams.PlayerName,
             IconId = playerRenameParams.IconId
         });
-        var allPlayers = await playerRepository.GetAllWithIconsAsync();
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, allPlayers);
+        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
+        {
+            GameId = player.GameId
+        });
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Players = gamePlayers
+        });
     }
     public async Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay)
     {
@@ -163,13 +177,20 @@ public class PlayerService(
             }
 
             Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
-            await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+
+            await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+            {
+                Game = updatedGame
+            });
         }
         var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
         {
             GameId = game.Id
         });
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, updatedGroupPlayers);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Players = updatedGroupPlayers
+        });
     }
     public async Task RollForTurn(Player player, Game game)
     {
@@ -177,9 +198,13 @@ public class PlayerService(
         //send to the group that rolling is in progress before final save at the end
         game.DiceRollInProgress = true;
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, game);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Game = game
+        });
 
         (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
+
         await diceRollService.RecordGameDiceRoll(game.Id, dieOne, dieTwo);
 
         //Handle jail logic
@@ -204,22 +229,38 @@ public class PlayerService(
         await gameRepository.UpdateAsync(game!.Id, new GameUpdateParams { DiceRollInProgress = false, MovementInProgress = true });
         Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
 
-        //wait one second while dice roll animation finishes
-        stopWatch.Stop();
-
-        //wait for at least 1000ms for dice roll to play.
-        await Task.Delay(Math.Max(0, 1000 - (int)stopWatch.ElapsedMilliseconds));
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, gamePlayers);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
         if (jailMessage != string.Empty)
         {
-            await socketMessageService.CreateAndSendLatestGameLogs(game.Id, jailMessage);
+
+            await gameLogRepository.CreateAsync( new GameLogCreateParams
+            {
+                GameId = updatedGame.Id,
+                Message = jailMessage
+            });
         }
         if (rollMessage != string.Empty)
         {
-            await socketMessageService.CreateAndSendLatestGameLogs(game.Id, rollMessage);
+            await gameLogRepository.CreateAsync( new GameLogCreateParams
+            {
+                GameId = updatedGame.Id,
+                Message = rollMessage
+            });
         }
 
+        IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(updatedGame.Id);
+
+        //wait one second while dice roll animation finishes
+        stopWatch.Stop();
+
+        //wait for at least 500ms for dice roll to play.
+        //await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new
+        {
+            Players = gamePlayers,
+            Game = updatedGame,
+            GameLogs = latestLogs
+        });
+        
         //run all the logic needed to handle the space that was landed on
         //includes sending out socket events
         await spaceLandingService.HandleLandedOnSpace(gamePlayers, updatedGame);
@@ -329,8 +370,11 @@ public class PlayerService(
             GameId = game.Id,
             Message = $"{player.PlayerName} purchased {gameProperty.BoardSpaceName}"
         });
-
-        await socketMessageService.SendGamePlayers(game.Id);
-        await socketMessageService.SendGameBoardSpaces(game.Id);
+        await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
+        {
+            Players = true,
+            BoardSpaces = true,
+            GameLogs = true
+        });
     }
 }

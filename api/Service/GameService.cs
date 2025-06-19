@@ -5,6 +5,7 @@ using api.Entity;
 using api.Enumerable;
 using api.Helper;
 using api.hub;
+using api.Hubs;
 using api.Interface;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
@@ -115,8 +116,13 @@ public class GameService(
 
         var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id });
         var updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new
+        {
+            Game = updatedGame,
+            Players = groupPlayers
+        });
+        //await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
+        //await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }
     public async Task JoinGame(Guid gameId)
     {
@@ -133,13 +139,15 @@ public class GameService(
         var latestLogs = await gameLogRepository.GetLatestFive(game.Id);
         var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
         var boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
-
-        await socketMessageService.SendToSelf(WebSocketEvents.GameUpdate, game);
+        await socketMessageService.SendToSelf(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Game = game,
+            Players = groupPlayers,
+            GameLogs = latestLogs,
+            Trades = trades,
+            BoardSpaces = boardSpaces
+        });
         await socketMessageService.SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);
-        await socketMessageService.SendToSelf(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-        await socketMessageService.SendToSelf(WebSocketEvents.GameLogUpdate, latestLogs);
-        await socketMessageService.SendToSelf(WebSocketEvents.TradeUpdate, trades);
-        await socketMessageService.SendToSelf(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
     }
     public async Task LeaveGame(Guid gameId)
     {

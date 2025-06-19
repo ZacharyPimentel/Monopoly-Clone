@@ -50,7 +50,6 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
             gameTileComponent = <PropertyTile sideClass={sideClass} position={position}/>
             break;       
     }
-
     return (
         <div className={`flex hover:scale-[1.05] hover:z-[1] w-full h-full duration-[0.3s] relative`}>
             <div className='absolute w-full h-full group'>

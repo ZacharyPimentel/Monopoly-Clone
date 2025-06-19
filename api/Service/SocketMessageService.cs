@@ -1,12 +1,21 @@
 using api.DTO.Entity;
+using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.hub;
+using api.Hubs;
 using api.Interface;
-using api.Repository;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
 namespace api.Service;
+
+public class GameStateIncludeParams {
+    public bool Game { get; set; } = false;
+    public bool Players { get; set; } = false;
+    public bool GameLogs { get; set; } = false;
+    public bool BoardSpaces { get; set; } = false;
+    public bool Trades { get; set; } = false;
+}
 
 public interface ISocketMessageService
 {
@@ -17,6 +26,7 @@ public interface ISocketMessageService
     public Task CreateAndSendLatestGameLogs(Guid gameId, string message);
     public Task SendGamePlayers(Guid gameId, bool includeLatestLogs = true);
     public Task SendGameBoardSpaces(Guid gameId);
+    public Task SendGameStateUpdate (Guid gameId, GameStateIncludeParams includeParams);
 }
 
 public class SocketMessageService(
@@ -24,7 +34,8 @@ public class SocketMessageService(
     ISocketContextAccessor socketContext,
     IGameLogRepository gameLogRepository,
     IPlayerRepository playerRepository,
-    IBoardSpaceRepository boardSpaceRepository
+    IBoardSpaceRepository boardSpaceRepository,
+    IGameRepository gameRepository
 ) : ISocketMessageService
 {
     public async Task SendToSelf(WebSocketEvents eventEnum, object? data)
@@ -92,5 +103,29 @@ public class SocketMessageService(
     {
         IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
         await SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
+    }
+
+    public async Task SendGameStateUpdate(Guid gameId, GameStateIncludeParams includeParams)
+    {
+        GameStateResponse response = new();
+
+        if (includeParams.Game)
+        {
+            response.Game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+        }
+        if (includeParams.Players)
+        {
+            response.Players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId });
+        }
+        if (includeParams.GameLogs)
+        {
+            response.GameLogs = await gameLogRepository.GetLatestFive(gameId);
+        }
+        if (includeParams.BoardSpaces)
+        {
+            response.BoardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
+        }
+
+        await SendToGroup(WebSocketEvents.GameStateUpdate, response);
     }
 }

@@ -20,7 +20,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
     gameId:'',
     gameLogs:[],
     cardToastMessage:'',
-    trades:[]
+    trades:[],
+    queueMessageCount:0
   }
 
   const [gameState, setGameState] = useState<GameState>(initialGameState)
@@ -29,6 +30,8 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
         return {...prevState, ...newGameState}
     })
   },[])
+
+  
 
   return (
     <GameStateContext.Provider value={gameState}>

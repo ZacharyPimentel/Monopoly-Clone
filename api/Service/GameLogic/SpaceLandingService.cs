@@ -1,10 +1,9 @@
-using System.Reflection.Metadata;
 using api.DTO.Entity;
+using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
 using api.Interface;
-using Microsoft.AspNetCore.Mvc;
 
 namespace api.Service.GameLogic;
 
@@ -37,7 +36,8 @@ public class SpaceLandingService(
     IJailService jailService,
     IGameLogRepository gameLogRepository,
     ISocketMessageService socketMessageService,
-    IBoardMovementService boardMovementService
+    IBoardMovementService boardMovementService,
+    IGameRepository gameRepository
 ) : ISpaceLandingService
 {
     public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
@@ -76,10 +76,19 @@ public class SpaceLandingService(
 
             case (int)BoardSpaceCategories.Jail:
                 await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                {
+                    Game = true,
+                    Players = true
+                });
                 break;
 
             case (int)BoardSpaceCategories.FreeParking:
                 await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                {
+                    Game = true
+                });
                 break;
 
             case (int)BoardSpaceCategories.GoToJail:
@@ -103,6 +112,10 @@ public class SpaceLandingService(
     public async Task HandleLandedOnGo(SpaceLandingServiceContext context)
     {
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true
+        });
     }
 
     public async Task HandleLandedOnProperty(SpaceLandingServiceContext context)
@@ -120,6 +133,11 @@ public class SpaceLandingService(
             if (propertyOwnerId == context.CurrentPlayer.Id)
             {
                 await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                {
+                    Game = true,
+                    GameLogs = true
+                });
                 return;
             }
             //if someone else owns the property, pay them
@@ -130,6 +148,11 @@ public class SpaceLandingService(
                 if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true)
                 {
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        GameLogs = true
+                    });
                     return;
                 }
                 //calculate payment amount and pay the owner
@@ -144,13 +167,23 @@ public class SpaceLandingService(
                         Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${rentInfo.Rent}"
                     });
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-                    await socketMessageService.SendGamePlayers(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        Players = true,
+                        GameLogs = true
+                    });
                     return;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            GameLogs = true
+        });
         return;
     }
 
@@ -168,6 +201,11 @@ public class SpaceLandingService(
             if (railroadOwnerId == context.CurrentPlayer.Id)
             {
                 await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                {
+                    Game = true,
+                    GameLogs = true
+                });
                 return;
             }
             //if someone else owns the railroad, pay them
@@ -177,6 +215,11 @@ public class SpaceLandingService(
                 if (landedOnProperty.Mortgaged is bool mortgaged && mortgaged == true)
                 {
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        GameLogs = true
+                    });
                     return;
                 }
                 //calculate payment amount and pay the owner
@@ -198,13 +241,23 @@ public class SpaceLandingService(
                         GameId = context.Game.Id,
                         Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${paymentAmount}"
                     });
-                    await socketMessageService.SendGamePlayers(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        Players = true,
+                        GameLogs = true
+                    });
                     return;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            GameLogs = true
+        });
         return;
     }
 
@@ -223,6 +276,11 @@ public class SpaceLandingService(
             if (utilityOwnerId == context.CurrentPlayer.Id)
             {
                 await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                {
+                    Game = true,
+                    GameLogs = true
+                });
                 return;
             }
             //if someone else owns the railroad, pay them
@@ -232,6 +290,11 @@ public class SpaceLandingService(
                 if (landedOnUtility.Mortgaged is bool mortgaged && mortgaged == true)
                 {
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        GameLogs = true
+                    });
                     return;
                 }
                 //set up the player to roll for payment
@@ -244,24 +307,53 @@ public class SpaceLandingService(
                         Message = $"{context.CurrentPlayer.PlayerName} landed on {context.LandedOnSpace.BoardSpaceName}, roll for payment amount."
                     });
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-                    await socketMessageService.SendGamePlayers(context.Game.Id);
+                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+                    {
+                        Game = true,
+                        Players = true,
+                        GameLogs = true
+                    });
                     return;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            GameLogs = true
+        });
         return;
     }
 
     public async Task HandleLandedOnGoToJail(SpaceLandingServiceContext context)
     {
-        await jailService.SendPlayerToJail(context.CurrentPlayer);
-        IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
-        await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id,$"{context.CurrentPlayer.PlayerName} was sent to jail.");
-        await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup,players);
+        //handle the initial land on the space
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = context.Game.Id,
+            Message = $"{context.CurrentPlayer.PlayerName} was sent to jail."
+        });
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-        await HandleLandedOnSpace(players, context.Game);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+        });
+        //send the player to jail
+        await boardMovementService.ToggleOnGameMovement(context.Game.Id);
+        await jailService.SendPlayerToJail(context.CurrentPlayer);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            Players = true
+        });
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            GameLogs = true
+        });
     }
 
     public async Task HandleLandedOnPayTaxes(SpaceLandingServiceContext context)
@@ -288,7 +380,12 @@ public class SpaceLandingService(
             Message = $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} in taxes."
         });
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-        await socketMessageService.SendGamePlayers(context.Game.Id);
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        {
+            Players = true,
+            GameLogs = true,
+            Game = true
+        }); 
         return;
     }
 
@@ -298,25 +395,63 @@ public class SpaceLandingService(
         if (context.LandedOnSpace.BoardSpaceCategoryId == (int)BoardSpaceCategories.Chance)
         {
             card = await gameCardRepository.PullCardForGame(context.Game.Id, CardTypeIds.Chance);
-         }
+        }
         else
         {
             card = await gameCardRepository.PullCardForGame(context.Game.Id, CardTypeIds.CommunityChest);
         }
-        await socketMessageService.CreateAndSendLatestGameLogs(context.Game.Id, card.CardDescription);
-        await cardService.HandlePulledCard(card, context);
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = context.Game.Id,
+            Message = card.CardDescription
+        });
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+
         //if the card had movement involved, need to handle landed on space again
         if (
             card.CardActionId == (int)CardActionIds.AdvanceToSpace ||
             card.CardActionId == (int)CardActionIds.BackThreeSpaces ||
             card.CardActionId == (int)CardActionIds.AdvanceToRailroad ||
-            card.CardActionId == (int)CardActionIds.AdvanceToUtility
+            card.CardActionId == (int)CardActionIds.AdvanceToUtility ||
+            card.CardActionId == (int)CardActionIds.GoToJail
         )
         {
+            await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+            {
+                Game = true,
+                Players = true,
+                GameLogs = true
+            });
+            BoardSpace movedToSpace = context.BoardSpaces.First(bs => bs.Id == card.AdvanceToSpaceId);
+            string message = movedToSpace.Id == 1
+                ? $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName} and collected $200."
+                : $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}."
+            ;
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
+            {
+                GameId = context.Game.Id,
+                Message = message
+            });
+            await boardMovementService.ToggleOnGameMovement(context.Game.Id);
+            await cardService.HandlePulledCard(card, context);
+            await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+            {
+                Game = true,
+                Players = true
+            });
             IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = context.Game.Id });
             await HandleLandedOnSpace(players, context.Game, true);
         }
-        
+        //no movement was involved, just send the details of the landed on space
+        else
+        {
+            await cardService.HandlePulledCard(card, context);
+            await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+            {
+                Game = true,
+                Players = true,
+                GameLogs = true
+            });
+        }
     }   
 }

@@ -1,6 +1,6 @@
-import { usePlayer } from "../../../../../../hooks/usePlayer";
-import { useGameState } from "../../../../../../stateProviders/GameStateProvider";
-import { useGlobalDispatch} from "../../../../../../stateProviders/GlobalStateProvider";
+import { usePlayer } from "@hooks/usePlayer";
+import { useGameState } from "@stateProviders/GameStateProvider";
+import { useGlobalDispatch} from "@stateProviders/GlobalStateProvider";
 import { PlayerCreateModal } from "../../../../modal/PlayerCreateModal";
 import { CurrentPlayerInLobbyListItem } from "./components/CurrentPlayerInLobbyListItem";
 import { PlayerInGameListitem } from "./components/PlayerInGameListitem";

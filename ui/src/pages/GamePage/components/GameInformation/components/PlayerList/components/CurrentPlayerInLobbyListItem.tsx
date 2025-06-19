@@ -1,6 +1,6 @@
-import { useWebSocket } from "../../../../../../../hooks/useWebSocket";
-import { useGlobalDispatch } from "../../../../../../../stateProviders/GlobalStateProvider"
-import { Player } from "../../../../../../../types/controllers/Player"
+import { useWebSocket } from "@hooks/useWebSocket";
+import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
+import { Player } from "@generated/index"
 import { PlayerEditModal } from "../../../../../modal/PlayerEditModal";
 
 export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
@@ -20,7 +20,6 @@ export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player})
                 </button>
                 <button 
                     onClick={() => invoke.player.setReadyStatus({
-                        playerId:player.id,
                         isReadyToPlay:!player.isReadyToPlay
                     })}
                     className='ml-auto bg-totorolightgreen p-[5px] rounded'

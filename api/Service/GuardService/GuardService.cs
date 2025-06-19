@@ -1,9 +1,11 @@
 using System.Net.WebSockets;
+using api.DTO.Entity;
 using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
 using api.hub;
+using api.Hubs;
 using api.Interface;
 using api.Service.GuardService;
 using api.Socket;
@@ -15,7 +17,8 @@ public class GuardService(
     ISocketContextAccessor socketContextAccessor,
     IPlayerRepository playerRepository,
     IGameRepository gameRepository,
-    ISocketMessageService socketMessageService
+    ISocketMessageService socketMessageService,
+    IErrorLogRepository errorLogRepository
 ) : IGuardService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -49,9 +52,16 @@ public class GuardService(
         {
             await action();
         }
-        catch(Exception error)
+        catch (Exception error)
         {
             await socketMessageService.SendToSelf(WebSocketEvents.Error, error.Message);
+            await errorLogRepository.CreateAsync(new ErrorLogCreateParams
+            {
+                ErrorMessage = error.Message,
+                Source = error.Source,
+                StackTrace = error.StackTrace,
+                InnerException = error.InnerException
+            });
         }
     }
     public IGuardService SocketConnectionHasPlayerId()

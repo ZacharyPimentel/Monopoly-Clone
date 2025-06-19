@@ -1,5 +1,6 @@
 using System.Data;
 using System.Reflection;
+using api;
 using api.Helper;
 using api.hub;
 using api.Interface;
@@ -66,6 +67,7 @@ builder.Services.AddScoped<IThemeRepository, ThemeRepository>();
 builder.Services.AddScoped<ITradePropertyRepository, TradePropertyRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<ITurnOrderRepository, TurnOrderRepository>();
+builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 //socket context
 builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 //services

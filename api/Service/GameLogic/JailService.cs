@@ -4,6 +4,7 @@ using api.Entity;
 using api.Enumerable;
 using api.Helper;
 using api.hub;
+using api.Hubs;
 using api.Interface;
 using api.Socket;
 using Microsoft.AspNetCore.SignalR;
@@ -33,7 +34,8 @@ public class JailService(
 
     public string RunJailTurnLogic(Player player, Game game, int dieOne, int dieTwo)
     {
-        var jailMessage = "";
+        string jailMessage;
+        player.PreviousBoardSpaceId = 11;
         if (dieOne == dieTwo)
         {
             player.JailTurnCount = 0;
@@ -75,14 +77,20 @@ public class JailService(
 
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
         {
-            Money = player.Money -= 50
+            Money = player.Money -= 50,
+            InJail = false,
+            JailTurnCount = 0
         });
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = player.GameId,
             Message = $"{player.PlayerName} paid $50 to get out of jail."
         });
-        await socketMessageService.SendGamePlayers(player.GameId);
+        await socketMessageService.SendGameStateUpdate(player.GameId, new GameStateIncludeParams
+        {
+            Players = true,
+            GameLogs = true
+        });
     }
 
     public async Task SendPlayerToJail(Player player)

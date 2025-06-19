@@ -1,10 +1,9 @@
 namespace api.hub
 {
-    using System.Data;
     using api.DTO.Entity;
     using api.DTO.Websocket;
-    using api.Entity;
     using api.Enumerable;
+    using api.Hubs;
     using api.Interface;
     using api.Service;
     using api.Service.GameLogic;

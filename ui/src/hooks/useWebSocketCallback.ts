@@ -1,66 +1,90 @@
-import { BoardSpace, Player, Game, Trade } from "@generated/index";
+import { GameStateResponse, WebSocketEvents } from "@generated/index";
 import { useGameDispatch } from "@stateProviders/GameStateProvider"
 import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
 import { LobbyGame } from "@types/websocket/Game";
-import { GameLog } from "@types/websocket/GameLog";
-import { SocketPlayer } from "@types/websocket/Player";
-import { useCallback } from "react"
+import { SocketPlayer } from "@generated/index";
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
+type Queue = {
+    processingQueue:boolean
+    queue: Function[]
+}
 
 export const useWebSocketCallback = () => {
 
     const gameDispatch = useGameDispatch();
     const globalDispatch = useGlobalDispatch();
     const navigate = useNavigate();
-    
-    const playerUpdateCallback = useCallback((currentSocketPlayer:SocketPlayer) => {
-        gameDispatch({currentSocketPlayer})
-    },[])
 
-    const playerUpdateAllCallback = useCallback((players:Player[]) => {
-        gameDispatch({players})
-    },[]);
+    const queueRef: MutableRefObject<Queue> = useRef({
+        processingQueue:false,
+        queue: []
+    });
 
-    const gameUpdateCallback = useCallback((game:Game| null) => {
-        if(!game){
-            navigate('/lobby')
-            return
+    const processNextCallback = useCallback(() => {
+        if(!queueRef.current) return
+        const nextCallback = queueRef.current.queue.shift();
+        if(nextCallback){
+            nextCallback();
+            gameDispatch({queueMessageCount:queueRef.current.queue.length})
+            setTimeout( () => {
+                processNextCallback()
+            },500)
+        }else{
+            queueRef.current.processingQueue = false;
         }
-        gameDispatch({game, gameId:game.id})
     },[]);
-    
-    const boardSpaceUpdateCallback = useCallback( (boardSpaces:BoardSpace[]) => 
-        gameDispatch({boardSpaces}
-    ),[])
 
-    const logUpdateCallback = useCallback ( (gameLogs:GameLog[]) => {
-        gameDispatch({gameLogs})
+    const socketEventCallbacks = useMemo( () => {
+
+        return {
+            [WebSocketEvents.PlayerUpdate] : (currentSocketPlayer:SocketPlayer) => {
+                gameDispatch({currentSocketPlayer})
+            },
+            [WebSocketEvents.GameCreate] : (gameId:string) => {
+                navigate(`/game/${gameId}`)
+            },
+            [WebSocketEvents.GameUpdateAll] : (games:LobbyGame[]) => {
+                globalDispatch({availableGames:games})
+            },
+            [WebSocketEvents.Error] : (message:string) => {
+                toast(message,{type:'error'})
+                navigate('/lobby')
+            },
+            [WebSocketEvents.GameStateUpdate] : (gameData:GameStateResponse) => {
+                if(gameData.game !== null && !gameData.game){
+                    navigate('/lobby')
+                    return
+                }
+                //logic to determine if messages should be queued or not
+
+                if(gameData.game){
+                    if( gameData.game.diceRollInProgress || 
+                        gameData.game.movementInProgress || 
+                        queueRef.current.processingQueue
+                    ){
+                        queueRef.current.queue.push( () => {
+                            console.log('GameData Processed:', {...gameData})
+                            gameDispatch({...gameData})
+                        })
+                        if (!queueRef.current.processingQueue) {
+                            queueRef.current.processingQueue = true;
+                            processNextCallback();
+                        }
+                    }else{
+                        gameDispatch({...gameData});
+                    }
+                }else{
+                    if(gameData.game == null){
+                        delete gameData.game;
+                    }
+                    gameDispatch({...gameData});
+                }
+            },
+        }
     },[])
 
-    const tradeUpdateCallback = useCallback( (trades:Trade[]) => {
-        gameDispatch({trades})
-    },[])
-    const errorCallback = useCallback( (message:string) => {
-        toast(message,{type:'error'})
-        navigate('/lobby')
-    },[]);
-
-    const gameListCallback = useCallback((games:LobbyGame[]) => globalDispatch({availableGames:games}),[]);
-    
-    const gameCreateCallback = useCallback((gameId:string) => {
-        navigate(`/game/${gameId}`);
-    },[]);
-
-    return {
-        boardSpaceUpdateCallback,
-        errorCallback,
-        gameUpdateCallback,
-        logUpdateCallback,
-        playerUpdateAllCallback,
-        playerUpdateCallback,
-        tradeUpdateCallback,
-        gameListCallback,
-        gameCreateCallback
-    }
+    return socketEventCallbacks;
 }

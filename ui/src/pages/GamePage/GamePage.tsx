@@ -9,7 +9,6 @@ import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "./modal/PlayerCreateModal";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { useWebSocketCallback } from "@hooks/useWebSocketCallback";
 
 export const GamePage = () => {
 
@@ -17,30 +16,17 @@ export const GamePage = () => {
     const gameState = useGameState();
     const {listen,invoke,stopListen} = useWebSocket()
     const {gameId} = useParams();
-    const websocketCallback = useWebSocketCallback();
 
     //updates the socket group on the server to receive game events
     useEffect( () => {
-
-        listen(WebSocketEvents.GameUpdate,websocketCallback.gameUpdateCallback)
-        listen(WebSocketEvents.PlayerUpdate,websocketCallback.playerUpdateCallback)
-        listen(WebSocketEvents.PlayerUpdateGroup,websocketCallback.playerUpdateAllCallback)
-        listen(WebSocketEvents.BoardSpaceUpdate, websocketCallback.boardSpaceUpdateCallback)
-        listen(WebSocketEvents.GameLogUpdate,websocketCallback.logUpdateCallback);
-        listen(WebSocketEvents.TradeUpdate,websocketCallback.tradeUpdateCallback);
-        listen(WebSocketEvents.Error, websocketCallback.errorCallback)
-
+        listen(WebSocketEvents.PlayerUpdate)
+        listen(WebSocketEvents.Error)
+        listen(WebSocketEvents.GameStateUpdate);
         invoke.game.join(gameId!);
-
-
         return () => {
-            stopListen(WebSocketEvents.GameUpdate)
             stopListen(WebSocketEvents.PlayerUpdate)
-            stopListen(WebSocketEvents.PlayerUpdateGroup)
-            stopListen(WebSocketEvents.BoardSpaceUpdate)
-            stopListen(WebSocketEvents.GameLogUpdate);
-            stopListen(WebSocketEvents.TradeUpdate);
             stopListen(WebSocketEvents.Error)
+            stopListen(WebSocketEvents.GameStateUpdate);
             invoke.game.leave(gameId!);
         }
     },[])
