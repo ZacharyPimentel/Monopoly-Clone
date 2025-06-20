@@ -18,6 +18,7 @@ public interface IGameService
     Task JoinGame(Guid gameId);
     Task LeaveGame(Guid gameId);
     Task UpdateRules(Guid GameId, SocketEventRulesUpdate rulesUpdateParams);
+    Task CreateGameLog(Guid GameId, string message);
 }
 
 public class GameService(
@@ -178,4 +179,11 @@ public class GameService(
         await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }
 
+    public async Task CreateGameLog(Guid gameId, string message) {
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = gameId,
+            Message = message
+        });
+    }
 }

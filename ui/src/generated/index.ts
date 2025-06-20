@@ -7,6 +7,7 @@ export * from './GameLog';
 export * from './GameProperty';
 export * from './GameStateResponse';
 export * from './Player';
+export * from './PlayerIcon';
 export * from './PlayerTrade';
 export * from './PlayerTradeCreateParams';
 export * from './PlayerTradeOffer';

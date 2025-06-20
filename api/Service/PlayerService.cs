@@ -34,14 +34,15 @@ public class PlayerService(
     IGameLogRepository gameLogRepository,
     IGameRepository gameRepository,
     ITurnOrderRepository turnOrderRepository,
-    ILastDiceRollRepository lastDiceRollRepository,
     IBoardSpaceRepository boardSpaceRepository,
     IJailService jailService,
     IBoardMovementService boardMovementService,
     IDiceRollService diceRollService,
     IGamePropertyRepository gamePropertyRepository,
     ISpaceLandingService spaceLandingService,
-    IGameCardRepository gameCardRepository
+    IGameCardRepository gameCardRepository,
+    IPlayerIconRepository playerIconRepository,
+    IGameService gameService
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -102,18 +103,62 @@ public class PlayerService(
     }
     public async Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams)
     {
-        Player player = await playerRepository.UpdateAndReturnAsync(playerId, new PlayerUpdateParams
+        Player player = await playerRepository.GetByIdWithIconAsync(playerId);
+        string oldPlayerName = player.PlayerName;
+        string oldPlayerIconName = player.IconName;
+        string newPlayerIconName = "";
+        bool playerNameUpdated = false;
+        bool playerIconUpdated = false;
+
+        if (playerRenameParams.PlayerName is not null) {
+            player.PlayerName = playerRenameParams.PlayerName;
+            playerNameUpdated = true;
+        }
+        if (playerRenameParams.IconId is int newIconId) {
+            PlayerIcon newPlayerIcon = (await playerIconRepository.SearchAsync(new PlayerIconWhereParams
+                {
+                    Id = newIconId
+                },
+                new { }
+            )).First();
+            newPlayerIconName = newPlayerIcon.IconName;
+            player.IconId = newIconId;
+            playerIconUpdated = true;
+        }
+
+        await playerRepository.UpdateAsync(player.Id,PlayerUpdateParams.FromPlayer(player));
+
+        //if both were updated
+        if (playerNameUpdated && playerIconUpdated)
         {
-            PlayerName = playerRenameParams.PlayerName,
-            IconId = playerRenameParams.IconId
-        });
-        IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
+            await gameService.CreateGameLog(
+                player.GameId,
+                $"{oldPlayerName} updated their name to {player.PlayerName} and change their icon from {oldPlayerIconName} to {newPlayerIconName}."
+            );
+        }
+        
+        //if just player name was updated
+        if (playerNameUpdated && !playerIconUpdated)
         {
-            GameId = player.GameId
-        });
-        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+            await gameService.CreateGameLog(
+                player.GameId,
+                $"{oldPlayerName} updated their name to {player.PlayerName}."
+            );
+        }
+
+        //if just player icon was updated
+        if (!playerNameUpdated && playerIconUpdated)
         {
-            Players = gamePlayers
+            await gameService.CreateGameLog(
+                player.GameId,
+                $"{player.PlayerName} updated their icon from {oldPlayerIconName} to {newPlayerIconName}."
+            );
+        }
+
+        await socketMessageService.SendGameStateUpdate(player.GameId, new GameStateIncludeParams
+        {
+            Players = true,
+            GameLogs = true
         });
     }
     public async Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay)

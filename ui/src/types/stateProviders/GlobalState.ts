@@ -1,6 +1,5 @@
+import { Game } from "@generated/index"
 import { ReactNode } from "react"
-import { Game } from "../controllers/Game"
-import { LobbyGame } from "@types/websocket/Game"
 
 export type GlobalState = {
     modalOpen:boolean
@@ -9,6 +8,6 @@ export type GlobalState = {
     toastStyle:'success' | 'info' | 'error',
     toastMessages:string[],
     ws: signalR.HubConnection
-    availableGames:LobbyGame[]
+    availableGames:Game[]
     socketConnected:boolean
 }

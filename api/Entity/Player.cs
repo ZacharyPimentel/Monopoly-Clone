@@ -1,5 +1,4 @@
 using TypeGen.Core.TypeAnnotations;
-
 namespace api.Entity;
 [ExportTsInterface]
 public class Player
@@ -23,4 +22,5 @@ public class Player
 
     //Joined properties from PlayerIcon
     public required string IconUrl { get; set; }
+    public required string IconName { get; set; }
 }

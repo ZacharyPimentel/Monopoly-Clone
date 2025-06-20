@@ -6,7 +6,7 @@ import { useWebSocket } from "../../hooks/useWebSocket";
 import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useParams } from "react-router-dom";
-import { PlayerCreateModal } from "./modal/PlayerCreateModal";
+import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
 

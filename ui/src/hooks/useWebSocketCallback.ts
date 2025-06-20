@@ -1,9 +1,8 @@
-import { GameStateResponse, WebSocketEvents } from "@generated/index";
+import { Game, GameStateResponse, WebSocketEvents } from "@generated/index";
 import { useGameDispatch } from "@stateProviders/GameStateProvider"
 import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
-import { LobbyGame } from "@types/websocket/Game";
 import { SocketPlayer } from "@generated/index";
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { MutableRefObject, useCallback, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -46,7 +45,7 @@ export const useWebSocketCallback = () => {
             [WebSocketEvents.GameCreate] : (gameId:string) => {
                 navigate(`/game/${gameId}`)
             },
-            [WebSocketEvents.GameUpdateAll] : (games:LobbyGame[]) => {
+            [WebSocketEvents.GameUpdateAll] : (games:Game[]) => {
                 globalDispatch({availableGames:games})
             },
             [WebSocketEvents.Error] : (message:string) => {

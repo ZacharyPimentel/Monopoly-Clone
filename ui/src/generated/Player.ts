@@ -21,4 +21,5 @@ export interface Player {
     jailTurnCount: number;
     getOutOfJailFreeCards: number;
     iconUrl: string;
+    iconName: string;
 }

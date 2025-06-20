@@ -27,6 +27,7 @@
       "@stateProviders/*": ["src/stateProviders/*"],
       "@types/*": ["src/types/*"],
       "@generated/*":["src/generated/*"],
+      "@globalComponents/*":["src/globalComponents/*"]
     }
   },
   "include": ["src"],

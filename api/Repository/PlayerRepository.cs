@@ -27,7 +27,9 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
     public async Task<Player> GetByIdWithIconAsync(Guid id)
     {
         Player player = await GetByIdAsync(id);
-        player.IconUrl = (await LoadPlayerIconsAsync()).First(pi => pi.Id == player.IconId).IconUrl;
+        PlayerIcon icon = (await LoadPlayerIconsAsync()).First(pi => pi.Id == player.IconId);
+        player.IconUrl = icon.IconUrl;
+        player.IconName = icon.IconName;
         return player;
     }
 
