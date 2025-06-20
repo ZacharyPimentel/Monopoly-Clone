@@ -1,12 +1,11 @@
 import { usePlayer } from "@hooks/usePlayer";
 import { useWebSocket } from "@hooks/useWebSocket";
-import { useGameDispatch, useGameState } from "@stateProviders/GameStateProvider"
+import { useGameState } from "@stateProviders/GameStateProvider"
 import { useEffect, useState } from "react";
 
 export const RollButton = () => {
 
     const gameState = useGameState();
-    const gameDispatch = useGameDispatch()
     const {player} = usePlayer();
     const [rollInProgress,setRollInProgress] = useState(false);
     const {invoke} = useWebSocket();
@@ -27,7 +26,7 @@ export const RollButton = () => {
                     invoke.player.rollForTurn();
                 }
             }}
-            className='bg-white p-[5px] disabled:opacity-[0.6]'
+            className='bg-white p-[5px] disabled:opacity-[0.6] min-w-[100px]'
         >
             {gameState.game?.utilityDiceOne && gameState.game?.utilityDiceTwo 
                 ? "Continue Turn"

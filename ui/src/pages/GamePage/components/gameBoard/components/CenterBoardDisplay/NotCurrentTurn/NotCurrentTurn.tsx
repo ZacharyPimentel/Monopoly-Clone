@@ -1,5 +1,4 @@
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider"
-import { DiceRoller } from "../CurrentTurn/DiceRoller/DiceRoller";
+import { useGameState } from "@stateProviders/GameStateProvider"
 export const NotCurrentTurn = () => {
 
     const gameState = useGameState();
@@ -7,7 +6,6 @@ export const NotCurrentTurn = () => {
 
     return (
         <div className='flex flex-col gap-[50px]'>
-            <DiceRoller/>
             <div className='flex gap-[20px] justify-center items-center'>
                 <img className='w-[50px]' src={currentTurnPlayer?.iconUrl}/>
                 <p className='text-white'>{currentTurnPlayer?.playerName} is playing</p>

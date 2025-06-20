@@ -1,11 +1,9 @@
 import { RollButton } from "./RollButton"
 import { EndTurn } from "./EndTurn";
 import { PurchaseButton } from "./PurchaseButton";
-import { usePlayer } from "../../../../../../../hooks/usePlayer";
+import { usePlayer } from "@hooks/usePlayer";
 import { PayJailFee } from "./PayJailFee";
-import { DiceRoller } from "./DiceRoller/DiceRoller";
 import { useGameState } from "@stateProviders/GameStateProvider";
-import { useEffect, useState } from "react";
 
 export const CurrentTurn = () => {
 
@@ -13,17 +11,11 @@ export const CurrentTurn = () => {
     const gameState = useGameState()
 
     if(gameState.game?.diceRollInProgress || gameState.queueMessageCount > 0){
-        return (
-            <div className='flex flex-col gap-[50px]'>
-                <DiceRoller/>
-            </div>
-        )
+        return null
     }
 
     return (
-        <div className='flex flex-col gap-[50px]'>
-            <DiceRoller/>
-
+        <div className='flex gap-[50px]'>
             {/* Show purchase button if property has no player id (not owned) */}
             {
                 currentBoardSpace?.property && 

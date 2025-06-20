@@ -73,8 +73,7 @@ export const Die:React.FC<{dieNumber:number}> = ({dieNumber}) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 mt-10">
-      <div className="scene">
+      <div className="scene flex items-center justify-center">
         <div className="dice" ref={diceRef}>
           <div className="number front">
             <div className="pip center" />
@@ -110,7 +109,6 @@ export const Die:React.FC<{dieNumber:number}> = ({dieNumber}) => {
             <div className="pip bottom-right" />
             </div>
         </div>
-      </div>
 
       <style>{`
       .pip {
