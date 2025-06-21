@@ -1,7 +1,5 @@
 import { ReactNode } from "react"
-import { Player, BoardSpace } from "@generated/index";
-import { SocketPlayer } from "@generated/index"
-import { GameLog } from "../websocket/GameLog"
+import { Player, BoardSpace, GameLog, SocketPlayer } from "@generated/index";
 import { Trade } from "../websocket/Trade"
 import { Game } from "@generated/Game"
 

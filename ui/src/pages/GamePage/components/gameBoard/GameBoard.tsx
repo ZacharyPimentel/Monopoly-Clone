@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 import TotoroFamily from './assets/totorofamily.svg?react';
 import { CenterBoardDisplay } from "./components/CenterBoardDisplay/CenterBoardDisplay";
 import { GameTile } from "./components/gameTile/GameTile";
@@ -9,7 +9,7 @@ import { useCurrentPlayer } from "@hooks/useCurrentPlayer";
 export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
-    const {game,players} = useGameState();
+    const {game} = useGameState();
     const tileRefs = useRef<Record<number,HTMLDivElement | null>>({})
     const currentPlayer = useCurrentPlayer();
     const currentPlayerWasInJailLastTurn = currentPlayer?.previousBoardSpaceId !== currentPlayer?.boardSpaceId

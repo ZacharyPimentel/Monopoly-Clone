@@ -1,3 +1,6 @@
+using TypeGen.Core.TypeAnnotations;
+namespace api.Entity;
+[ExportTsInterface]
 public class GameLog
 {
     public int Id { get; set; }

@@ -65,7 +65,6 @@ export const useWebSocketCallback = () => {
                         queueRef.current.processingQueue
                     ){
                         queueRef.current.queue.push( () => {
-                            console.log('GameData Processed:', {...gameData})
                             gameDispatch({...gameData})
                         })
                         if (!queueRef.current.processingQueue) {
