@@ -37,7 +37,7 @@ public class SpaceLandingService(
     IGameLogRepository gameLogRepository,
     ISocketMessageService socketMessageService,
     IBoardMovementService boardMovementService,
-    IGameRepository gameRepository
+    IGameService gameService
 ) : ISpaceLandingService
 {
     public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
@@ -112,6 +112,7 @@ public class SpaceLandingService(
     public async Task HandleLandedOnGo(SpaceLandingServiceContext context)
     {
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO.");
         await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
         {
             Game = true

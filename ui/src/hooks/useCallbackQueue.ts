@@ -35,6 +35,5 @@ export const useCallbackQueue = (delay:number) => {
 
     return {
         pushToQueue,
-        queueProcessing: () => queueRef.current.processingQueue
     }
 };
