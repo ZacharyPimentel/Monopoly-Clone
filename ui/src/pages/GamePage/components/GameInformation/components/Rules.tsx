@@ -35,6 +35,17 @@ export const Rules = () => {
                         disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
                     />
                 </li>
+                {/* Additional Money for landing on GO */}
+                <li className='flex gap-[20px]'>
+                    <p className='flex-1'>Extra money for landing on GO</p>
+                    <input 
+                        checked={gameState.game?.extraMoneyForLandingOnGo || false} 
+                        type='checkbox' 
+                        className='scale-[1.5]'
+                        onChange={(e) => invoke.game.updateRules({extraMoneyForLandingOnGo:e.target.checked})}
+                        disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
+                    />
+                </li>
             </ul>
         </div>
     )

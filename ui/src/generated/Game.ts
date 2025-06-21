@@ -12,6 +12,7 @@ export interface Game {
     startingMoney: number;
     themeId: number;
     fullSetDoublePropertyRent: boolean;
+    extraMoneyForLandingOnGo: boolean;
     currentPlayerTurn?: string;
     activePlayerCount?: number;
     diceRollInProgress: boolean;

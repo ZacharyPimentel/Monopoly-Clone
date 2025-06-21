@@ -112,11 +112,25 @@ public class SpaceLandingService(
     public async Task HandleLandedOnGo(SpaceLandingServiceContext context)
     {
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO.");
-        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+        GameStateIncludeParams updateParams = new()
         {
             Game = true
-        });
+        };
+
+        if (context.Game.ExtraMoneyForLandingOnGo)
+        {
+            await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
+            {
+                Money = context.CurrentPlayer.Money + 100
+            });
+            updateParams.Players = true;
+            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO and collected and extra $100.");
+        }
+        else
+        {
+            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO.");
+        }
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, updateParams);
     }
 
     public async Task HandleLandedOnProperty(SpaceLandingServiceContext context)
@@ -423,7 +437,17 @@ public class SpaceLandingService(
                 Players = true,
                 GameLogs = true
             });
-            BoardSpace movedToSpace = context.BoardSpaces.First(bs => bs.Id == card.AdvanceToSpaceId);
+            //get the cards advance to space id, unless it's move back 3 spaces which is calculated manually.
+            BoardSpace movedToSpace;
+            if (card.CardActionId == (int)CardActionIds.BackThreeSpaces)
+            {
+                movedToSpace = context.BoardSpaces.First(bs => bs.Id == bs.Id - 3);
+            }
+            else
+            {
+                movedToSpace = context.BoardSpaces.First(bs => bs.Id == card.AdvanceToSpaceId);
+            }
+
             string message = movedToSpace.Id == 1
                 ? $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName} and collected $200."
                 : $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}."

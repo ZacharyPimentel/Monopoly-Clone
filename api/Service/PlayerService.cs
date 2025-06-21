@@ -221,11 +221,13 @@ public class PlayerService(
                 await turnOrderRepository.CreateAsync(turnOrderCreateParams);
             }
 
-            Game? updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+            await gameService.CreateGameLog(game.Id, "The game has started.");
+            await gameService.CreateGameLog(game.Id, $"It's {shuffledActivePlayers[0].PlayerName}'s turn.");
 
-            await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+            await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
             {
-                Game = updatedGame
+                Game = true,
+                GameLogs = true
             });
         }
         var updatedGroupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams

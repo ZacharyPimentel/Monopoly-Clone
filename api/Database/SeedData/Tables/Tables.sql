@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS GAME(
     ThemeId INTEGER NOT NULL,
     FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
     FullSetDoublePropertyRent BOOLEAN DEFAULT false,
+    ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
     CreatedAt TimeStamp NOT NULL
 );
 

@@ -7,6 +7,7 @@ public class GameUpdateParams
     public bool? GameStarted { get; set; }
     public int? StartingMoney { get; set; }
     public bool? FullSetDoublePropertyRent { get; set; }
+    public bool? ExtraMoneyForLandingOnGo { get; set; }
     public bool? DiceRollInProgress { get; set; }
     public bool? MovementInProgress { get; set; }
 }

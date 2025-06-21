@@ -1,4 +1,5 @@
 using System.Data;
+using api.Entity;
 using api.Interface;
 using Dapper;
 
@@ -10,14 +11,21 @@ public class TurnOrderRepository(IDbConnection db) : BaseRepository<TurnOrder, G
     {
         var sql = @"
             SELECT 
-                *
+                t.Id,
+                t.PlayerId,
+                t.GameId,
+                t.PlayOrder,
+                t.HasPlayed,
+                p.Id,
+                p.PlayerName
             FROM 
-                TurnOrder
+                TurnOrder t
+            INNER JOIN Player p ON p.Id = t.PlayerId
             WHERE 
-                HasPlayed = false
+                t.HasPlayed = false
             AND
-                GameId = @GameId
-            ORDER BY PlayOrder
+                t.GameId = @GameId
+            ORDER BY t.PlayOrder
             LIMIT 1
         ";
 

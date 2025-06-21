@@ -1,5 +1,5 @@
+using api.Entity;
 namespace api.Interface;
-
 public class TurnOrderCreateParams
 {
     public required Guid PlayerId { get; set; }

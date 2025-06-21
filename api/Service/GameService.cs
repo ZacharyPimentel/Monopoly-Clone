@@ -115,15 +115,13 @@ public class GameService(
         await playerRepository.UpdateAsync(nextTurn.PlayerId, new PlayerUpdateParams { CanRoll = true });
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false, RollCount = 0 });
 
-        var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id });
-        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new
+        await CreateGameLog(game.Id, $"It's {nextTurn.PlayerName}'s turn.");
+        await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
         {
-            Game = updatedGame,
-            Players = groupPlayers
+            Game = true,
+            Players = true,
+            GameLogs = true
         });
-        //await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
-        //await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
     }
     public async Task JoinGame(Guid gameId)
     {
@@ -173,10 +171,13 @@ public class GameService(
         await gameRepository.UpdateAsync(gameId, new GameUpdateParams
         {
             StartingMoney = rulesUpdateParams.StartingMoney,
-            FullSetDoublePropertyRent = rulesUpdateParams.FullSetDoublePropertyRent
+            FullSetDoublePropertyRent = rulesUpdateParams.FullSetDoublePropertyRent,
+            ExtraMoneyForLandingOnGo = rulesUpdateParams.ExtraMoneyForLandingOnGo
         });
-        var updatedGame = await gameRepository.GetByIdWithDetailsAsync(gameId);
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
+        await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
+        {
+            Game = true
+        });
     }
 
     public async Task CreateGameLog(Guid gameId, string message) {

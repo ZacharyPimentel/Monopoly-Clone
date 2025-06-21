@@ -86,7 +86,7 @@ public class GameCardRepository(IDbConnection db) : BaseRepository<GameCard, int
             );
         }
 
-        var singleGameCard = gameCard.First();
+        var singleGameCard = gameCard.FirstOrDefault();
 
         if (singleGameCard is not GameCard validatedGameCard)
         {
