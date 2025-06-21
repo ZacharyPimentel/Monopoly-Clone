@@ -174,12 +174,22 @@ public class SpaceLandingService(
                 else
                 {
                     PropertyRent rentInfo = landedOnProperty.PropertyRents.First(pr => pr.UpgradeNumber == landedOnProperty.UpgradeCount);
-                    await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - rentInfo.Rent });
-                    await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + rentInfo.Rent });
+                    int paymentAmount = rentInfo.Rent;
+                    //if owner has the full set, pay 2x if the game setting is enabled
+                    if (context.Game.FullSetDoublePropertyRent)
+                    {
+                        IEnumerable<BoardSpace> setSpaces = context.BoardSpaces.Where(bs => bs.Property?.SetNumber == landedOnProperty.SetNumber);
+                        if (setSpaces.All(bs => bs?.Property?.PlayerId == propertyOwnerId))
+                        {
+                            paymentAmount *= 2;
+                        }
+                    }
+                    await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - paymentAmount });
+                    await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + paymentAmount });
                     await gameLogRepository.CreateAsync(new GameLogCreateParams
                     {
                         GameId = context.Game.Id,
-                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${rentInfo.Rent}"
+                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${paymentAmount}"
                     });
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                     await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
