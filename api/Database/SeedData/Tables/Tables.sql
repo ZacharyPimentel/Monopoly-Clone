@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS GAME(
     FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
     FullSetDoublePropertyRent BOOLEAN DEFAULT false,
     ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
+    CollectMoneyFromFreeParking BOOLEAN DEFAULT false,
+    MoneyInFreeParking INTEGER DEFAULT 0,
     CreatedAt TimeStamp NOT NULL
 );
 

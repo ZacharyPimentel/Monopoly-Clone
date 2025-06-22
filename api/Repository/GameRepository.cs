@@ -67,10 +67,26 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
         ";
 
         Game? game = await db.QuerySingleOrDefaultAsync<Game>(sql, new { Id = gameId });
-        if (game == null) {
+        if (game == null)
+        {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameDoesNotExist);
             throw new Exception(errorMessage);
         }
         return game;
     }
+
+    public async Task AddMoneyToFreeParking(Guid gameId, int amount)
+    {
+        var sql = @"
+            UPDATE
+                Game
+            SET 
+                MoneyInFreeParking = MoneyInFreeParking + @Amount
+            WHERE
+                GameId = @GameId
+        ";
+
+        await db.ExecuteAsync(sql, new { GameId = gameId, Amount = amount });
+    }
+
 }

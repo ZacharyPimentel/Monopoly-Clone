@@ -20,6 +20,7 @@ public class SpaceLandingServiceContext
 public interface ISpaceLandingService
 {
     public Task HandleLandedOnGo(SpaceLandingServiceContext context);
+    public Task HandleLandedOnFreeParking(SpaceLandingServiceContext context);
     public Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false);
     public Task HandleLandedOnProperty(SpaceLandingServiceContext context);
     public Task HandleLandedOnRailroad(SpaceLandingServiceContext context);
@@ -37,7 +38,8 @@ public class SpaceLandingService(
     IGameLogRepository gameLogRepository,
     ISocketMessageService socketMessageService,
     IBoardMovementService boardMovementService,
-    IGameService gameService
+    IGameService gameService,
+    IGameRepository gameRepository
 ) : ISpaceLandingService
 {
     public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
@@ -84,11 +86,7 @@ public class SpaceLandingService(
                 break;
 
             case (int)BoardSpaceCategories.FreeParking:
-                await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-                await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
-                {
-                    Game = true
-                });
+                await HandleLandedOnFreeParking(context);
                 break;
 
             case (int)BoardSpaceCategories.GoToJail:
@@ -131,6 +129,32 @@ public class SpaceLandingService(
             await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO.");
         }
         await socketMessageService.SendGameStateUpdate(context.Game.Id, updateParams);
+    }
+
+    public async Task HandleLandedOnFreeParking(SpaceLandingServiceContext context)
+    {
+        GameStateIncludeParams includeParams = new()
+        {
+            Game = true,
+            GameLogs = true
+        };
+
+        await boardMovementService.ToggleOffGameMovement(context.Game.Id);
+        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on Free Parking");
+
+        if (context.Game.CollectMoneyFromFreeParking)
+        {
+            await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
+            {
+                Money = context.CurrentPlayer.Money + context.Game.MoneyInFreeParking
+            });
+            await gameService.EmptyMoneyFromFreeParking(context.Game.Id);
+
+            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} collected ${context.Game.MoneyInFreeParking}.");
+            includeParams.Players = true;
+        }
+
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, includeParams);
     }
 
     public async Task HandleLandedOnProperty(SpaceLandingServiceContext context)
@@ -399,7 +423,7 @@ public class SpaceLandingService(
             Money = context.CurrentPlayer.Money - paymentAmount,
         });
 
-        await gameLogRepository.CreateAsync( new GameLogCreateParams
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = context.Game.Id,
             Message = $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} in taxes."

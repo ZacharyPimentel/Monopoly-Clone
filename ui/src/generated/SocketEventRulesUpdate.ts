@@ -7,4 +7,5 @@ export interface SocketEventRulesUpdate {
     startingMoney?: number;
     fullSetDoublePropertyRent?: boolean;
     extraMoneyForLandingOnGo?: boolean;
+    collectMoneyFromFreeParking?: boolean;
 }

@@ -13,6 +13,8 @@ export interface Game {
     themeId: number;
     fullSetDoublePropertyRent: boolean;
     extraMoneyForLandingOnGo: boolean;
+    collectMoneyFromFreeParking: boolean;
+    moneyInFreeParking: number;
     currentPlayerTurn?: string;
     activePlayerCount?: number;
     diceRollInProgress: boolean;

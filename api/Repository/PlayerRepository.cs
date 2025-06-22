@@ -57,4 +57,23 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
 
         return players.AsList();
     }
+
+    public async Task AddMoneyToPlayer(Guid playerId, int amount)
+    {
+        var sql = @"
+            UPDATE Player
+            SET Money = Money + @Amount
+            WHERE Id = @PlayerId
+        ";
+        await _db.ExecuteAsync(sql, new { PlayerId = playerId, Amount = amount });
+    }
+    public async Task SubtractMoneyFromPlayer(Guid playerId, int amount)
+    {
+        var sql = @"
+            UPDATE Player
+            SET Money = Money + @Amount
+            WHERE Id = @PlayerId
+        ";
+        await _db.ExecuteAsync(sql, new { PlayerId = playerId, Amount = amount });
+    }
 }

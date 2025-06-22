@@ -21,9 +21,10 @@ public interface IPlayerService
     public Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams);
     public Task RollForTurn(Player player, Game game);
     public Task RollForUtilities(Player player, Game game);
-
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
     public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
+    public Task AddMoneyToPlayer(Guid playerId, int amount);
+    public Task SubtractMoneyFromPlayer(Guid playerId, int amount);
 }
 
 public class PlayerService(
@@ -110,15 +111,17 @@ public class PlayerService(
         bool playerNameUpdated = false;
         bool playerIconUpdated = false;
 
-        if (playerRenameParams.PlayerName is not null) {
+        if (playerRenameParams.PlayerName is not null)
+        {
             player.PlayerName = playerRenameParams.PlayerName;
             playerNameUpdated = true;
         }
-        if (playerRenameParams.IconId is int newIconId) {
+        if (playerRenameParams.IconId is int newIconId)
+        {
             PlayerIcon newPlayerIcon = (await playerIconRepository.SearchAsync(new PlayerIconWhereParams
-                {
-                    Id = newIconId
-                },
+            {
+                Id = newIconId
+            },
                 new { }
             )).First();
             newPlayerIconName = newPlayerIcon.IconName;
@@ -126,7 +129,7 @@ public class PlayerService(
             playerIconUpdated = true;
         }
 
-        await playerRepository.UpdateAsync(player.Id,PlayerUpdateParams.FromPlayer(player));
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
 
         //if both were updated
         if (playerNameUpdated && playerIconUpdated)
@@ -136,7 +139,7 @@ public class PlayerService(
                 $"{oldPlayerName} updated their name to {player.PlayerName} and change their icon from {oldPlayerIconName} to {newPlayerIconName}."
             );
         }
-        
+
         //if just player name was updated
         if (playerNameUpdated && !playerIconUpdated)
         {
@@ -217,7 +220,7 @@ public class PlayerService(
                 {
                     await playerRepository.UpdateAsync(shuffledPlayer.Id, new PlayerUpdateParams { CanRoll = true });
                 }
-                
+
                 await turnOrderRepository.CreateAsync(turnOrderCreateParams);
             }
 
@@ -279,7 +282,7 @@ public class PlayerService(
         if (jailMessage != string.Empty)
         {
 
-            await gameLogRepository.CreateAsync( new GameLogCreateParams
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
             {
                 GameId = updatedGame.Id,
                 Message = jailMessage
@@ -287,7 +290,7 @@ public class PlayerService(
         }
         if (rollMessage != string.Empty)
         {
-            await gameLogRepository.CreateAsync( new GameLogCreateParams
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
             {
                 GameId = updatedGame.Id,
                 Message = rollMessage
@@ -307,7 +310,7 @@ public class PlayerService(
             Game = updatedGame,
             GameLogs = latestLogs
         });
-        
+
         //run all the logic needed to handle the space that was landed on
         //includes sending out socket events
         await spaceLandingService.HandleLandedOnSpace(gamePlayers, updatedGame);
@@ -343,14 +346,14 @@ public class PlayerService(
 
 
         GameCard? lastPlayedCard = await gameCardRepository.GetLastPlayedGameCard(game.Id);
-        bool needsToPay10x= false;
+        bool needsToPay10x = false;
         //if the last card was advance to utility, need to pay owner 10x regardless of how many utilities are owned.
         if (lastPlayedCard != null && lastPlayedCard?.Card?.CardActionId == (int)CardActionIds.AdvanceToUtility)
         {
             needsToPay10x = true;
         }
 
-            int amountToPay = 0;
+        int amountToPay = 0;
         if (ownerNumberOfUtilties == 1)
         {
             //4x multiplier
@@ -377,7 +380,7 @@ public class PlayerService(
             Message = $"{player.PlayerName} paid {propertyOwner.PlayerName} ${amountToPay}."
         });
         //update rolling to be finished
-        await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = false});
+        await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = false });
         Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
 
         //wait one second while dice roll animation finishes
@@ -423,5 +426,14 @@ public class PlayerService(
             BoardSpaces = true,
             GameLogs = true
         });
+    }
+
+    public async Task AddMoneyToPlayer(Guid playerId, int amount)
+    {
+        await playerRepository.AddMoneyToPlayer(playerId, amount);
+    }
+    public async Task SubtractMoneyFromPlayer(Guid playerId, int amount)
+    {
+        await playerRepository.SubtractMoneyFromPlayer(playerId, amount);
     }
 }

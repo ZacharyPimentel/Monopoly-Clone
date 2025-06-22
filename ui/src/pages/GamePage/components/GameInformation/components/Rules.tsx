@@ -46,6 +46,18 @@ export const Rules = () => {
                         disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
                     />
                 </li>
+
+                {/* Allow money to be collected from Free Parking */}
+                <li className='flex gap-[20px]'>
+                    <p className='flex-1'>Collect money when landing on Free Parking</p>
+                    <input 
+                        checked={gameState.game?.collectMoneyFromFreeParking || false} 
+                        type='checkbox' 
+                        className='scale-[1.5]'
+                        onChange={(e) => invoke.game.updateRules({collectMoneyFromFreeParking:e.target.checked})}
+                        disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
+                    />
+                </li>
             </ul>
         </div>
     )

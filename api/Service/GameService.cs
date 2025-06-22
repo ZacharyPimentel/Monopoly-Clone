@@ -19,6 +19,8 @@ public interface IGameService
     Task LeaveGame(Guid gameId);
     Task UpdateRules(Guid GameId, SocketEventRulesUpdate rulesUpdateParams);
     Task CreateGameLog(Guid GameId, string message);
+    Task AddMoneyToFreeParking(Guid gameId, int amount);
+    Task EmptyMoneyFromFreeParking(Guid GameId);
 }
 
 public class GameService(
@@ -172,7 +174,8 @@ public class GameService(
         {
             StartingMoney = rulesUpdateParams.StartingMoney,
             FullSetDoublePropertyRent = rulesUpdateParams.FullSetDoublePropertyRent,
-            ExtraMoneyForLandingOnGo = rulesUpdateParams.ExtraMoneyForLandingOnGo
+            ExtraMoneyForLandingOnGo = rulesUpdateParams.ExtraMoneyForLandingOnGo,
+            CollectMoneyFromFreeParking = rulesUpdateParams.CollectMoneyFromFreeParking,
         });
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {
@@ -180,11 +183,24 @@ public class GameService(
         });
     }
 
-    public async Task CreateGameLog(Guid gameId, string message) {
+    public async Task CreateGameLog(Guid gameId, string message)
+    {
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = gameId,
             Message = message
+        });
+    }
+
+    public async Task AddMoneyToFreeParking(Guid gameId, int amount)
+    {
+        await gameRepository.AddMoneyToFreeParking(gameId, amount);
+    }
+    public async Task EmptyMoneyFromFreeParking(Guid GameId)
+    {
+        await gameRepository.UpdateAsync(GameId, new GameUpdateParams
+        {
+            MoneyInFreeParking = 0
         });
     }
 }

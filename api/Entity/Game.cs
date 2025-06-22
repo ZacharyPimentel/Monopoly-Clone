@@ -12,6 +12,8 @@ public class Game
     public int ThemeId { get; set; }
     public bool FullSetDoublePropertyRent { get; set; }
     public bool ExtraMoneyForLandingOnGo { get; set; }
+    public bool CollectMoneyFromFreeParking { get; set; }
+    public int MoneyInFreeParking { get; set; }
     public Guid? CurrentPlayerTurn { get; set; } //Join for PlayerId on TurnOrder with GameId
     public int? ActivePlayerCount { get; set; } = 0; //Join for game PlayerId on Game when searching games
     public bool DiceRollInProgress { get; set; }
