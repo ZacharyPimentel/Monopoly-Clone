@@ -51,6 +51,9 @@ public enum Errors
     [Description("Player does not exist.")]
     PlayerDoesNotExist,
 
+    [Description("Player Id does not match any of the valid ones specified.")]
+    PlayerIdNotInList,
+
     [Description("This player is not currently active.")]
     PlayerInactive,
     

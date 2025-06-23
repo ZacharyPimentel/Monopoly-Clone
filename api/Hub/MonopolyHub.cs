@@ -8,23 +8,19 @@ namespace api.hub
     using api.Service;
     using api.Service.GameLogic;
     using api.Service.GuardService;
-    using Dapper;
     using Microsoft.AspNetCore.SignalR;
     public class MonopolyHub(
         GameState<MonopolyHub> gameState,
         IBoardSpaceRepository boardSpaceRepository,
         IGameLogRepository gameLogRepository,
-        //IGamePropertyRepository gamePropertyRepository,
         IGameRepository gameRepository,
-        //ILastDiceRollRepository lastDiceRollRepository,
         IPlayerRepository playerRepository,
         ITradeRepository tradeRepository,
-        //ITurnOrderRepository turnOrderRepository,
         IGameService gameService,
         IPlayerService playerService,
         IGuardService guardService,
-        IJailService jailService
-        //ISocketMessageService socketMessageService
+        IJailService jailService,
+        ITradeService tradeService
     ) : Hub
     {
         //=======================================================
@@ -330,11 +326,36 @@ namespace api.hub
         //=======================================================
         // Trade
         //=======================================================
-        public async Task TradeCreate(TradeCreateParams tradeCreateParams)
+        public async Task TradeCreate(SocketEventTradeCreate tradeCreateParams)
         {
-            await tradeRepository.CreateFullTradeAsync(tradeCreateParams);
-            var trades = await tradeRepository.GetActiveFullTradesForGameAsync(tradeCreateParams.GameId);
-            await SendToGroup(WebSocketEvents.TradeUpdate, trades);
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .InitMultiple(
+                        [
+                            tradeCreateParams.PlayerOne.PlayerId,
+                            tradeCreateParams.PlayerTwo.PlayerId
+                        ],
+                        currentSocketPlayer.GameId
+                    );
+                guards
+                    .PlayersExist()
+                    .GameExists()
+                    .PlayersAreInCorrectGame()
+                    .PlayerIdInList([tradeCreateParams.PlayerOne.PlayerId,tradeCreateParams.PlayerTwo.PlayerId])
+                    .PlayerIdsAreInList([tradeCreateParams.PlayerOne.PlayerId,tradeCreateParams.PlayerTwo.PlayerId]);
+
+                await tradeService.CreateGameTrade(new TradeCreateParams
+                {
+                    Initiator = guardService.GetPlayerFromList().Id,
+                    GameId = guardService.GetGame().Id,
+                    PlayerOne = tradeCreateParams.PlayerOne,
+                    PlayerTwo = tradeCreateParams.PlayerTwo
+                });
+            });
         }
         public async Task TradeSearch(Guid gameId)
         {

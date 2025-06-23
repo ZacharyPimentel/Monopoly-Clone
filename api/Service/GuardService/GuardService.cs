@@ -24,6 +24,7 @@ public class GuardService(
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
     private SocketPlayer CurrentSocketPlayer => gameState.GetPlayer(SocketContext.ConnectionId);
     private Player? Player { get; set; } = null;
+    private List<Player> Players { get; set; } = [];
     private Game? Game { get; set; } = null;
 
     public Player GetPlayer()
@@ -31,10 +32,21 @@ public class GuardService(
         if (Player == null)
         {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);
-            socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage );
+            socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage);
             throw new Exception(errorMessage);
         }
         return Player;
+    }
+    public Player GetPlayerFromList()
+    {
+        Player? player = Players.FirstOrDefault(p => p.Id == CurrentSocketPlayer?.PlayerId);
+        if (player == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);
+            socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage);
+            throw new Exception(errorMessage);
+        }
+        return player;
     }
     public Game GetGame()
     {
@@ -75,7 +87,8 @@ public class GuardService(
     }
     public IGuardService SocketConnectionDoesNotHavePlayerId()
     {
-        if (CurrentSocketPlayer.PlayerId != null) {
+        if (CurrentSocketPlayer.PlayerId != null)
+        {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionHasPlayerId);
             throw new Exception(errorMessage);
         }
@@ -97,7 +110,7 @@ public class GuardService(
         {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionHasGameId);
             throw new Exception(errorMessage);
-        } 
+        }
         return this;
     }
 
@@ -114,7 +127,27 @@ public class GuardService(
             Game = await gameRepository.GetByIdWithDetailsAsync(gameIdGuid);
         }
 
-        return new GuardClause(Player, Game);
+        return new GuardClause(Players, Player, Game);
+    }
+    public async Task<IGuardClause> InitMultiple(IEnumerable<Guid> playerIds, Guid? gameId)
+    {
+        List<Player> result = [];
+        foreach (Guid playerId in playerIds)
+        {
+            Player player = await playerRepository.GetByIdWithIconAsync(playerId);
+            if (CurrentSocketPlayer.PlayerId == player.Id)
+            {
+                Player = player;
+            }
+            result.Add(player);
+        }
+        Players = result;
+
+        if (gameId is Guid gameIdGuid)
+        {
+            Game = await gameRepository.GetByIdWithDetailsAsync(gameIdGuid);
+        }
+        return new GuardClause(Players, Player, Game);
     }
 
 }

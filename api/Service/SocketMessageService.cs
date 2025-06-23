@@ -35,7 +35,8 @@ public class SocketMessageService(
     IGameLogRepository gameLogRepository,
     IPlayerRepository playerRepository,
     IBoardSpaceRepository boardSpaceRepository,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    ITradeRepository tradeRepository
 ) : ISocketMessageService
 {
     public async Task SendToSelf(WebSocketEvents eventEnum, object? data)
@@ -124,6 +125,10 @@ public class SocketMessageService(
         if (includeParams.BoardSpaces)
         {
             response.BoardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
+        }
+        if (includeParams.Trades)
+        {
+            response.Trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
         }
 
         await SendToGroup(WebSocketEvents.GameStateUpdate, response);

@@ -1,10 +1,9 @@
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
-using api.Service.GuardService;
 namespace api.Service.GuardService;
 
-public class GuardClause(Player? player, Game? game) : IGuardClause
+public class GuardClause(List<Player> players, Player? player, Game? game) : IGuardClause
 {
     private static Player ValidatePlayerExists(Player? player)
     {
@@ -33,12 +32,12 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
     public IGuardClause PlayerExists()
     {
         ValidatePlayerExists(player);
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause GameExists()
     {
         ValidateGameExists(game);
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause IsCurrentTurn()
     {
@@ -50,7 +49,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             throw new Exception(errorMessage);
         }
 
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause GameNotStarted()
     {
@@ -60,7 +59,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameStarted);
             throw new Exception(errorMessage);
         }
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause PlayerIsInactive()
     {
@@ -70,13 +69,13 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerActive);
             throw new Exception(errorMessage);
         }
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
-    public IGuardClause PlayerIsInCorrectGame()
+    public IGuardClause PlayerIsInCorrectGame(Guid? PlayerId = null)
     {
         (player, game) = ValidatePlayerAndGameExists(player, game);
         if (player.GameId != game.Id) throw new Exception("This player is not in the expected game");
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause PlayerAllowedToRoll()
     {
@@ -86,7 +85,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerNotAllowedToRoll);
             throw new Exception(errorMessage);
         }
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause PlayerNotAllowedToRoll()
     {
@@ -96,7 +95,7 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerAllowedToRoll);
             throw new Exception(errorMessage);
         }
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
     public IGuardClause PlayerInJail()
     {
@@ -106,7 +105,41 @@ public class GuardClause(Player? player, Game? game) : IGuardClause
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.NotInJail);
             throw new Exception(errorMessage);
         }
-        return new GuardClause(player, game);
+        return new GuardClause(players, player, game);
     }
 
+    public IGuardClause PlayerIdInList(IEnumerable<Guid> validIds)
+    {
+        if (!validIds.Any(id => player?.Id == id))
+        {
+            var errorMEssage = EnumExtensions.GetEnumDescription(Errors.PlayerIdNotInList);
+            throw new Exception(errorMEssage);
+        }
+        return new GuardClause(players, player, game);
+    }
+
+    public IGuardClause PlayersExist()
+    {
+        foreach (Player player in players)
+        {
+            ValidatePlayerExists(player);
+        }
+        return new GuardClause(players, player, game);
+    }
+    public IGuardClause PlayersAreInCorrectGame()
+    {
+        foreach (Player player in players)
+        {
+            PlayerIsInCorrectGame();
+        }
+        return new GuardClause(players, player, game);
+    }
+    public IGuardClause PlayerIdsAreInList(IEnumerable<Guid> validIds)
+    {
+        foreach (Player player in players)
+        {
+            PlayerIdInList(validIds);
+        }
+        return new GuardClause(players, player, game);
+    }
 }
