@@ -3,7 +3,6 @@ using api.DTO.Entity;
 using api.Entity;
 using api.Interface;
 using Dapper;
-
 namespace api.Repository;
 public class TradeRepository(
     IDbConnection db,
@@ -60,10 +59,7 @@ public class TradeRepository(
     }
     public async Task<List<Trade>> GetActiveFullTradesForGameAsync(Guid gameId)
     {
-        IEnumerable<Trade> activeTrades = await SearchAsync(
-            new TradeWhereParams { GameId = gameId, AcceptedBy = null, DeclinedBy = null },
-            new { }
-        );
+        IEnumerable<Trade> activeTrades = await GetActiveTradesForGameAsync(gameId);
 
         foreach (var trade in activeTrades)
         {
@@ -104,7 +100,7 @@ public class TradeRepository(
                 },
                 new { }
             )).Single();
-            
+
             await playerTradeRepository.UpdateAsync(playerTrade.Id, new PlayerTradeUpdateParams
             {
                 Money = offer.Money,
@@ -144,4 +140,18 @@ public class TradeRepository(
     {
         throw new NotImplementedException();
     }
+
+    public async Task<IEnumerable<Trade>> GetActiveTradesForGameAsync(Guid gameId)
+    {
+        var sql = @"
+            SELECT * 
+            FROM Trade
+            WHERE DeclinedBy IS NULL
+            AND AcceptedBy IS NULL
+            AND GameId = @GameId
+        ";
+        IEnumerable<Trade> trades = await db.QueryAsync<Trade>(sql, new {GameId = gameId});
+        return trades;
+    }
+
 }

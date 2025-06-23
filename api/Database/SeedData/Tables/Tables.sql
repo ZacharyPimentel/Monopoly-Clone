@@ -236,6 +236,6 @@ CREATE TABLE IF NOT EXISTS ERRORLOG(
     ErrorMessage TEXT,
     Source TEXT,
     StackTrace TEXT,
-    Exception JSONB,
+    InnerException JSONB,
     CreatedAt TimeStamp NOT NULL
 )
