@@ -24,6 +24,7 @@ public enum WebSocketEvents
     PlayerUpdateGroup,
     PlayerRollForTurn,
     PlayerRollForUtilties,
+    TradeDecline,
     TradeList,
     TradeUpdate,
 }

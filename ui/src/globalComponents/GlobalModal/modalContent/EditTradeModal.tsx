@@ -72,7 +72,7 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
             buttonText:'Decline',
             buttonStyle:'warning',
             buttonCallback: async() => {
-                console.log('decline trade')
+                invoke.trade.decline({ tradeId: trade.id });
             }
         })
         return config;

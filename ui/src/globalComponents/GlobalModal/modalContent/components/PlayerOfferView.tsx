@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { Player } from "../../../../types/controllers/Player"
-import { useGameState } from "../../../../stateProviders/GameStateProvider";
+import { Player } from "@generated/index"
+import { useGameState } from "@stateProviders/GameStateProvider";
 import React from "react";
 import { TradePropertyItem } from "../../../../pages/GamePage/components/GameInformation/components/Trades/components/TradePropertyItem";
 import { NumberInput } from "../../../FormElements/NumberInput";

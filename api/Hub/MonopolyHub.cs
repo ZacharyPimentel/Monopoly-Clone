@@ -377,22 +377,21 @@ namespace api.hub
                 await SendToGroup(WebSocketEvents.TradeUpdate, trades);
             }
         }
-        public async Task TradeDecline(int tradeId)
+        public async Task TradeDecline(SocketEventTradeDecline declineParams)
         {
-            var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            if (socketPlayer.GameId is Guid gameId)
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
             {
-                await tradeRepository.DeclineTrade(tradeId, gameId);
-                var groupPlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = socketPlayer.GameId });
-                var gamePlayer = groupPlayers.First(x => x.Id == socketPlayer.PlayerId);
-                await gameLogRepository.CreateAsync(new GameLogCreateParams
-                {
-                    GameId = gameId,
-                    Message = $"{gamePlayer.PlayerName} has disconnected."
-                });
-                var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-                await SendToGroup(WebSocketEvents.TradeUpdate, trades);
-            }
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .Init(currentSocketPlayer.PlayerId);
+                guards
+                    .PlayersExist();
+
+                await tradeService.DeclineTrade(guardService.GetPlayer(),declineParams.TradeId);
+            });
+            
         }
     }
 }

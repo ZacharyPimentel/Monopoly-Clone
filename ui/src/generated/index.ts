@@ -24,6 +24,7 @@ export * from './SocketEventPlayerUpdate';
 export * from './SocketEventPurchaseProperty';
 export * from './SocketEventRulesUpdate';
 export * from './SocketEventTradeCreate';
+export * from './SocketEventTradeDecline';
 export * from './SocketEventTradeUpdate';
 export * from './SocketPlayer';
 export * from './Trade';

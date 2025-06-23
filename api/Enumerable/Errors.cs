@@ -48,6 +48,9 @@ public enum Errors
     [Description("Player's current boardspace doesn't match what was expected.")]
     PlayerBoardSpaceMismatch,
 
+    [Description("This player is not allowed to modify this trade.")]
+    PlayerCannotModifyTrade,
+
     [Description("Player does not exist.")]
     PlayerDoesNotExist,
 
