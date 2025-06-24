@@ -350,7 +350,7 @@ namespace api.hub
 
                 await tradeService.CreateGameTrade(new TradeCreateParams
                 {
-                    Initiator = guardService.GetPlayerFromList().Id,
+                    Initiator = guardService.GetCurrentPlayerFromList().Id,
                     GameId = guardService.GetGame().Id,
                     PlayerOne = tradeCreateParams.PlayerOne,
                     PlayerTwo = tradeCreateParams.PlayerTwo

@@ -37,9 +37,25 @@ public class GuardService(
         }
         return Player;
     }
-    public Player GetPlayerFromList()
+    public Player GetCurrentPlayerFromList()
     {
         Player? player = Players.FirstOrDefault(p => p.Id == CurrentSocketPlayer?.PlayerId);
+        if (player == null)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);
+            socketMessageService.SendToSelf(WebSocketEvents.Error, errorMessage);
+            throw new Exception(errorMessage);
+        }
+        return player;
+    }
+    public IEnumerable<Player> GetPlayers()
+    {
+        return Players;
+    }
+
+    public Player GetPlayerFromList(Guid playerId)
+    {
+        Player? player = Players.FirstOrDefault(p => p.Id == playerId);
         if (player == null)
         {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotExist);

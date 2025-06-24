@@ -4,7 +4,9 @@ namespace api.Service.GuardService;
 public interface IGuardService
 {
     public Player GetPlayer();
-    public Player GetPlayerFromList();
+    public IEnumerable<Player> GetPlayers();
+    public Player GetCurrentPlayerFromList();
+    public Player GetPlayerFromList(Guid playerId);
     public Game GetGame();
     public Task HandleGuardError( Func<Task> action);
     public Task<IGuardClause> Init(Guid? playerId = null, Guid? gameId = null);
