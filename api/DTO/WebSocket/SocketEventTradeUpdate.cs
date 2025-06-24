@@ -5,5 +5,6 @@ namespace api.DTO.Websocket;
 public class SocketEventTradeUpdate
 {
     public required int TradeId { get; set; }
-    public required TradeUpdateParams TradeUpdateParams{ get; set; }
+    public required PlayerTradeOffer PlayerOne { get; set; }
+    public required PlayerTradeOffer PlayerTwo { get; set; }
 }

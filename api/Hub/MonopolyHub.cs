@@ -362,20 +362,38 @@ namespace api.hub
             var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
             await SendToSelf(WebSocketEvents.TradeList, trades);
         }
-        public async Task TradeUpdate(SocketEventTradeUpdate socketEventData)
+        public async Task TradeUpdate(SocketEventTradeUpdate tradeUpdateParams)
         {
-
-            var socketPlayer = gameState.GetPlayer(Context.ConnectionId);
-            socketEventData.TradeUpdateParams.LastUpdatedBy = socketPlayer.PlayerId;
-            await tradeRepository.UpdateFullTradeAsync(
-                socketEventData.TradeId,
-                socketEventData.TradeUpdateParams
-            );
-            if (socketPlayer.GameId is Guid gameId)
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
             {
-                var trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
-                await SendToGroup(WebSocketEvents.TradeUpdate, trades);
-            }
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasGameId()
+                    .SocketConnectionHasPlayerId()
+                    .InitMultiple(
+                        [
+                            tradeUpdateParams.PlayerOne.PlayerId,
+                            tradeUpdateParams.PlayerTwo.PlayerId
+                        ],
+                        currentSocketPlayer.GameId
+                    );
+                guards
+                    .PlayersExist()
+                    .GameExists()
+                    .PlayersAreInCorrectGame()
+                    .PlayerIdInList([tradeUpdateParams.PlayerOne.PlayerId,tradeUpdateParams.PlayerTwo.PlayerId])
+                    .PlayerIdsAreInList([tradeUpdateParams.PlayerOne.PlayerId,tradeUpdateParams.PlayerTwo.PlayerId]);
+
+                await tradeService.UpdateGameTrade(
+                    tradeUpdateParams.TradeId,
+                    guardService.GetGame().Id,
+                    new TradeUpdateParams
+                    {
+                        PlayerOne = tradeUpdateParams.PlayerOne,
+                        PlayerTwo = tradeUpdateParams.PlayerTwo,
+                        LastUpdatedBy = guardService.GetPlayer().Id
+                    });
+            });
         }
         public async Task TradeDecline(SocketEventTradeDecline declineParams)
         {

@@ -10,14 +10,12 @@ import { AdvancedActionButtons, AdvancedButtonConfig } from "../AdvancedActionBu
 type EditTradeInputs = {
     playerOne:{
         playerId:string,
-        initiator:boolean
         money:number,
         getOutOfJailFreeCards:number
         gamePropertyIds: number[]
     },
     playerTwo:{
         playerId:string
-        initiator:boolean
         money:number,
         getOutOfJailFreeCards:number
         gamePropertyIds: number[]
@@ -57,7 +55,11 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                 buttonText:'Modify',
                 buttonStyle:'success',
                 buttonCallback: async() => {
-                    console.log('modify trade')
+                    invoke.trade.update({
+                        tradeId: trade.id,
+                        playerOne:form.getValues().playerOne,
+                        playerTwo:form.getValues().playerTwo
+                    })
                 }
             })
             config.push({
@@ -77,8 +79,6 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
         })
         return config;
     },[])
-
-    console.log(advancedbuttonConfig)
 
     const form = useForm<EditTradeInputs>({
         mode:'onBlur',

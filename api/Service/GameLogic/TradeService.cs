@@ -1,4 +1,5 @@
 using api.DTO.Entity;
+using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
@@ -10,6 +11,7 @@ public interface ITradeService
 {
     public Task CreateGameTrade(TradeCreateParams tradeCreateParams);
     public Task DeclineTrade(Player playerId, int tradeId);
+    public Task UpdateGameTrade(int tradeId, Guid gameId,TradeUpdateParams tradeUpdateParams);
 }
 public class TradeService(
     ITradeRepository tradeRepository,
@@ -42,10 +44,18 @@ public class TradeService(
         {
             DeclinedBy = player.Id
         });
-        await socketMessageService.SendGameStateUpdate(player.GameId,new GameStateIncludeParams
+        await socketMessageService.SendGameStateUpdate(player.GameId, new GameStateIncludeParams
         {
             Trades = true
         });
     }
 
+    public async Task UpdateGameTrade(int tradeId, Guid gameId, TradeUpdateParams tradeUpdateParams)
+    {
+        await tradeRepository.UpdateFullTradeAsync(tradeId, tradeUpdateParams);
+        await socketMessageService.SendGameStateUpdate(gameId,new GameStateIncludeParams
+        {
+            Trades = true
+        });
+    }
 }

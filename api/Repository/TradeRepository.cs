@@ -84,8 +84,6 @@ public class TradeRepository(
         await UpdateAsync(tradeId, new TradeUpdateParams
         {
             LastUpdatedBy = updateParams.LastUpdatedBy,
-            DeclinedBy = updateParams.DeclinedBy,
-            AcceptedBy = updateParams.AcceptedBy
         });
 
         //loop over each players new offer and update them

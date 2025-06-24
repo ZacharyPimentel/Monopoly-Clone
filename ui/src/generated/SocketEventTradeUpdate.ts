@@ -3,9 +3,10 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-import { TradeUpdateParams } from "./TradeUpdateParams";
+import { PlayerTradeOffer } from "./PlayerTradeOffer";
 
 export interface SocketEventTradeUpdate {
     tradeId: number;
-    tradeUpdateParams: TradeUpdateParams;
+    playerOne: PlayerTradeOffer;
+    playerTwo: PlayerTradeOffer;
 }
