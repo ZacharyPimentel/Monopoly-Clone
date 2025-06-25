@@ -1,36 +1,34 @@
 import { useEffect, useRef, useState} from "react";
 import { useGlobalDispatch, useGlobalState } from "../../stateProviders/GlobalStateProvider";
 import { useLocation } from "react-router-dom";
+import { useCallbackQueue } from "@hooks/useCallbackQueue";
 
 export const GlobalModal = () => {
     const globalModalRef = useRef<HTMLDialogElement | null>(null);
     const globalState = useGlobalState();
     const globalDispatch = useGlobalDispatch()
     const location = useLocation();
-
     const [opacity,setOpacity] = useState(1);
     const [scale,setScale] = useState(0)
-
     const [lastcontent,setLastContent] = useState(globalState.modalContent);
+    const {pushToQueue} = useCallbackQueue(300);
 
-    useEffect( () => {
-        if(!globalModalRef.current)return;
-        const timeout = setTimeout( () => {
-            globalModalRef.current?.close();
-        },300)
-        if(globalState.modalOpen){
+    useEffect(() => {
+        pushToQueue( () => {
+            if(!globalModalRef.current)return;
+            if(globalState.modalOpen){
             setOpacity(1)
             setScale(1)
             setLastContent(globalState.modalContent)
-            clearTimeout(timeout)
             globalModalRef.current.show()
-        }else{
-            setScale(0)
-            setOpacity(0)
-        }
-        return () => {
-            clearTimeout(timeout);
-        }
+            }else{
+                setScale(0)
+                setOpacity(0)
+                setTimeout( () => {
+                    setLastContent(null)
+                },300)
+            }
+        })
     },[globalState.modalOpen,globalState.modalContent])
 
     //close the modal on route change
@@ -53,7 +51,7 @@ export const GlobalModal = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
             <div className='flex flex-col gap-[20px] p-[20px] relative bg-totorolightgreen border-2 border-black'>
-                {globalState.modalOpen && lastcontent}
+                {lastcontent}
             </div>
         </dialog>
     )
