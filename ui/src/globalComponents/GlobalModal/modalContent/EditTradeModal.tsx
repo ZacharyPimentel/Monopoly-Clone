@@ -50,7 +50,7 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
         
         const config:AdvancedButtonConfig[] = [];
         // allow modify trade
-        if(player.id == trade.lastUpdatedBy){
+        if(player.id !== trade.lastUpdatedBy){
             config.push({
                 buttonText:'Modify',
                 buttonStyle:'success',
@@ -66,7 +66,7 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                 buttonText:'Accept',
                 buttonStyle:'success',
                 buttonCallback: async() => {
-                    console.log('accept trade')
+                    invoke.trade.accept({tradeId:trade.id})
                 }
             })
         }

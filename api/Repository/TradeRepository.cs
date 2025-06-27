@@ -122,7 +122,7 @@ public class TradeRepository(
 
         return true;
     }
-    public async Task<bool> DeclineTrade(int tradeId, string playerId)
+    public async Task<bool> DeclineTrade(int tradeId, Guid playerId)
     {
         var tradeDeclineSql = @"
             UPDATE TRADE
@@ -132,11 +132,6 @@ public class TradeRepository(
 
         await db.ExecuteScalarAsync(tradeDeclineSql, new { tradeId, DeclinedBy = playerId });
         return true;
-    }
-
-    public Task<bool> DeclineTrade(int tradeId, Guid playerId)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<IEnumerable<Trade>> GetActiveTradesForGameAsync(Guid gameId)
@@ -151,5 +146,22 @@ public class TradeRepository(
         IEnumerable<Trade> trades = await db.QueryAsync<Trade>(sql, new {GameId = gameId});
         return trades;
     }
+    public async Task<Trade> GetActiveFullTradeAsync(int tradeId)
+    {
+        Trade trade = await GetByIdAsync(tradeId);
 
+        IEnumerable<PlayerTrade> playerTrades = await playerTradeRepository.SearchAsync(
+            new PlayerTradeWhereParams { TradeId = trade.Id },
+            new { }
+        );
+
+        foreach (var playerTrade in playerTrades)
+        {
+            IEnumerable<TradeProperty> tradeProperties =
+                await tradePropertyRepository.GetAllForPlayerTradeWithPropertyDetailsAsync(playerTrade.Id);
+            playerTrade.TradeProperties = [.. tradeProperties];
+        }
+        trade.PlayerTrades = [.. playerTrades];
+        return trade;
+    }
 }

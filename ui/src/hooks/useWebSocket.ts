@@ -3,7 +3,7 @@ import { useGameState } from "../stateProviders/GameStateProvider"
 import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
-import {  SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeDecline, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
+import {  SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeAccept, SocketEventTradeDecline, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
 import { useCallback, useMemo, useRef } from "react";
 import { useWebSocketCallback } from "./useWebSocketCallback";
@@ -135,6 +135,9 @@ export const useWebSocket = () => {
                     },
                     decline:(tradeDeclineParams:SocketEventTradeDecline) => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.TradeDecline),tradeDeclineParams)
+                    },
+                    accept:(tradeAcceptParams:SocketEventTradeAccept) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.TradeAccept),tradeAcceptParams)
                     }
                 }
             },

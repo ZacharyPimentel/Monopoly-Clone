@@ -22,7 +22,8 @@ export enum WebSocketEvents {
     PlayerUpdateGroup = 15,
     PlayerRollForTurn = 16,
     PlayerRollForUtilties = 17,
-    TradeDecline = 18,
-    TradeList = 19,
-    TradeUpdate = 20,
+    TradeAccept = 18,
+    TradeDecline = 19,
+    TradeList = 20,
+    TradeUpdate = 21,
 }

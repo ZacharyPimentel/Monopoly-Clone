@@ -23,6 +23,7 @@ export * from './SocketEventPlayerReady';
 export * from './SocketEventPlayerUpdate';
 export * from './SocketEventPurchaseProperty';
 export * from './SocketEventRulesUpdate';
+export * from './SocketEventTradeAccept';
 export * from './SocketEventTradeCreate';
 export * from './SocketEventTradeDecline';
 export * from './SocketEventTradeUpdate';
