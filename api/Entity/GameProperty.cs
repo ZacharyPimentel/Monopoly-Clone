@@ -14,6 +14,7 @@ public class GameProperty
     //Joined from Property
     public int? BoardSpaceId { get; set; }
     public int? PurchasePrice { get; set; }
+    public int? MortgageValue { get; set; }
     //Joined from BoardSpaceTheme
     public string? BoardSpaceName { get; set; }
 }

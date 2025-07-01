@@ -38,7 +38,11 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
 
     return (
         <div className='h-full relative'>
-            <button className={`${sideClass} w-full h-full bg-white flex items-center justify-between shadow-lg border border-totorodarkgreen rounded-[5px] overflow-hidden`}>
+            {/* The tile */}
+            <div className={`${sideClass} w-full h-full bg-white flex items-center text-center justify-between shadow-lg border border-totorodarkgreen rounded-[5px] overflow-hidden relative`}>
+                {property.mortgaged && 
+                    <div className='absolute bg-black inset-0 opacity-[0.5]'></div>
+                }
                 {property.playerId
                     ? <img className='w-[30px] h-[30px] opacity-[0.7]' src={gameState.players.find( (player) => player.id === property.playerId)?.iconUrl}/>
                     : <p className='text-center bg-[#eaeaea]'>${property.purchasePrice}</p>
@@ -48,7 +52,8 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                     {gameState.boardSpaces[position - 1].boardSpaceName}
                 </p>
                 <span style={{backgroundColor:property.color}} className='flex'></span>
-            </button>
+            </div>
+            {/* The popover */}
             <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
                 <p className='mb-[5px]'>{gameState.boardSpaces[position - 1].boardSpaceName}</p>
                 <div className='flex justify-between border-b border-black'>

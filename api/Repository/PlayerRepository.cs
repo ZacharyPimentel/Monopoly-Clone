@@ -71,7 +71,7 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
     {
         var sql = @"
             UPDATE Player
-            SET Money = Money + @Amount
+            SET Money = Money - @Amount
             WHERE Id = @PlayerId
         ";
         await _db.ExecuteAsync(sql, new { PlayerId = playerId, Amount = amount });

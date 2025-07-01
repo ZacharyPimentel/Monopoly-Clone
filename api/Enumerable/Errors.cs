@@ -54,6 +54,9 @@ public enum Errors
     [Description("Player does not exist.")]
     PlayerDoesNotExist,
 
+    [Description("Player does not own this property.")]
+    PlayerDoesNotOwnProperty,
+
     [Description("Player Id does not match any of the valid ones specified.")]
     PlayerIdNotInList,
 

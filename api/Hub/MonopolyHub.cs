@@ -20,7 +20,8 @@ namespace api.hub
         IPlayerService playerService,
         IGuardService guardService,
         IJailService jailService,
-        ITradeService tradeService
+        ITradeService tradeService,
+        IPropertyService propertyService
     ) : Hub
     {
         //=======================================================
@@ -412,7 +413,7 @@ namespace api.hub
             });
 
         }
-        
+
         public async Task TradeAccept(SocketEventTradeAccept acceptParams)
         {
             var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -425,9 +426,38 @@ namespace api.hub
                 guards
                     .PlayersExist();
 
-                await tradeService.AcceptTrade(guardService.GetPlayer(),acceptParams.TradeId);
+                await tradeService.AcceptTrade(guardService.GetPlayer(), acceptParams.TradeId);
             });
-            
+
+        }
+
+        public async Task PropertyMortgage(int gamePropertyId)
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId);
+                guards.PlayerExists();
+
+                await propertyService.MortgageProperty(gamePropertyId);
+            });
+        }
+        public async Task PropertyUnmortgage(int gamePropertyId)
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId);
+                guards.PlayerExists();
+
+                await propertyService.UnmortgageProperty(gamePropertyId);
+            });
         }
     }
 }

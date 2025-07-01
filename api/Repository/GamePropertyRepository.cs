@@ -34,6 +34,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 p.Id,
                 p.BoardSpaceId,
                 p.PurchasePrice,
+                p.MortgageValue,
                 g.Id,
                 bst.BoardSpaceName
             FROM 
@@ -52,6 +53,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
             {
                 gp.BoardSpaceName = bst.BoardSpaceName;
                 gp.BoardSpaceId = p.BoardSpaceId;
+                gp.MortgageValue = p.MortgageValue;
                 gp.PurchasePrice = p.PurchasePrice;
                 return gp;
             },

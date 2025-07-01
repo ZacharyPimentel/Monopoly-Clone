@@ -12,5 +12,6 @@ export interface GameProperty {
     mortgaged: boolean;
     boardSpaceId?: number;
     purchasePrice?: number;
+    mortgageValue?: number;
     boardSpaceName?: string;
 }

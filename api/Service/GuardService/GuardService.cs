@@ -37,6 +37,15 @@ public class GuardService(
         }
         return Player;
     }
+    public Guid GetPlayerId()
+    {
+        if (CurrentSocketPlayer.PlayerId is not Guid playerId)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionMissingPlayerId);
+            throw new Exception(errorMessage);
+        }
+        return playerId;
+    }
     public Player GetCurrentPlayerFromList()
     {
         Player? player = Players.FirstOrDefault(p => p.Id == CurrentSocketPlayer?.PlayerId);
@@ -72,6 +81,15 @@ public class GuardService(
             throw new Exception(errorMessage);
         }
         return Game;
+    }
+    public Guid GetGameId()
+    {
+        if (CurrentSocketPlayer.GameId is not Guid gameId)
+        {
+            var errorMessage = EnumExtensions.GetEnumDescription(Errors.SocketConnectionMissingGameId);
+            throw new Exception(errorMessage);
+        }
+        return gameId;
     }
 
     public async Task HandleGuardError(Func<Task> action)

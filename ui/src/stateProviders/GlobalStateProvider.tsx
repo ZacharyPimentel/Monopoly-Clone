@@ -63,3 +63,13 @@ export function useGlobalState():GlobalState {
 export function useGlobalDispatch():React.Dispatch<Partial<GlobalState>>{
   return useContext(GlobalDispatchContext);
 }
+
+export function useGlobalContext():{
+  globalState:GlobalState,
+  globalDispatch:React.Dispatch<Partial<GlobalState>>
+}{
+  return {
+    globalState: useContext(GlobalStateContext),
+    globalDispatch: useContext(GlobalDispatchContext)
+  }
+}

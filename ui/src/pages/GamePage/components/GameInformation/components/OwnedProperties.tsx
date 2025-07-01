@@ -1,12 +1,16 @@
-import { useCallback, useMemo } from "react";
-import { usePlayer } from "../../../../../hooks/usePlayer";
-import { useGameState } from "../../../../../stateProviders/GameStateProvider"
-import { Property } from "../../../../../types/controllers/Property";
+import { useCallback } from "react";
+import { usePlayer } from "@hooks/usePlayer";
+import { useGameState } from "@stateProviders/GameStateProvider"
+import { Property } from "@generated/index";
+import { useGlobalContext } from "@stateProviders/GlobalStateProvider";
+import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
+import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
 
 export const OwnedProperties = () => {
 
     const gameState = useGameState();
     const {player} = usePlayer();
+    const {globalDispatch} = useGlobalContext();
 
     const propertyColor = useCallback( (property:Property) => {
         if(property.setNumber === 1) return 'bg-monopolyBrown'
@@ -28,10 +32,29 @@ export const OwnedProperties = () => {
                     .filter((space) =>space?.property?.playerId === player?.id)
                     .map( (space) => {
                         if(!space.property)return null
+                        const property = space.property as Property
                         return (
                             <li key={space.property.id} className='flex items-center gap-[20px]'>
                                 <div className={`h-[30px] w-[30px] rounded-[50%] ${propertyColor(space.property)}`}></div>
                                 <p>{space.boardSpaceName}</p>
+                                <button onClick={() => {
+                                    if(!property.mortgaged){
+                                        globalDispatch({
+                                            modalOpen:true,
+                                            modalContent: <MortgagePropertyModal space={space}/> 
+                                        })
+                                    }else{
+                                        globalDispatch({
+                                            modalOpen:true,
+                                            modalContent: <UnmortgagePropertyModal space={space}/> 
+                                        })
+                                    }
+                                }} className='ml-auto btn-secondary'>
+                                    {space.property?.mortgaged 
+                                        ? "Unmortgage"
+                                        : "Mortgage"
+                                    }
+                                </button>
                             </li>
                         )
                     })}

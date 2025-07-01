@@ -82,6 +82,7 @@ builder.Services.AddScoped<IGuardService, GuardService>();
 builder.Services.AddScoped<ISpaceLandingService, SpaceLandingService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ITradeService, TradeService>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 bool isRegistered = builder.Services.Any(sd =>
     sd.ServiceType == typeof(ISocketMessageService));

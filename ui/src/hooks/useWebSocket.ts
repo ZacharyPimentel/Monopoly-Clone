@@ -121,6 +121,14 @@ export const useWebSocket = () => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerUpdate),updateParams)
                     },
                 },
+                property:{
+                    mortgage:(gamePropertyId:number) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PropertyMortgage),gamePropertyId);
+                    },
+                    unmortgage:(gamePropertyId:number) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PropertyUnmortgage),gamePropertyId);
+                    }
+                },
                 gameProperty:{
                     update:(gamePropertyId:number,updateParams:Partial<PropertyUpdateParams>) => {
                         globalState.ws.invoke("GamePropertyUpdate",gamePropertyId,updateParams)

@@ -80,7 +80,7 @@ public class GuardClause(List<Player> players, Player? player, Game? game) : IGu
     public IGuardClause PlayerAllowedToRoll()
     {
         (player, game) = ValidatePlayerAndGameExists(player, game);
-        if (!player.CanRoll)
+        if (!player.CanRoll && player.Money >= 0)
         {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerNotAllowedToRoll);
             throw new Exception(errorMessage);
@@ -90,7 +90,7 @@ public class GuardClause(List<Player> players, Player? player, Game? game) : IGu
     public IGuardClause PlayerNotAllowedToRoll()
     {
         (player, game) = ValidatePlayerAndGameExists(player, game);
-        if (player.CanRoll)
+        if (player.CanRoll || player.Money < 0)
         {
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerAllowedToRoll);
             throw new Exception(errorMessage);

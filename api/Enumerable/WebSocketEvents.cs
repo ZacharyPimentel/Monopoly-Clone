@@ -24,6 +24,8 @@ public enum WebSocketEvents
     PlayerUpdateGroup,
     PlayerRollForTurn,
     PlayerRollForUtilties,
+    PropertyMortgage,
+    PropertyUnmortgage,
     TradeAccept,
     TradeDecline,
     TradeList,
