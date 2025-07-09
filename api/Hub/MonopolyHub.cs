@@ -440,7 +440,9 @@ namespace api.hub
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
                     .Init(currentSocketPlayer.PlayerId);
-                guards.PlayerExists();
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
 
                 await propertyService.MortgageProperty(gamePropertyId);
             });
@@ -454,7 +456,9 @@ namespace api.hub
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
                     .Init(currentSocketPlayer.PlayerId);
-                guards.PlayerExists();
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
 
                 await propertyService.UnmortgageProperty(gamePropertyId);
             });
