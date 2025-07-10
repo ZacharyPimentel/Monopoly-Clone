@@ -1,15 +1,15 @@
 import { useGameState } from "@stateProviders/GameStateProvider";
 import { BoardSpaceCategories } from "@generated/index";
-import { ChanceTile } from "./components/ChanceTile";
-import { CommunityChestTile } from "./components/CommunityChestTile";
-import { GoToJail } from "./components/GoToJail";
-import { Jail } from "./components/Jail";
-import { PropertyTile } from "./components/PropertyTile";
-import { Railroad } from "./components/Railroad";
-import { StartTile } from "./components/StartTile";
-import { TaxTile } from "./components/TaxTile";
-import { UtilityTile } from "./components/UtilityTile";
-import { Vacation } from "./components/Vacation";
+import { ChanceTile } from "./tileComponents/ChanceTile";
+import { CommunityChestTile } from "./tileComponents/CommunityChestTile";
+import { GoToJail } from "./tileComponents/GoToJail";
+import { Jail } from "./tileComponents/Jail";
+import { PropertyTile } from "./tileComponents/PropertyTile";
+import { Railroad } from "./tileComponents/Railroad";
+import { StartTile } from "./tileComponents/StartTile";
+import { TaxTile } from "./tileComponents/TaxTile";
+import { UtilityTile } from "./tileComponents/UtilityTile";
+import { Vacation } from "./tileComponents/Vacation";
 
 export const GameTile:React.FC<{position:number, sideClass?:string}> = ({position,sideClass = ''}) => {
 

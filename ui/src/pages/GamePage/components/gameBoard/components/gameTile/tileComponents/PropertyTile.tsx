@@ -4,12 +4,12 @@ import { usePlayer } from "@hooks/usePlayer";
 import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
 import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
 import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
+import { Popover } from "../components/Popover";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 
     const gameState = useGameState();
     const property = gameState.boardSpaces[position - 1]?.property;
-    const {player,isCurrentTurn} = usePlayer();
     const globalDispatch = useGlobalDispatch();
 
     //return the same content but in a different orientation depending on the property set
@@ -40,6 +40,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
         if(property.setNumber === 8) return({
             position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
+        return {position:''};
     },[property])
 
     return (
@@ -59,52 +60,12 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 </p>
                 <span style={{backgroundColor:property.color}} className='flex'></span>
             </div>
-            {/* The popover */}
-            <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
-                <p className='mb-[5px]'>{gameState.boardSpaces[position - 1].boardSpaceName}</p>
-                <div className='flex justify-between border-b border-black'>
-                    <p>Upgrades</p>
-                    <p>Rent</p>
-                </div>
-                {property.propertyRents.map( (propertyRent,index) => {
-                    return (
-                        <div 
-                            key={propertyRent.id}
-                            style={{fontWeight:property.upgradeCount === index ? 'bold' : 'normal'}} 
-                            className='flex justify-between'
-                        >
-                            <p>{propertyRent.upgradeNumber}</p>
-                            <p>${propertyRent.rent}</p>
-                        </div>
-                    )
-                })}
-                <div className='border-t border-black pt-[5px]'>
-                    <p>House Cost: ${property.upgradeCost}</p>
-                    <p>Mortgage Value: ${property.mortgageValue}</p>
-                </div>
-                {property.playerId === player.id && isCurrentTurn && (
-                    <div className='mt-[10px]'>
-                        <button onClick={() => {
-                            if(!property.mortgaged){
-                                globalDispatch({
-                                    modalOpen:true,
-                                    modalContent: <MortgagePropertyModal space={gameState.boardSpaces[position - 1]}/> 
-                                })
-                            }else{
-                                globalDispatch({
-                                    modalOpen:true,
-                                    modalContent: <UnmortgagePropertyModal space={gameState.boardSpaces[position - 1]}/> 
-                                })
-                            }
-                        }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full`}>
-                            {gameState.boardSpaces[position - 1]?.property?.mortgaged
-                                ? 'Unmortgage'
-                                : 'Mortgage'
-                            }
-                        </button>
-                    </div>
-                )}
-            </div>
+            <Popover 
+                sideClass={sideClass}
+                space={gameState.boardSpaces[position - 1]}
+                property={property}
+                propertyStyles={propertyStyles}
+            />
         </div>
         
     )

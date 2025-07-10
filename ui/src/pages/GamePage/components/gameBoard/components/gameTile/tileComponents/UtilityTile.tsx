@@ -2,7 +2,6 @@ import { useGameState } from "@stateProviders/GameStateProvider";
 import { BoardSpace } from "@generated/index"
 
 export const UtilityTile:React.FC<{space:BoardSpace,sideClass:string}> = ({space,sideClass}) => {
-
     const gameState = useGameState();
 
     if(!space.property)return null

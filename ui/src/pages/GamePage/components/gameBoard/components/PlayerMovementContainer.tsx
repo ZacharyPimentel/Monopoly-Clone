@@ -41,14 +41,6 @@ export const PlayerMovementContainer:React.FC<{
     }, [tileCoordinates]);
 
     return(<>
-        {/* <div style={{
-            top:(tileCoordinates?.y1 || 0),
-            left:(tileCoordinates?.x1 || 0)
-        }} className='absolute w-[30px] h-[30px] bg-[blue] z-[20]'></div>
-        <div style={{
-            top:tileCoordinates?.y2,
-            left:tileCoordinates?.x2
-        }} className='absolute w-[30px] h-[30px] bg-[yellow] z-[20]'></div> */}
         <div
             ref={divRef}
             style={{
