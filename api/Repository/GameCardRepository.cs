@@ -114,7 +114,7 @@ public class GameCardRepository(IDbConnection db) : BaseRepository<GameCard, int
                 gc.Id,
                 gc.CardId,
                 gc.GameId,
-                gc.Played
+                gc.Played,
                 c.Id,
                 c.CardActionId,
                 c.Amount,

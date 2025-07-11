@@ -72,6 +72,12 @@ public enum Errors
     [Description("Property is already owned by another player.")]
     PropertyAlreadyOwned,
 
+    [Description("Property cannot be upgraded any further.")]
+    PropertyCantBeUpgraded,
+
+    [Description("Property cannot be downgraded any further.")]
+    PropertyCantBeDowngraded,
+
     [Description("Property is not owned by another player.")]
     PropertyNotOwned,
 

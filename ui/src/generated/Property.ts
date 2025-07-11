@@ -14,7 +14,7 @@ export interface Property {
     propertyRents: PropertyRent[];
     gamePropertyId?: number;
     playerId?: string;
-    upgradeCount?: number;
+    upgradeCount: number;
     mortgaged?: boolean;
     gameId?: string;
     setNumber?: number;

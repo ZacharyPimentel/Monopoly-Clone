@@ -127,6 +127,12 @@ export const useWebSocket = () => {
                     },
                     unmortgage:(gamePropertyId:number) => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PropertyUnmortgage),gamePropertyId);
+                    },
+                    upgrade:(gamePropertyId:number) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PropertyUpgrade),gamePropertyId);
+                    },
+                    downgrade:(gamePropertyId:number) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PropertyDowngrade),gamePropertyId);
                     }
                 },
                 gameProperty:{

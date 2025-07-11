@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using api.DTO.Entity;
 using api.DTO.Websocket;
 using api.Entity;
@@ -471,11 +472,47 @@ public class SpaceLandingService(
                 Players = true,
                 GameLogs = true
             });
-            //get the cards advance to space id, unless it's move back 3 spaces which is calculated manually.
+            //get the cards advance to space id, unless it's:
+            // move back 3 spaces 
+            // advance to utility
+            // advance to nearest railroad
             BoardSpace movedToSpace;
             if (card.CardActionId == (int)CardActionIds.BackThreeSpaces)
             {
-                movedToSpace = context.BoardSpaces.First(bs => bs.Id == bs.Id - 3);
+                int playerCurrentSpace = context.CurrentPlayer.BoardSpaceId;
+                movedToSpace = context.BoardSpaces.First(bs => bs.Id == playerCurrentSpace - 3);
+            }
+            else if (card.CardActionId == (int)CardActionIds.AdvanceToUtility)
+            {
+                // if on or after waterworks, go to electric company
+                if (context.CurrentPlayer.BoardSpaceId >= 29)
+                {
+                    movedToSpace = context.BoardSpaces.First(bs => bs.Id == 13);
+                }
+                // should go to water works if between electric company and water works
+                else if (context.CurrentPlayer.BoardSpaceId >= 13 && context.CurrentPlayer.BoardSpaceId < 23)
+                {
+                    movedToSpace = context.BoardSpaces.First(bs => bs.Id == 29);
+                }
+                // go to electric company when current space < 13
+                else
+                {
+                    movedToSpace = context.BoardSpaces.First(bs => bs.Id == 13);
+                }
+            }
+            else if (card.CardActionId == (int)CardActionIds.AdvanceToRailroad)
+            {
+                int playerCurrentSpace = context.CurrentPlayer.BoardSpaceId;
+                if (playerCurrentSpace >= 36)
+                {
+                    movedToSpace = context.BoardSpaces.First(bs => bs.Id == 6);
+                }
+                else
+                {
+                    var availableRailroads = context.BoardSpaces.Where(bs => bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard);
+                    BoardSpace nearestRailroad = availableRailroads.First(rr => rr.Id > playerCurrentSpace);
+                    movedToSpace = nearestRailroad;
+                }
             }
             else
             {

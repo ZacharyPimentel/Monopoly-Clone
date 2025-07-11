@@ -25,9 +25,7 @@ public interface ICardService
 public class CardService(
     IPlayerRepository playerRepository,
     IBoardMovementService boardMovementService,
-    ISocketMessageService socketMessageService,
-    IJailService jailService,
-    IGameLogRepository gameLogRepository
+    IJailService jailService
 ) : ICardService
 {
     public async Task HandlePulledCard(Card card, SpaceLandingServiceContext context)

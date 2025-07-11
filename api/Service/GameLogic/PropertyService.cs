@@ -11,6 +11,8 @@ public interface IPropertyService
 {
     public Task MortgageProperty(int gamePropertyId);
     public Task UnmortgageProperty(int gamePropertyId);
+    public Task UpgradeProperty(int gamePropertyId);
+    public Task DowngradeProperty(int gamePropertyId);
 }
 public class PropertyService(
     IGuardService guardService,
@@ -62,6 +64,69 @@ public class PropertyService(
         int paymentAmount = (int)Math.Round((gameProperty.MortgageValue ?? 0) * 1.1);
         await playerRepository.SubtractMoneyFromPlayer(player.Id, paymentAmount);
         await gameService.CreateGameLog(gameId, $"{player.PlayerName} unmortgaged {gameProperty.BoardSpaceName} for ${paymentAmount}.");
+        await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
+        {
+            BoardSpaces = true,
+            Players = true,
+            GameLogs = true
+        });
+    }
+
+    public async Task UpgradeProperty(int gamePropertyId)
+    {
+        Player player = guardService.GetPlayer();
+        Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
+        GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
+        if (player.Id != gameProperty.PlayerId)
+        {
+            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+        }
+        if (gameProperty.UpgradeCount == 5)
+        {
+            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
+        }
+
+        await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
+        {
+            UpgradeCount = gameProperty.UpgradeCount + 1,
+        });
+        int paymentAmount = gameProperty.UpgradeCost ?? 0;
+        await playerRepository.SubtractMoneyFromPlayer(player.Id, paymentAmount);
+        await gameService.CreateGameLog(gameId, $"{player.PlayerName} upgraded {gameProperty.BoardSpaceName} for ${paymentAmount}.");
+        await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
+        {
+            BoardSpaces = true,
+            Players = true,
+            GameLogs = true
+        });
+    }
+
+    public async Task DowngradeProperty(int gamePropertyId)
+    {
+        Player player = guardService.GetPlayer();
+        Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
+        GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
+        if (player.Id != gameProperty.PlayerId)
+        {
+            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+        }
+
+        if (gameProperty.UpgradeCount == 0)
+        {
+            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PropertyCantBeDowngraded));
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyCantBeDowngraded));
+        }
+
+        await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
+        {
+            UpgradeCount = gameProperty.UpgradeCount - 1,
+        });
+        int paymentAmount = (int)Math.Round((decimal)(gameProperty.UpgradeCost ?? 0) / 2) ;
+        await playerRepository.AddMoneyToPlayer(player.Id, paymentAmount / 2);
+        await gameService.CreateGameLog(gameId, $"{player.PlayerName} downgraded {gameProperty.BoardSpaceName} for ${paymentAmount}.");
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {
             BoardSpaces = true,

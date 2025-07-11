@@ -15,7 +15,7 @@ public class Property
     //joined GameProperty Id
     public int? GamePropertyId { get; set; }
     public Guid? PlayerId { get; set; }
-    public int? UpgradeCount { get; set; }
+    public int UpgradeCount { get; set; }
     public bool? Mortgaged { get; set; }
     public Guid? GameId { get; set; }
 

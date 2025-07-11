@@ -439,7 +439,7 @@ namespace api.hub
                 IGuardClause guards = await guardService
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
-                    .Init(currentSocketPlayer.PlayerId);
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
                 guards
                     .PlayerExists()
                     .IsCurrentTurn();
@@ -455,12 +455,45 @@ namespace api.hub
                 IGuardClause guards = await guardService
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
-                    .Init(currentSocketPlayer.PlayerId);
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
                 guards
                     .PlayerExists()
                     .IsCurrentTurn();
 
                 await propertyService.UnmortgageProperty(gamePropertyId);
+            });
+        }
+        public async Task PropertyUpgrade(int gamePropertyId)
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
+
+                await propertyService.UpgradeProperty(gamePropertyId);
+            });
+        }
+        
+        public async Task PropertyDowngrade(int gamePropertyId)
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
+
+                await propertyService.DowngradeProperty(gamePropertyId);
             });
         }
     }

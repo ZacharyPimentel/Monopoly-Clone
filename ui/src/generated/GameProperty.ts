@@ -13,5 +13,6 @@ export interface GameProperty {
     boardSpaceId?: number;
     purchasePrice?: number;
     mortgageValue?: number;
+    upgradeCost?: number;
     boardSpaceName?: string;
 }
