@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using api.DTO.Entity;
 using api.Entity;
 using api.Enumerable;
@@ -20,12 +19,15 @@ public interface ICardService
     public Task AdvanceToRailroad(SpaceLandingServiceContext context);
     public Task AdvanceToUtility(SpaceLandingServiceContext context);
     public Task PayPlayers(Card card, SpaceLandingServiceContext context);
+    public Task PayForHouseUpgrades(Card card, SpaceLandingServiceContext context);
 }
 
 public class CardService(
     IPlayerRepository playerRepository,
     IBoardMovementService boardMovementService,
-    IJailService jailService
+    IJailService jailService,
+    IGamePropertyRepository gamePropertyRepository,
+    IGameService gameService
 ) : ICardService
 {
     public async Task HandlePulledCard(Card card, SpaceLandingServiceContext context)
@@ -51,6 +53,7 @@ public class CardService(
                 await ReceiveGetOutOfJailFreeCard(card, context);
                 break;
             case (int)CardActionIds.PayHouseHotel:
+                await PayForHouseUpgrades(card, context);
                 break;
             case (int)CardActionIds.ReceiveFromPlayers:
                 await ReceiveFromPlayers(card, context);
@@ -112,7 +115,7 @@ public class CardService(
         // });
         //await socketMessageService.SendGamePlayers(context.Game.Id);
     }
- 
+
     public async Task BackThreeSpaces(Card card, SpaceLandingServiceContext context)
     {
         await boardMovementService.MovePlayerBackThreeSpaces(context.CurrentPlayer);
@@ -193,4 +196,30 @@ public class CardService(
         });
     }
 
+    public async Task PayForHouseUpgrades(Card card, SpaceLandingServiceContext context)
+    {
+        int costPerHouse = card.CardTypeId == (int)CardTypeIds.Chance ? 25 : 100;
+        int costPerHotel = card.CardTypeId == (int)CardTypeIds.CommunityChest ? 40 : 115;
+
+        IEnumerable<GameProperty> gameProperties = await gamePropertyRepository.SearchAsync(
+            new GamePropertyWhereParams { PlayerId = context.CurrentPlayer.Id },
+            new { }
+        );
+
+        int numberOfHouses = gameProperties
+            .Where(gp => gp.UpgradeCount < 5)
+            .Sum(gp => gp.UpgradeCount);
+
+        int numberOfHotels = gameProperties
+            .Where(gp => gp.UpgradeCount == 5)
+            .Count();
+
+        int paymentAmount = (costPerHouse * numberOfHouses) + (costPerHotel * numberOfHotels);
+
+        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
+        {
+            Money = context.CurrentPlayer.Money - paymentAmount
+        });
+        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} paid {paymentAmount} for their property upgrades.");
+    }
 }

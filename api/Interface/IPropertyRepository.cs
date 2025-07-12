@@ -1,5 +1,5 @@
 using api.Entity;
-using api.Interface;
+namespace api.Interface;
 public class PropertyUpdateParams
 {
     public int? UpgradeCount { get; set; }
