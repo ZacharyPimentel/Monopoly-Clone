@@ -18,4 +18,5 @@ export interface PlayerUpdateParams {
     rollCount?: number;
     rollingForUtilities?: boolean;
     canRoll?: boolean;
+    bankrupt?: boolean;
 }

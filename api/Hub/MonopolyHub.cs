@@ -479,7 +479,7 @@ namespace api.hub
                 await propertyService.UpgradeProperty(gamePropertyId);
             });
         }
-        
+
         public async Task PropertyDowngrade(int gamePropertyId)
         {
             var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -488,12 +488,29 @@ namespace api.hub
                 IGuardClause guards = await guardService
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
-                    .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
                 guards
                     .PlayerExists()
                     .IsCurrentTurn();
 
                 await propertyService.DowngradeProperty(gamePropertyId);
+            });
+        }
+
+        public async Task PlayerGoBankrupt()
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
+
+                await playerService.DeclareBankruptcy();
             });
         }
     }

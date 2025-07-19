@@ -8,4 +8,5 @@ public interface IGameRepository : IBaseRepository<Game, Guid>
     Task<List<Game>> Search(GameWhereParams gameWhereParams);
     Task<List<Game>> GetAllWithPlayerCountAsync();
     Task AddMoneyToFreeParking(Guid gameId, int amount);
+    Task PayoutFreeParkingToPlayer(Player player);
 }

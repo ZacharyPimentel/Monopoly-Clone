@@ -55,7 +55,8 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
                 SELECT 
                 t.PlayerId, t.GameId, t.PlayOrder
                 FROM TURNORDER AS t
-                WHERE HasPlayed = false
+                WHERE HasPlayed = false 
+                AND t.GameId = @Id
                 ORDER BY PlayOrder
                 LIMIT 1
             )
@@ -63,7 +64,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
             FROM Game as g
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
             Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId
-                WHERE g.Id = @Id
+            WHERE g.Id = @Id
         ";
 
         Game? game = await db.QuerySingleOrDefaultAsync<Game>(sql, new { Id = gameId });
@@ -87,6 +88,28 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
         ";
 
         await db.ExecuteAsync(sql, new { GameId = gameId, Amount = amount });
+    }
+    public async Task PayoutFreeParkingToPlayer(Player player)
+    {
+        var sql = @"
+            UPDATE Player
+            SET 
+                Money = Money + (
+                    SELECT 
+                        MoneyInFreeParking
+                    FROM 
+                        GAME
+                    WHERE
+                        Id = @GameId
+                )
+            WHERE PlayerId = @PlayerId
+
+            UPDATE Game
+            SET MoneyInFreeParking = 0
+            WHERE Id = @GameId
+        ";
+
+        await db.ExecuteAsync(sql, new { PlayerId = player.Id, player.GameId });
     }
 
 }

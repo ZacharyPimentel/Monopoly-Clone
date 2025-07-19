@@ -19,6 +19,7 @@ public class PlayerUpdateParams
     public int? RollCount { get; set; }
     public bool? RollingForUtilities { get; set; }
     public bool? CanRoll { get; set; }
+    public bool? Bankrupt { get; set; }
     public static PlayerUpdateParams FromPlayer(Player player)
     {
         return new PlayerUpdateParams
@@ -37,6 +38,7 @@ public class PlayerUpdateParams
             RollCount = player.RollCount,
             RollingForUtilities = player.RollingForUtilities,
             CanRoll = player.CanRoll,
+            Bankrupt = player.Bankrupt,
         };
     }
 }

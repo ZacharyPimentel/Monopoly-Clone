@@ -87,13 +87,19 @@ public class PropertyService(
             await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
             throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
         }
+        
+        int paymentAmount = gameProperty.UpgradeCost ?? 0;
 
+        if (player.Money < paymentAmount)
+        {
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.NotEnoughMoney));
+        }
+
+        await playerRepository.SubtractMoneyFromPlayer(player.Id, paymentAmount);
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
         {
             UpgradeCount = gameProperty.UpgradeCount + 1,
         });
-        int paymentAmount = gameProperty.UpgradeCost ?? 0;
-        await playerRepository.SubtractMoneyFromPlayer(player.Id, paymentAmount);
         await gameService.CreateGameLog(gameId, $"{player.PlayerName} upgraded {gameProperty.BoardSpaceName} for ${paymentAmount}.");
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {

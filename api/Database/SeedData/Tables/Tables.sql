@@ -80,6 +80,10 @@ CREATE TABLE IF NOT EXISTS PLAYER(
     RollingForUtilities BOOLEAN DEFAULT false,
     JailTurnCount INTEGER DEFAULT 0,
     GetOutOfJailFreeCards INTEGER DEFAULT 0,
+    Bankrupt BOOLEAN DEFAULT false,
+    InDebtTo UUID NULL,
+    InDebtToAmount INTEGER DEFAULT 0,
+    DebtToBank INTEGER DEFAULT 0,
     CreatedAt TimeStamp NOT NULL
 );
 

@@ -4,6 +4,7 @@ import { PurchaseButton } from "./PurchaseButton";
 import { usePlayer } from "@hooks/usePlayer";
 import { PayJailFee } from "./PayJailFee";
 import { useGameState } from "@stateProviders/GameStateProvider";
+import { BankruptButton } from "./BankruptButton";
 
 export const CurrentTurn = () => {
 
@@ -28,7 +29,13 @@ export const CurrentTurn = () => {
             {
                 player.canRoll || player.rollingForUtilities
                     ?   <RollButton/>
-                    :   <EndTurn/>
+                    :   player.money >= 0
+                        ?   <EndTurn/>
+                        : <div className='flex flex-col items-center gap-[20px]'>
+                            <p className='text-white'>You are out of money! Raise some money and pay your debt!</p>
+                            <p className='text-white text-[20px]'>$600 still owed to: </p>
+                            <BankruptButton/>
+                          </div>
             }
             {player?.inJail && player.rollCount === 0 && (
                 <PayJailFee/>

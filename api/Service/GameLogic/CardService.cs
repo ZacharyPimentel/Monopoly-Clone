@@ -220,6 +220,6 @@ public class CardService(
         {
             Money = context.CurrentPlayer.Money - paymentAmount
         });
-        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} paid {paymentAmount} for their property upgrades.");
+        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} for their property upgrades.");
     }
 }

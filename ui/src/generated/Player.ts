@@ -20,6 +20,10 @@ export interface Player {
     rollingForUtilities: boolean;
     jailTurnCount: number;
     getOutOfJailFreeCards: number;
+    bankrupt: boolean;
+    inDebtTo?: string;
+    inDebtToAmount: number;
+    debtToBank: number;
     iconUrl: string;
     iconName: string;
 }

@@ -8,6 +8,7 @@ using api.hub;
 using api.Hubs;
 using api.Interface;
 using api.Service.GameLogic;
+using api.Service.GuardService;
 using api.Socket;
 using Dapper;
 using Microsoft.AspNetCore.SignalR;
@@ -23,8 +24,7 @@ public interface IPlayerService
     public Task RollForUtilities(Player player, Game game);
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
     public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
-    public Task AddMoneyToPlayer(Guid playerId, int amount);
-    public Task SubtractMoneyFromPlayer(Guid playerId, int amount);
+    public Task DeclareBankruptcy();
 }
 
 public class PlayerService(
@@ -43,7 +43,8 @@ public class PlayerService(
     ISpaceLandingService spaceLandingService,
     IGameCardRepository gameCardRepository,
     IPlayerIconRepository playerIconRepository,
-    IGameService gameService
+    IGameService gameService,
+    IGuardService guardService
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -365,6 +366,8 @@ public class PlayerService(
             amountToPay = (dieOne + dieTwo) * 10;
         }
 
+        //logic for if player doesn't have enough money to pay
+
         Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
         await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams
         {
@@ -428,12 +431,16 @@ public class PlayerService(
         });
     }
 
-    public async Task AddMoneyToPlayer(Guid playerId, int amount)
+    public async Task DeclareBankruptcy()
     {
-        await playerRepository.AddMoneyToPlayer(playerId, amount);
-    }
-    public async Task SubtractMoneyFromPlayer(Guid playerId, int amount)
-    {
-        await playerRepository.SubtractMoneyFromPlayer(playerId, amount);
+        Player player = guardService.GetPlayer();
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
+        {
+            CanRoll = false,
+            Bankrupt = true
+        });
+
+        //unassign properties
+        
     }
 }

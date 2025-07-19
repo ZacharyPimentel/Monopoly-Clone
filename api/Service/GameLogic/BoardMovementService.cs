@@ -53,7 +53,6 @@ public class BoardMovementService(
         if (newBoardPosition == 1)
         {
             newBoardPosition = 1;
-            message = $"{player.PlayerName} landed on GO and collected $200.";
         }
 
         if (passedGo) player.Money += 200;
