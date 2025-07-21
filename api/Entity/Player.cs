@@ -20,9 +20,7 @@ public class Player
     public int JailTurnCount { get; set; } = 0;
     public int GetOutOfJailFreeCards { get; set; } = 0;
     public bool Bankrupt { get; set; }
-    public Guid? InDebtTo {get; set;}
-    public int InDebtToAmount {get; set;}
-    public int DebtToBank { get; set; }
+    public int MoneyNeededForPayment { get; set; }
 
     //Joined properties from PlayerIcon
     public required string IconUrl { get; set; }

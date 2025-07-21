@@ -21,7 +21,9 @@ namespace api.hub
         IGuardService guardService,
         IJailService jailService,
         ITradeService tradeService,
-        IPropertyService propertyService
+        IPropertyService propertyService,
+        IPaymentService paymentService,
+        ISpaceLandingService spaceLandingService
     ) : Hub
     {
         //=======================================================
@@ -511,6 +513,23 @@ namespace api.hub
                     .IsCurrentTurn();
 
                 await playerService.DeclareBankruptcy();
+            });
+        }
+
+        public async Task PlayerCompletePayment()
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .SocketConnectionHasPlayerId()
+                    .SocketConnectionHasGameId()
+                    .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+                guards
+                    .PlayerExists()
+                    .IsCurrentTurn();
+
+                await playerService.CompletePayment(guardService.GetPlayer());
             });
         }
     }

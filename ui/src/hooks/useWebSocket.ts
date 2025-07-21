@@ -99,6 +99,9 @@ export const useWebSocket = () => {
                     getAll: () => {
                         globalState.ws.invoke("PlayerGetAll")
                     },
+                    completePayment:() => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerCompletePayment))
+                    },
                     payOutOfJail: () => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PayOutOfJail));
                     },

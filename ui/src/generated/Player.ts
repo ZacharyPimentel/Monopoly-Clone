@@ -21,9 +21,7 @@ export interface Player {
     jailTurnCount: number;
     getOutOfJailFreeCards: number;
     bankrupt: boolean;
-    inDebtTo?: string;
-    inDebtToAmount: number;
-    debtToBank: number;
+    moneyNeededForPayment: number;
     iconUrl: string;
     iconName: string;
 }

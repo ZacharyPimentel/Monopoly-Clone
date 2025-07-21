@@ -27,7 +27,8 @@ public class CardService(
     IBoardMovementService boardMovementService,
     IJailService jailService,
     IGamePropertyRepository gamePropertyRepository,
-    IGameService gameService
+    IGameService gameService,
+    IPaymentService paymentService
 ) : ICardService
 {
     public async Task HandlePulledCard(Card card, SpaceLandingServiceContext context)
@@ -78,10 +79,7 @@ public class CardService(
             throw new Exception(errorMessage);
         }
 
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            Money = context.CurrentPlayer.Money - paymentAmount
-        });
+        await paymentService.PayBank(context.CurrentPlayer, paymentAmount);
     }
 
     public async Task ReceiveFromBank(Card card, SpaceLandingServiceContext context)

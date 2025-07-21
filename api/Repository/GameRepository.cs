@@ -84,7 +84,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
             SET 
                 MoneyInFreeParking = MoneyInFreeParking + @Amount
             WHERE
-                GameId = @GameId
+                Id = @GameId
         ";
 
         await db.ExecuteAsync(sql, new { GameId = gameId, Amount = amount });
@@ -102,14 +102,14 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
                     WHERE
                         Id = @GameId
                 )
-            WHERE PlayerId = @PlayerId
+            WHERE Id = @PlayerId
 
             UPDATE Game
             SET MoneyInFreeParking = 0
             WHERE Id = @GameId
         ";
 
-        await db.ExecuteAsync(sql, new { PlayerId = player.Id, player.GameId });
+        await db.ExecuteAsync(sql, new { player.Id, player.GameId });
     }
 
 }

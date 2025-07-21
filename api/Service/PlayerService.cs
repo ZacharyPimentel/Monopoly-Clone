@@ -25,6 +25,7 @@ public interface IPlayerService
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
     public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
     public Task DeclareBankruptcy();
+    public Task CompletePayment(Player player);
 }
 
 public class PlayerService(
@@ -44,7 +45,8 @@ public class PlayerService(
     IGameCardRepository gameCardRepository,
     IPlayerIconRepository playerIconRepository,
     IGameService gameService,
-    IGuardService guardService
+    IGuardService guardService,
+    IPaymentService paymentService
 ) : IPlayerService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
@@ -367,16 +369,9 @@ public class PlayerService(
         }
 
         //logic for if player doesn't have enough money to pay
+        await paymentService.PayPlayer(player, propertyOwnerId, amountToPay);
 
         Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
-        await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams
-        {
-            Money = propertyOwner.Money + amountToPay
-        });
-        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
-        {
-            Money = player.Money - amountToPay
-        });
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = game.Id,
@@ -441,6 +436,24 @@ public class PlayerService(
         });
 
         //unassign properties
-        
     }
+
+    public async Task CompletePayment(Player player)
+    {
+        if (player.MoneyNeededForPayment == 0)
+        {
+            throw new Exception("Player has no payment needed to be completed");
+        }
+
+        var gamePlayers = await playerRepository.SearchWithIconsAsync(
+            new PlayerWhereParams { GameId = player.GameId },
+            new PlayerWhereParams { }
+        );
+
+        await spaceLandingService.HandleLandedOnSpace(
+            gamePlayers,
+            guardService.GetGame()
+        );
+    }
+    
 }

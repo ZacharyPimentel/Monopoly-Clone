@@ -6,6 +6,7 @@ import { PlayerOfferView } from "./components/PlayerOfferView"
 import { useWebSocket } from "@hooks/useWebSocket"
 import { Player } from "@generated/Player"
 import { PlayerTradeOffer } from "@generated/PlayerTradeOffer"
+import { useMemo } from "react"
 
 type CreateTradeInputs = {
     playerOne:PlayerTradeOffer
@@ -18,23 +19,31 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 
+    const defaultValues = {
+        playerOne:{
+            playerId:player.id,
+            money:0,
+            getOutOfJailFreeCards:0,
+            gamePropertyIds:[]
+        },
+        playerTwo:{
+            playerId:tradeWithPlayer.id,
+            money:0,
+            getOutOfJailFreeCards:0,
+            gamePropertyIds:[]
+        },
+    }
+
     const form = useForm<CreateTradeInputs>({
         mode:'onBlur',
-        defaultValues:{
-            playerOne:{
-                playerId:player.id,
-                money:0,
-                getOutOfJailFreeCards:0,
-                gamePropertyIds:[]
-            },
-            playerTwo:{
-                playerId:tradeWithPlayer.id,
-                money:0,
-                getOutOfJailFreeCards:0,
-                gamePropertyIds:[]
-            },
-        }
+        defaultValues:defaultValues
     })
+
+    const tradeHasSomethingFilledOut = useMemo( () => {
+        const defaultsHaveChanged = JSON.stringify(form.watch()) !== JSON.stringify(defaultValues)
+        console.log(defaultsHaveChanged)
+        return defaultsHaveChanged
+    },[form.watch()])
 
     return (
         <FormProvider {...form}>
@@ -62,7 +71,7 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
                         })
                     }}
                     confirmButtonText="Create Trade"
-                    confirmDisabled={!form.formState.isValid}
+                    confirmDisabled={!tradeHasSomethingFilledOut}
                 />
             </div>
         </FormProvider>

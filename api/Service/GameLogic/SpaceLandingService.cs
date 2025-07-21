@@ -40,7 +40,8 @@ public class SpaceLandingService(
     ISocketMessageService socketMessageService,
     IBoardMovementService boardMovementService,
     IGameService gameService,
-    IGameRepository gameRepository
+    IGameRepository gameRepository,
+    IPaymentService paymentService
 ) : ISpaceLandingService
 {
     public async Task HandleLandedOnSpace(IEnumerable<Player> players, Game game, bool cameFromCard = false)
@@ -209,8 +210,7 @@ public class SpaceLandingService(
                             paymentAmount *= 2;
                         }
                     }
-                    await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - paymentAmount });
-                    await playerRepository.UpdateAsync(propertyOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + paymentAmount });
+                    await paymentService.PayPlayer(context.CurrentPlayer, propertyOwnerId, paymentAmount);
                     await gameLogRepository.CreateAsync(new GameLogCreateParams
                     {
                         GameId = context.Game.Id,
@@ -419,10 +419,8 @@ public class SpaceLandingService(
         { // Luxury tax
             paymentAmount = 75;
         }
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            Money = context.CurrentPlayer.Money - paymentAmount,
-        });
+
+        await paymentService.PayBank(context.CurrentPlayer, paymentAmount);
 
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {

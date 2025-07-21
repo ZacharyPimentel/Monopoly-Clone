@@ -9,7 +9,7 @@ export const NumberInput:React.FC<{
 }> = ({formControl,min,max,disabled = false}) => {
 
     const form = useFormContext();
-
+    
     return (
         <input 
             className='pl-[5px]'
@@ -20,7 +20,6 @@ export const NumberInput:React.FC<{
                 if(min !== undefined && parseInt(e.target.value) < min){
                     form.setValue(formControl, 0);
                 }
-                console.log(max)
                 if(max !== undefined && parseInt(e.target.value) > max){
                     form.setValue(formControl,max)
                 }

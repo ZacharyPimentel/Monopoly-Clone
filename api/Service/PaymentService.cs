@@ -29,32 +29,41 @@ public class PaymentService(
 {
     public async Task PayPlayer(Player payingPlayer, Guid receivingPlayerId, int amount)
     {
-        int payingPlayerMoney = payingPlayer.Money;
-        payingPlayer.Money -= amount;
-        if (payingPlayer.Money < amount)
+        //if the payment would drop the player money below 0
+        if (payingPlayer.Money - amount < 0)
         {
-            payingPlayer.InDebtTo = receivingPlayerId;
-            payingPlayer.InDebtToAmount = Math.Abs(payingPlayer.Money);
+            payingPlayer.MoneyNeededForPayment = amount;
+        }
+        //player has enough money, can pay without extra logic needed
+        else
+        {
+            await AddMoneyToPlayer(
+                receivingPlayerId,
+                amount
+            );
+            payingPlayer.Money -= amount;
+            payingPlayer.MoneyNeededForPayment = 0;
         }
         await playerRepository.UpdateAsync(payingPlayer.Id, PlayerUpdateParams.FromPlayer(payingPlayer));
-        await AddMoneyToPlayer(
-            receivingPlayerId,
-            payingPlayerMoney >= amount ? amount : payingPlayerMoney
-        );
     }
     public async Task PayBank(Player payingPlayer, int amount)
     {
-        int payingPlayerMoney = payingPlayer.Money;
-        payingPlayer.Money -= amount;
-        if (payingPlayer.Money < amount)
+        //if the payment would drop the player money below 0
+        if (payingPlayer.Money - amount < 0)
         {
-            payingPlayer.DebtToBank = Math.Abs(payingPlayer.Money);
+            payingPlayer.MoneyNeededForPayment = amount;
+        }
+        //player has enough money, can pay without extra logic needed
+        else
+        {
+            await gameRepository.AddMoneyToFreeParking(
+                payingPlayer.GameId,
+                amount
+            );
+            payingPlayer.Money -= amount;
+            payingPlayer.MoneyNeededForPayment = 0;
         }
         await playerRepository.UpdateAsync(payingPlayer.Id, PlayerUpdateParams.FromPlayer(payingPlayer));
-        await gameRepository.AddMoneyToFreeParking(
-            payingPlayer.GameId,
-            payingPlayerMoney >= amount ? amount : payingPlayerMoney
-        );
     }
     public async Task SubtractMoneyFromPlayer(Guid playerId, int amount)
     {
@@ -80,5 +89,4 @@ public class PaymentService(
 
         await gameRepository.PayoutFreeParkingToPlayer(player);
     }
-
 }

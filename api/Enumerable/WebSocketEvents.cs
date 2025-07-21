@@ -19,6 +19,7 @@ public enum WebSocketEvents
     PlayerEdit,
     PlayerEndTurn,
     PlayerGoBankrupt,
+    PlayerCompletePayment,
     PlayerPurchaseProperty,
     PlayerReady,
     PlayerUpdate,

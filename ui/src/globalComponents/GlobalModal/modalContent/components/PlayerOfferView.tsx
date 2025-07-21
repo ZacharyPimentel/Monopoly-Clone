@@ -37,7 +37,7 @@ export const PlayerOfferView:React.FC<{formControlPrefix:string, player:Player}>
                 <NumberInput 
                     formControl={`${formControlPrefix}.money`}
                     min={0}
-                    max={player.money}
+                    max={player.money < 0 ? 0 : player.money}
                 />
             </label>
             <label className='flex flex-col'>
