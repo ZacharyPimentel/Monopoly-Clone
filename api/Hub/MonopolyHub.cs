@@ -529,7 +529,7 @@ namespace api.hub
                     .PlayerExists()
                     .IsCurrentTurn();
 
-                await playerService.CompletePayment(guardService.GetPlayer());
+                await paymentService.PayDebt(guardService.GetPlayer());
             });
         }
     }

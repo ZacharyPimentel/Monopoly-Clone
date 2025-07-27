@@ -210,12 +210,7 @@ public class SpaceLandingService(
                             paymentAmount *= 2;
                         }
                     }
-                    await paymentService.PayPlayer(context.CurrentPlayer, propertyOwnerId, paymentAmount);
-                    await gameLogRepository.CreateAsync(new GameLogCreateParams
-                    {
-                        GameId = context.Game.Id,
-                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${paymentAmount}"
-                    });
+                    await paymentService.PayPlayer(context.CurrentPlayer, propertyOwner, paymentAmount);
                     await boardMovementService.ToggleOffGameMovement(context.Game.Id);
                     await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
                     {
@@ -421,12 +416,7 @@ public class SpaceLandingService(
         }
 
         await paymentService.PayBank(context.CurrentPlayer, paymentAmount);
-
-        await gameLogRepository.CreateAsync(new GameLogCreateParams
-        {
-            GameId = context.Game.Id,
-            Message = $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} in taxes."
-        });
+        
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
         {

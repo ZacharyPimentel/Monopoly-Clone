@@ -102,6 +102,9 @@ export const useWebSocket = () => {
                     completePayment:() => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerCompletePayment))
                     },
+                    goBankrupt:() => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerGoBankrupt))
+                    },
                     payOutOfJail: () => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PayOutOfJail));
                     },

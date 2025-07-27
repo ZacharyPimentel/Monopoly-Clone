@@ -3,6 +3,8 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
+import { PlayerDebt } from "./PlayerDebt";
+
 export interface Player {
     id: string;
     playerName: string;
@@ -21,7 +23,7 @@ export interface Player {
     jailTurnCount: number;
     getOutOfJailFreeCards: number;
     bankrupt: boolean;
-    moneyNeededForPayment: number;
     iconUrl: string;
     iconName: string;
+    debts: PlayerDebt[];
 }

@@ -1,6 +1,7 @@
 using System.Data;
 using System.Reflection;
 using api;
+using api.Database;
 using api.Helper;
 using api.hub;
 using api.Interface;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<ITradePropertyRepository, TradePropertyRepository>();
 builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<ITurnOrderRepository, TurnOrderRepository>();
 builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
+builder.Services.AddScoped<IPlayerDebtRepository, PlayerDebtRepository>();
 //socket context
 builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 //services
@@ -85,6 +87,10 @@ builder.Services.AddScoped<ITradeService, TradeService>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+//used for seeding games in various states for testing
+builder.Services.AddScoped<TestGameSeeder>();
+
+
 bool isRegistered = builder.Services.Any(sd =>
     sd.ServiceType == typeof(ISocketMessageService));
 
@@ -98,6 +104,11 @@ using (var scope = app.Services.CreateScope())
     var dbConnection = scope.ServiceProvider.GetRequiredService<IDbConnection>();
     dbConnection.Open(); // Open the connection
     DatabaseInitializer.Initialize(dbConnection); // Initialize the database
+    if (app.Environment.IsDevelopment())
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<TestGameSeeder>();
+        await seeder.SeedTestingGameData();
+    }
 }
 
 if (app.Environment.IsDevelopment())

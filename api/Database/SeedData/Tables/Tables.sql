@@ -81,7 +81,16 @@ CREATE TABLE IF NOT EXISTS PLAYER(
     JailTurnCount INTEGER DEFAULT 0,
     GetOutOfJailFreeCards INTEGER DEFAULT 0,
     Bankrupt BOOLEAN DEFAULT false,
-    MoneyNeededForPayment INTEGER DEFAULT 0,
+    CreatedAt TimeStamp NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PLAYERDEBT(
+    Id SERIAL PRIMARY KEY,
+    PlayerId UUID,
+    FOREIGN KEY (PlayerId) REFERENCES Player(Id),
+    InDebtTo UUID,
+    DebtPaid BOOLEAN DEFAULT false,
+    Amount INTEGER,
     CreatedAt TimeStamp NOT NULL
 );
 

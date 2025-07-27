@@ -84,7 +84,7 @@ public class GameService(
             new TurnOrderUpdateParams { HasPlayed = true },
             new TurnOrderWhereParams
             {
-                PlayerId = CurrentSocketPlayer.PlayerId,
+                PlayerId = player.Id,
                 GameId = game.Id,
             },
             new { }

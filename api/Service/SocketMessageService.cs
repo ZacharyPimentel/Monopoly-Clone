@@ -19,6 +19,7 @@ public class GameStateIncludeParams {
 
 public interface ISocketMessageService
 {
+    bool SuppressMessages { get; set; }
     public Task SendToSelf(WebSocketEvents eventEnum, object? data);
     public Task SendToGroup(WebSocketEvents eventEnum, object? data);
     public Task SendToAll(WebSocketEvents eventEnum, object? data);
@@ -39,8 +40,11 @@ public class SocketMessageService(
     ITradeRepository tradeRepository
 ) : ISocketMessageService
 {
+    public bool SuppressMessages { get; set; } = false;
     public async Task SendToSelf(WebSocketEvents eventEnum, object? data)
     {
+        if (SuppressMessages) return;
+
         if (socketContext.Current == null)
         {
             throw new Exception("Socket context is null in SendToSelf");
@@ -49,6 +53,8 @@ public class SocketMessageService(
     }
     public async Task SendToGroup(WebSocketEvents eventEnum, object? data)
     {
+        if (SuppressMessages) return;
+
         if (socketContext.Current == null)
         {
             throw new Exception("Socket context is null in SendToGroup");
@@ -66,6 +72,8 @@ public class SocketMessageService(
     }
     public async Task SendToAll(WebSocketEvents eventEnum, object? data)
     {
+        if (SuppressMessages) return;
+
         if (socketContext.Current == null)
         {
             throw new Exception("Socket context is null in SendToAll");
@@ -75,11 +83,15 @@ public class SocketMessageService(
 
     public async Task SendLatestGameLogs(Guid gameId)
     {
+        if (SuppressMessages) return;
+
         IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(gameId);
         await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
     }
     public async Task CreateAndSendLatestGameLogs(Guid gameId, string message)
     {
+        if (SuppressMessages) return;
+
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = gameId,
@@ -90,6 +102,8 @@ public class SocketMessageService(
 
     public async Task SendGamePlayers(Guid gameId, bool includeLatestLogs = true)
     {
+        if (SuppressMessages) return;
+
         IEnumerable<Player> gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams
         {
             GameId = gameId
@@ -102,12 +116,16 @@ public class SocketMessageService(
     }
     public async Task SendGameBoardSpaces(Guid gameId)
     {
+        if (SuppressMessages) return;
+
         IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(gameId);
         await SendToGroup(WebSocketEvents.BoardSpaceUpdate, boardSpaces);
     }
 
     public async Task SendGameStateUpdate(Guid gameId, GameStateIncludeParams includeParams)
     {
+        if (SuppressMessages) return;
+
         GameStateResponse response = new();
 
         if (includeParams.Game)

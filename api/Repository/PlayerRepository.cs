@@ -26,10 +26,24 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
     }
     public async Task<Player> GetByIdWithIconAsync(Guid id)
     {
-        Player player = await GetByIdAsync(id);
+        var sql = @"
+            SELECT * FROM Player
+            WHERE Id = @Id;
+
+            SELECT * FROM PlayerDebt
+            WHERE PlayerId = @Id
+            AND DebtPaid = FALSE;
+        ";
+
+        var response = await _db.QueryMultipleAsync(sql, new { Id = id });
+        Player player = (await response.ReadAsync<Player>()).ToList()[0];
+        IEnumerable<PlayerDebt> debts = await response.ReadAsync<PlayerDebt>();
+        player.Debts = debts;
+
         PlayerIcon icon = (await LoadPlayerIconsAsync()).First(pi => pi.Id == player.IconId);
         player.IconUrl = icon.IconUrl;
         player.IconName = icon.IconName;
+
         return player;
     }
 
@@ -38,9 +52,20 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
         List<PlayerIcon> playerIcons = await LoadPlayerIconsAsync();
         var players = await GetAllAsync();
 
+        var playerIds = players.Select(p => p.Id).ToList();
+
+        var playerDebtSql = @"
+            SELECT * FROM PlayerDebt
+            WHERE PlayerId = ANY(@PlayerIds)
+            AND DebtPaid = FALSE
+        ";
+
+        var playerDebts = await _db.QueryAsync<PlayerDebt>(playerDebtSql, new { PlayerIds = playerIds });
+
         foreach (var player in players)
         {
             player.IconUrl = playerIcons.First(pi => pi.Id == player.IconId).IconUrl;
+            player.Debts = playerDebts.Where(pd => pd.PlayerId == player.Id);
         }
 
         return players.AsList();
@@ -50,9 +75,20 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
         List<PlayerIcon> playerIcons = await LoadPlayerIconsAsync();
 
         var players = await SearchAsync(includeParams, excludeParams);
+
+        var playerIds = players.Select(p => p.Id).ToList();
+
+        var playerDebtSql = @"
+            SELECT * FROM PlayerDebt
+            WHERE PlayerId = ANY(@PlayerIds)
+            AND DebtPaid = FALSE;
+        ";
+        var playerDebts = await _db.QueryAsync<PlayerDebt>(playerDebtSql, new { PlayerIds = playerIds });
+
         foreach (var player in players)
         {
             player.IconUrl = playerIcons.First(pi => pi.Id == player.IconId).IconUrl;
+            player.Debts = playerDebts.Where(pd => pd.PlayerId == player.Id);
         }
 
         return players.AsList();

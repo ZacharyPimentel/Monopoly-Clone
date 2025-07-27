@@ -50,7 +50,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
         ";
         var result = await db.QueryAsync<GameProperty, Property, Game, BoardSpaceTheme, GameProperty>(
             sql,
-            (gp,p,g,bst) =>
+            (gp, p, g, bst) =>
             {
                 gp.BoardSpaceName = bst.BoardSpaceName;
                 gp.BoardSpaceId = p.BoardSpaceId;
@@ -60,9 +60,20 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 return gp;
             },
             new { GamePropertyId = gamePropertyId },
-            splitOn:"Id,Id,BoardSpaceName"
+            splitOn: "Id,Id,BoardSpaceName"
         );
 
         return result.Single();
+    }
+
+    public async Task<bool> AssignAllToPlayer(Guid GameId, Guid PlayerId)
+    {
+        var sql = @"
+            UPDATE GameProperty
+            SET PlayerId = @PlayerId
+            WHERE GameId = @GameId
+        ";
+        var result = await db.ExecuteAsync(sql, new { GameId, PlayerId });
+        return result > 0;
     }
 }

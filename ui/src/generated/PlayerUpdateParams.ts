@@ -19,5 +19,4 @@ export interface PlayerUpdateParams {
     rollingForUtilities?: boolean;
     canRoll?: boolean;
     bankrupt?: boolean;
-    moneyNeededForPayment?: number;
 }

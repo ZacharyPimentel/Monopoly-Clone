@@ -369,14 +369,9 @@ public class PlayerService(
         }
 
         //logic for if player doesn't have enough money to pay
-        await paymentService.PayPlayer(player, propertyOwnerId, amountToPay);
-
         Player propertyOwner = await playerRepository.GetByIdAsync(propertyOwnerId);
-        await gameLogRepository.CreateAsync(new GameLogCreateParams
-        {
-            GameId = game.Id,
-            Message = $"{player.PlayerName} paid {propertyOwner.PlayerName} ${amountToPay}."
-        });
+        await paymentService.PayPlayer(player, propertyOwner, amountToPay);
+                
         //update rolling to be finished
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = false });
         Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
@@ -440,11 +435,6 @@ public class PlayerService(
 
     public async Task CompletePayment(Player player)
     {
-        if (player.MoneyNeededForPayment == 0)
-        {
-            throw new Exception("Player has no payment needed to be completed");
-        }
-
         var gamePlayers = await playerRepository.SearchWithIconsAsync(
             new PlayerWhereParams { GameId = player.GameId },
             new PlayerWhereParams { }
