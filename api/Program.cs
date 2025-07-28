@@ -70,6 +70,7 @@ builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<ITurnOrderRepository, TurnOrderRepository>();
 builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 builder.Services.AddScoped<IPlayerDebtRepository, PlayerDebtRepository>();
+builder.Services.AddScoped<ICardRepository, CardRepository>();
 //socket context
 builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 //services

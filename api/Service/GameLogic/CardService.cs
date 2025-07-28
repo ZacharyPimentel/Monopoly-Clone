@@ -138,23 +138,12 @@ public class CardService(
             throw new Exception(errorMessage);
         }
 
-        int totalPaid = 0;
-
         //subtract money from other game players
         foreach (var player in context.Players)
         {
             if (player.Id == context.CurrentPlayer.Id) continue;
-            await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
-            {
-                Money = player.Money - receiveAmount
-            });
-            totalPaid += receiveAmount;
+            await paymentService.PayPlayer(player, context.CurrentPlayer, receiveAmount);
         }
-        //add money from everyone to current player
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            Money = context.CurrentPlayer.Money + totalPaid
-        });
     }
 
     public async Task AdvanceToRailroad(SpaceLandingServiceContext context)
@@ -175,23 +164,12 @@ public class CardService(
             throw new Exception(errorMessage);
         }
 
-        int totalToPay = 0;
-
-        //subtract money from other game players
+        //pay other game players
         foreach (var player in context.Players)
         {
             if (player.Id == context.CurrentPlayer.Id) continue;
-            await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
-            {
-                Money = player.Money + payAmount
-            });
-            totalToPay += payAmount;
+            await paymentService.PayPlayer(context.CurrentPlayer, player, payAmount);
         }
-        //add money from everyone to current player
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            Money = context.CurrentPlayer.Money - totalToPay
-        });
     }
 
     public async Task PayForHouseUpgrades(Card card, SpaceLandingServiceContext context)
@@ -214,10 +192,6 @@ public class CardService(
 
         int paymentAmount = (costPerHouse * numberOfHouses) + (costPerHotel * numberOfHotels);
 
-        await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
-        {
-            Money = context.CurrentPlayer.Money - paymentAmount
-        });
-        await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} paid ${paymentAmount} for their property upgrades.");
+        await paymentService.PayBank(context.CurrentPlayer, paymentAmount);
     }
 }

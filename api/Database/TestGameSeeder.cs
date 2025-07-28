@@ -1,7 +1,9 @@
 using System.Data;
 using api.DTO.Entity;
 using api.Entity;
+using api.Enumerable;
 using api.Interface;
+using api.Repository;
 using api.Service;
 using api.Service.GameLogic;
 
@@ -15,25 +17,26 @@ public class TestGameSeeder(
         ISpaceLandingService spaceLandingService,
         IPlayerService playerService,
         IGameService gameService,
-        ITurnOrderRepository turnOrderRepository
+        ITurnOrderRepository turnOrderRepository,
+        IGameCardRepository gameCardRepository,
+        ICardRepository cardRepository
 )
 {
     public async Task SeedTestingGameData()
     {
         socketMessagingService.SuppressMessages = true;
 
-
-        // Game 1: Fresh Game With Two Players
+        // Game 1: Single player can't pay / bankruptcy test
         Game game1 = await SeedGame("Cannot pay / bankruptcy test");
-        IEnumerable<Player> players = await SeedDefaultPlayers(game1.Id);
-        await SeedGameStart(game1, players);
-        await SeedBankruptcyTest(game1, players);
+        IEnumerable<Player> game1Players = await SeedPlayers(game1.Id, 2);
+        await SeedGameStart(game1, game1Players);
+        await SeedBankruptcyTest(game1, game1Players);
 
-
-        // await playerService.SetPlayerReadyStatus(game1Player2, game1, true);
-        // game1 = await gameRepository.GetByIdWithDetailsAsync(game1.Id);
-        // IEnumerable<Player> game1Players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game1.Id }, null);
-        // await spaceLandingService.HandleLandedOnSpace(game1Players, game1);
+        // Game 2: Single player can't pay / bankruptcy test
+        Game game2 = await SeedGame("Cannot pay multiple / bankruptcy test");
+        IEnumerable<Player> game2Players = await SeedPlayers(game2.Id, 3);
+        await SeedGameStart(game2, game2Players);
+        await SeedMultipleDebtTest(game2, game2Players);
     }
 
     private async Task<Game> SeedGame(string gameName)
@@ -41,26 +44,22 @@ public class TestGameSeeder(
         await gameService.CreateGame(new GameCreateParams { GameName = gameName, ThemeId = 1 });
         var game = (await gameRepository.Search(new GameWhereParams { GameName = gameName }))
             .First() ?? throw new Exception("Game is null in SeedGame");
-        game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+
         return game;
     }
-    private async Task<IEnumerable<Player>> SeedDefaultPlayers(Guid gameId)
+    private async Task<IEnumerable<Player>> SeedPlayers(Guid gameId, int numberOfPlayers)
     {
-        await playerRepository.CreateAsync(new PlayerCreateParams
+        for (int i = 0; i < numberOfPlayers; i++)
         {
-            PlayerName = "Player One",
-            IconId = 1,
-            GameId = gameId,
-            Active = false,
-            IsReadyToPlay = false
-        });
-        await playerRepository.CreateAsync(new PlayerCreateParams
-        {
-            PlayerName = "Player Two",
-            IconId = 2,
-            GameId = gameId,
-            Active = false
-        });
+            await playerRepository.CreateAsync(new PlayerCreateParams
+            {
+                PlayerName = $"Player {i + 1}",
+                IconId = i + 1,
+                GameId = gameId,
+                Active = false,
+                IsReadyToPlay = false
+            });
+        }
         IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId }, null);
         return players;
     }
@@ -100,4 +99,32 @@ public class TestGameSeeder(
         players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
         await spaceLandingService.HandleLandedOnSpace(players, game);
     }
+
+    public async Task SeedMultipleDebtTest(Game game, IEnumerable<Player> players)
+    {
+        Player playerOne = players.First();
+        await playerRepository.UpdateAsync(playerOne.Id, new PlayerUpdateParams
+        {
+            Money = 0,
+            BoardSpaceId = 8 //Chance
+        });
+
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true },
+            new TurnOrderWhereParams { },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id }
+        );
+
+        var cards = (await cardRepository.GetAllAsync()).Where( c => c.CardActionId == (int)CardActionIds.PayPlayers);
+        var firstMatchingCard = cards.ToList()[0];
+
+        await gameCardRepository.UpdateWhereAsync(
+            new GameCardUpdateParams { Played = true },
+            new GameCardWhereParams { GameId = game.Id },
+            new GameCardWhereParams { CardId = firstMatchingCard.Id }
+        );
+        game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
+        await spaceLandingService.HandleLandedOnSpace(players, game); 
+    }   
 }
