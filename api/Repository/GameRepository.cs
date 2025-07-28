@@ -22,7 +22,8 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
 
         if (searchParams.GameName != null)
         {
-            parameters.Add(" AND g.GameName = @GameName", searchParams.GameName);
+            sql += " AND g.GameName = @GameName";
+            parameters.Add("GameName", searchParams.GameName);
         }
 
         sql += @"

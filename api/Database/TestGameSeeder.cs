@@ -92,7 +92,7 @@ public class TestGameSeeder(
         });
         await turnOrderRepository.UpdateWhereAsync(
             new TurnOrderUpdateParams { HasPlayed = true },
-            new TurnOrderWhereParams { PlayerId = playerOne.Id },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id, GameId = game.Id },
             new { }
         );
         game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
@@ -111,7 +111,7 @@ public class TestGameSeeder(
 
         await turnOrderRepository.UpdateWhereAsync(
             new TurnOrderUpdateParams { HasPlayed = true },
-            new TurnOrderWhereParams { },
+            new TurnOrderWhereParams { GameId = game.Id },
             new TurnOrderWhereParams { PlayerId = playerOne.Id }
         );
 
