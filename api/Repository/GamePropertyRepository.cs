@@ -76,4 +76,15 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
         var result = await db.ExecuteAsync(sql, new { GameId, PlayerId });
         return result > 0;
     }
+
+    public async Task<bool> UnassignAllFromPlayer(Guid GameId, Guid PlayerId)
+    {
+        var sql = @"
+            UPDATE GameProperty
+            SET PlayerId = NULL
+            WHERE GameId = @GameId
+        ";
+        var result = await db.ExecuteAsync(sql, new { GameId, PlayerId });
+        return result > 0;
+    }
 }

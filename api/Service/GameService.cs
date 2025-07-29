@@ -91,13 +91,7 @@ public class GameService(
         );
 
         //check if everyone has taken their turn, reset if so
-        var notPlayedCount = (await turnOrderRepository.SearchAsync(new TurnOrderSearchParams
-        {
-            HasPlayed = false,
-            GameId = game.Id
-        },
-            new { }
-        )).Count();
+        var notPlayedCount = await turnOrderRepository.GetNumberOfPlayersWhoHaveNotTakenTheirTurn(game.Id);
 
         if (notPlayedCount == 0)
         {
@@ -112,7 +106,6 @@ public class GameService(
                 new { }
             );
         }
-
         TurnOrder nextTurn = await turnOrderRepository.GetNextTurnByGameAsync(game.Id);
         await playerRepository.UpdateAsync(nextTurn.PlayerId, new PlayerUpdateParams { CanRoll = true });
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams { CanRoll = false, RollCount = 0 });

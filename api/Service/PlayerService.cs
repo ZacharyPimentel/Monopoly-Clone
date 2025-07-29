@@ -424,13 +424,16 @@ public class PlayerService(
     public async Task DeclareBankruptcy()
     {
         Player player = guardService.GetPlayer();
-        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
-        {
-            CanRoll = false,
-            Bankrupt = true
-        });
+        player.Bankrupt = true;
+        player.CanRoll = false;
+        player.Money = 0;
+        await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
 
         //unassign properties
+        await gamePropertyRepository.UnassignAllFromPlayer(player.GameId, player.Id);
+
+        Game game = await gameRepository.GetByIdWithDetailsAsync(player.GameId);
+        await gameService.EndTurn(player,game);
     }
 
     public async Task CompletePayment(Player player)

@@ -70,6 +70,7 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
                             })
                             .map((player) => {
                                 if(player.boardSpaceId !== position)return null
+                                if(player.bankrupt)return null
                                 const isThisPlayersTurn = gameState.game?.currentPlayerTurn === player.id;
                                 return (
                                     <div key={player.id} className='relative' >
