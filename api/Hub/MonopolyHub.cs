@@ -245,7 +245,8 @@ namespace api.hub
         public async Task GameGetAll()
         {
             var games = await gameRepository.GetAllWithPlayerCountAsync();
-            await SendToSelf(WebSocketEvents.GameUpdateAll, games);
+            var activeGames = games.Where(g => g.GameOver == false);
+            await SendToSelf(WebSocketEvents.GameUpdateAll, activeGames);
         }
         public async Task GameCreate(GameCreateParams gameCreateParams)
         {

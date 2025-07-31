@@ -433,7 +433,19 @@ public class PlayerService(
         await gamePropertyRepository.UnassignAllFromPlayer(player.GameId, player.Id);
 
         Game game = await gameRepository.GetByIdWithDetailsAsync(player.GameId);
-        await gameService.EndTurn(player,game);
+
+        var gamePlayers = await playerRepository.SearchAsync(
+            new PlayerWhereParams { GameId = game.Id},
+            new PlayerWhereParams { Bankrupt = true}
+        );
+
+        //game is over if only one player is not bankrupt
+        if (gamePlayers.Count() == 1)
+        {
+            await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { GameOver = true });
+        }
+        
+        await gameService.EndTurn(player, game);
     }
 
     public async Task CompletePayment(Player player)

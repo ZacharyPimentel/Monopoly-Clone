@@ -7,4 +7,5 @@ export interface PlayerWhereParams {
     active?: boolean;
     inCurrentGame?: boolean;
     gameId?: string;
+    bankrupt?: boolean;
 }

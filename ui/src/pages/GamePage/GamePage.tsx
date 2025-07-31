@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
 import { GameMasterMenu } from "./components/GameMasterMenu";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
+import { GameOverModal } from "@globalComponents/GlobalModal/modalContent/GameOverModal";
 
 export const GamePage = () => {
 
@@ -37,6 +38,12 @@ export const GamePage = () => {
           globalDispatch({modalOpen:true,modalContent:<PlayerCreateModal/>})
         }
       },[gameState.currentSocketPlayer])
+
+    useEffect( () => {
+        if(gameState.game?.gameOver){
+            globalDispatch({modalOpen:true,modalContent:<GameOverModal/>})
+        }
+    },[gameState.game])
 
     //only let people through once they've connected to the socket
     if(!gameState || !gameState.currentSocketPlayer || gameState.boardSpaces.length === 0){
