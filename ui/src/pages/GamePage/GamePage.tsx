@@ -7,7 +7,6 @@ import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
 import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
 import { useParams } from "react-router-dom";
 import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
-import { GameMasterMenu } from "./components/GameMasterMenu";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
 import { GameOverModal } from "@globalComponents/GlobalModal/modalContent/GameOverModal";
 
@@ -52,7 +51,6 @@ export const GamePage = () => {
 
     return (
         <div className='flex flex-col relative'>
-            <GameMasterMenu/>
             <div className='justify-center w-full h-full flex flex-wrap'>
                 <GameBoard/>
                 <div className='h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll'>
