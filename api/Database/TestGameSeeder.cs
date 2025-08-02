@@ -1,5 +1,6 @@
 using System.Data;
 using api.DTO.Entity;
+using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Interface;
@@ -41,7 +42,12 @@ public class TestGameSeeder(
 
     private async Task<Game> SeedGame(string gameName)
     {
-        await gameService.CreateGame(new GameCreateParams { GameName = gameName, ThemeId = 1 });
+        var createParams = new GameCreateParams
+        {
+            GameName = gameName,
+            ThemeId = 1
+        };
+        await gameService.CreateGame(new SocketEventGameCreate { GameCreateParams = createParams });
         var game = (await gameRepository.Search(new GameWhereParams { GameName = gameName }))
             .First() ?? throw new Exception("Game is null in SeedGame");
 

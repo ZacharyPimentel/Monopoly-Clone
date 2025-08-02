@@ -3,7 +3,7 @@ import { useGameState } from "../stateProviders/GameStateProvider"
 import { useGlobalState } from "../stateProviders/GlobalStateProvider";
 import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
-import {  SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeAccept, SocketEventTradeDecline, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
+import {  SocketEventGameCreate, SocketEventPasswordValidate, SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeAccept, SocketEventTradeDecline, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
 import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
 import { useCallback, useMemo, useRef } from "react";
 import { useWebSocketCallback } from "./useWebSocketCallback";
@@ -57,8 +57,8 @@ export const useWebSocket = () => {
                     getAll: () => {
                         globalState.ws.invoke('GameGetAll');
                     },
-                    create: (gameName:string,themeId:number) => {
-                        globalState.ws.invoke('GameCreate',{gameName,themeId});
+                    create: (createParams:SocketEventGameCreate) => {
+                        globalState.ws.invoke('GameCreate',createParams);
                     },
                     join: (gameId:string) => {
                         globalState.ws.invoke('GameJoin',gameId)
@@ -71,6 +71,9 @@ export const useWebSocket = () => {
                     },
                     endTurn: () => {
                         globalState.ws.invoke('GameEndTurn');
+                    },
+                    validatePassword:(passwordValidateParams:SocketEventPasswordValidate) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PasswordValidate),passwordValidateParams)
                     }
                 },
                 gameLog:{
@@ -161,10 +164,10 @@ export const useWebSocket = () => {
                     }
                 }
             },
-            listen: (eventEnum:1|2|3|6|16) => {
+            listen: (eventEnum:1|2|3|6|10|18) => {
                 globalState.ws.on(eventEnum.toString(), webSocketCallbacks[eventEnum])
             },
-            stopListen: (eventEnum:1|2|3|6|16) => {
+            stopListen: (eventEnum:1|2|3|6|10|18) => {
                 globalState.ws.off(eventEnum.toString(),webSocketCallbacks[eventEnum])
             },
         }

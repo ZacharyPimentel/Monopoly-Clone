@@ -71,6 +71,7 @@ builder.Services.AddScoped<ITurnOrderRepository, TurnOrderRepository>();
 builder.Services.AddScoped<IErrorLogRepository, ErrorLogRepository>();
 builder.Services.AddScoped<IPlayerDebtRepository, PlayerDebtRepository>();
 builder.Services.AddScoped<ICardRepository, CardRepository>();
+builder.Services.AddScoped<IGamePasswordRepository, GamePasswordRepository>();
 //socket context
 builder.Services.AddScoped<ISocketContextAccessor, SocketContextAccessor>();
 //services

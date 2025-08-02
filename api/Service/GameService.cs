@@ -7,13 +7,15 @@ using api.Helper;
 using api.hub;
 using api.Hubs;
 using api.Interface;
+using api.Repository;
 using api.Socket;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 namespace api.Service;
 
 public interface IGameService
 {
-    Task CreateGame(GameCreateParams gameCreateParams);
+    Task CreateGame(SocketEventGameCreate gameCreateParams);
     Task EndTurn(Player player, Game game);
     Task JoinGame(Guid gameId);
     Task LeaveGame(Guid gameId);
@@ -21,6 +23,7 @@ public interface IGameService
     Task CreateGameLog(Guid GameId, string message);
     Task AddMoneyToFreeParking(Guid gameId, int amount);
     Task EmptyMoneyFromFreeParking(Guid GameId);
+    Task ValidatePassword(Game Game, string Password);
 }
 
 public class GameService(
@@ -35,17 +38,18 @@ public class GameService(
     IGameLogRepository gameLogRepository,
     ITradeRepository tradeRepository,
     IBoardSpaceRepository boardSpaceRepository,
-    ITurnOrderRepository turnOrderRepository
+    ITurnOrderRepository turnOrderRepository,
+    IGamePasswordRepository gamePasswordRepository
 ) : IGameService
 {
     private HubCallerContext SocketContext => socketContextAccessor.RequireContext().Context;
     private IHubContext<MonopolyHub> HubContext => socketContextAccessor.RequireContext().HubContext;
     private SocketPlayer CurrentSocketPlayer => gameState.GetPlayer(SocketContext.ConnectionId);
 
-    public async Task CreateGame(GameCreateParams gameCreateParams)
+    public async Task CreateGame(SocketEventGameCreate gameCreateParams)
     {
         IEnumerable<Game> gamesWithName = await gameRepository.SearchAsync(
-            new GameWhereParams { GameName = gameCreateParams.GameName },
+            new GameWhereParams { GameName = gameCreateParams.GameCreateParams.GameName },
             new { }
         );
 
@@ -54,13 +58,29 @@ public class GameService(
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.GameNameExists);
             throw new Exception(errorMessage);
         }
-        var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams);
+
+        var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams.GameCreateParams);
+
+        //set up password record if required
+        if (gameCreateParams.Password is not null)
+        {
+            var hasher = new PasswordHasher<object>();
+            string hashedPassword = hasher.HashPassword(null, gameCreateParams.Password);
+            gameCreateParams.Password = hashedPassword;
+            await gamePasswordRepository.CreateAsync(new GamePasswordCreateParams
+            {
+                GameId = newGame.Id,
+                Password = hashedPassword
+            });
+            CurrentSocketPlayer.ValidatedGamePassword = true;
+        }
+
         //populate tables for new game
         await lastDiceRollRepository.CreateAsync(new { GameId = newGame.Id });
         await gamePropertyRepository.CreateForNewGameAsync(newGame.Id);
         await gameCardRepository.CreateForNewGameAsync(newGame.Id);
         await socketMessageService.SendToSelf(WebSocketEvents.GameCreate, newGame.Id); ;
-        var games = await gameRepository.GetAllAsync();
+        var games = await gameRepository.GetAllWithPlayerCountAsync();
         await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
     }
     public async Task EndTurn(Player player, Game game)
@@ -121,9 +141,18 @@ public class GameService(
     public async Task JoinGame(Guid gameId)
     {
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
+        Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
+
+        if (game.HasPassword is true)
+        {
+            if (currentSocketPlayer.ValidatedGamePassword is false)
+            {
+                throw new Exception("Unauthorized");
+            }
+        }
+
         currentSocketPlayer.GameId = gameId;
         await HubContext.Groups.AddToGroupAsync(SocketContext.ConnectionId, gameId.ToString());
-        Game? game = await gameRepository.GetByIdWithDetailsAsync(gameId);
         if (game == null)
         {
             await socketMessageService.SendToSelf(WebSocketEvents.GameUpdate, game);
@@ -157,6 +186,7 @@ public class GameService(
             await socketMessageService.SendToGroup(WebSocketEvents.PlayerUpdateGroup, groupPlayers);
             currentSocketPlayer.GameId = null;
             currentSocketPlayer.PlayerId = null;
+            currentSocketPlayer.ValidatedGamePassword = false;
             var games = await gameRepository.Search(new GameWhereParams { });
             await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, games);
         }
@@ -195,5 +225,38 @@ public class GameService(
         {
             MoneyInFreeParking = 0
         });
+    }
+    public async Task ValidatePassword(Game game, string password)
+    {
+        SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
+        //handle password
+        if (game.HasPassword is true)
+        {
+            if (password is null)
+            {
+                throw new Exception("Password not provided.");
+            }
+
+            var gamePassword = (await gamePasswordRepository.SearchAsync(new
+            {
+                GameId = game.Id
+            }, new { })).First();
+
+            var hasher = new PasswordHasher<object>();
+            var result = hasher.VerifyHashedPassword(null, gamePassword.Password, password);
+            if (result == PasswordVerificationResult.Success)
+            {
+                currentSocketPlayer.ValidatedGamePassword = true;
+            }
+            else
+            {
+                throw new Exception("Unauthorized.");
+            }
+            await socketMessageService.SendToSelf(WebSocketEvents.PasswordValidated, new
+            {
+                GameId = game.Id,
+                Valid = true
+            });
+        }
     }
 }

@@ -11,6 +11,8 @@ export const GameCreateModal = () => {
     const {invoke} = useWebSocket();
     const api = useApi();
     const [themeId,setThemeId] = useState('1');
+    const [passwordEnabled,setPasswordEnabled] = useState(false);
+    const [password,setPassword] = useState('');
 
     return (
         <div className='flex flex-col gap-[20px]'>
@@ -31,14 +33,41 @@ export const GameCreateModal = () => {
                 setStateCallback={(newValue) => setThemeId(newValue)}
             />
             </label>
+            <label className='flex flex-wrap gap-[10px] items-center'>
+                <p className='min-w-[165px]'>Password Enabled</p>
+                <input checked={passwordEnabled} onChange={(e) => {
+                    if(e.target.checked){
+                        setPasswordEnabled(true)
+                    }else{
+                        setPasswordEnabled(false)
+                        return
+                    }
+                }} type='checkbox' className='scale-[1.5]'/>
+            </label>
+
+            {passwordEnabled && (
+                <label className='flex flex-wrap gap-[10px] items-center'>
+                    <p className='required min-w-[165px]'>Password:</p>
+                    <input value={password} onChange={(e) => setPassword(e.target.value)} className='text-input flex-1' type='text'/>
+                </label>
+            )}
             
             <ActionButtons
                 confirmCallback={async() => {
-                    invoke.game.create(gameName,parseInt(themeId));
+                    invoke.game.create({
+                        gameCreateParams:{
+                            gameName,
+                            themeId: parseInt(themeId)},
+                        password
+                    });
                 }}
                 confirmButtonStyle="success"
                 confirmButtonText="Create"
-                confirmDisabled={gameName === '' || themeId === ''}
+                confirmDisabled={
+                    gameName === '' || 
+                    themeId === '' ||
+                    (passwordEnabled && password == '')
+                }
             />
         </div>
     )

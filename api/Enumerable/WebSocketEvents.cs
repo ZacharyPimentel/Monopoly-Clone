@@ -15,6 +15,8 @@ public enum WebSocketEvents
     GameUpdateAll,
     GameUpdateGroup,
     GameLogUpdate,
+    PasswordValidate,
+    PasswordValidated,
     PayOutOfJail,
     PlayerEdit,
     PlayerEndTurn,

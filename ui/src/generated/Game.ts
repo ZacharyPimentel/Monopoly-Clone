@@ -16,6 +16,7 @@ export interface Game {
     collectMoneyFromFreeParking: boolean;
     moneyInFreeParking: number;
     currentPlayerTurn?: string;
+    hasPassword?: boolean;
     activePlayerCount?: number;
     diceRollInProgress: boolean;
     movementInProgress: boolean;

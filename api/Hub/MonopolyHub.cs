@@ -248,7 +248,7 @@ namespace api.hub
             var activeGames = games.Where(g => g.GameOver == false);
             await SendToSelf(WebSocketEvents.GameUpdateAll, activeGames);
         }
-        public async Task GameCreate(GameCreateParams gameCreateParams)
+        public async Task GameCreate(SocketEventGameCreate gameCreateParams)
         {
             await guardService.HandleGuardError(async () =>
             {
@@ -525,12 +525,26 @@ namespace api.hub
                 IGuardClause guards = await guardService
                     .SocketConnectionHasPlayerId()
                     .SocketConnectionHasGameId()
-                    .Init(currentSocketPlayer.PlayerId,currentSocketPlayer.GameId);
+                    .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
                 guards
                     .PlayerExists()
                     .IsCurrentTurn();
 
                 await paymentService.PayDebt(guardService.GetPlayer());
+            });
+        }
+        
+        public async Task PasswordValidate(SocketEventPasswordValidate passwordValidateParams)
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+            {
+                IGuardClause guards = await guardService
+                    .Init(null,passwordValidateParams.GameId);
+                guards
+                    .GameExists();
+
+                await gameService.ValidatePassword(guardService.GetGame(),passwordValidateParams.Password);
             });
         }
     }

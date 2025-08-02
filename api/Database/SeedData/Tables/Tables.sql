@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS GAME(
     Id UUID PRIMARY KEY,
     DiceRollInProgress BOOLEAN DEFAULT false,
     GameName TEXT UNIQUE,
+    Password TEXT,
     MovementInProgress BOOLEAN DEFAULT false,
     InLobby BOOLEAN DEFAULT true,
     GameOver BOOLEAN DEFAULT false,
@@ -20,6 +21,14 @@ CREATE TABLE IF NOT EXISTS GAME(
     ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
     CollectMoneyFromFreeParking BOOLEAN DEFAULT false,
     MoneyInFreeParking INTEGER DEFAULT 0,
+    CreatedAt TimeStamp NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS GAMEPASSWORD(
+    Id Serial PRIMARY KEY,
+    GameId UUID NOT NULL,
+    FOREIGN KEY (GameId) REFERENCES Game(Id),
+    Password TEXT NOT NULL,
     CreatedAt TimeStamp NOT NULL
 );
 

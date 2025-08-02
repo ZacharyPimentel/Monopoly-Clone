@@ -1,5 +1,7 @@
+using System.Text.Json.Serialization;
 using TypeGen.Core.TypeAnnotations;
 namespace api.Entity;
+
 [ExportTsInterface]
 public class Game
 {
@@ -15,6 +17,7 @@ public class Game
     public bool CollectMoneyFromFreeParking { get; set; }
     public int MoneyInFreeParking { get; set; }
     public Guid? CurrentPlayerTurn { get; set; } //Join for PlayerId on TurnOrder with GameId
+    public bool? HasPassword { get; set; } // Join for GameId on GamePassword
     public int? ActivePlayerCount { get; set; } = 0; //Join for game PlayerId on Game when searching games
     public bool DiceRollInProgress { get; set; }
     public bool MovementInProgress { get; set; }

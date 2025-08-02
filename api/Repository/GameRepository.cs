@@ -39,9 +39,11 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
     {
         var sql = @"
         SELECT 
-            g.*, COUNT(p.Id) AS ActivePlayerCount
+            g.*, COUNT(p.Id) AS ActivePlayerCount,
+            COUNT(gp.Password) > 0 AS HasPassword
             FROM Game g
             LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
+            LEFT JOIN GamePassword gp on gp.GameId = g.Id
             GROUP BY g.Id
             ORDER BY g.Id
         ";
@@ -61,8 +63,19 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
                 ORDER BY PlayOrder
                 LIMIT 1
             )
-            SELECT g.*, f.PlayerId AS CurrentPlayerTurn, ldr.DiceOne, ldr.DiceTwo, ldr.UtilityDiceOne, ldr.UtilityDiceTwo
-            FROM Game as g
+            SELECT 
+                g.*, 
+                (
+                    SELECT EXISTS (
+                        SELECT 1 FROM GamePassword gp WHERE gp.GameId = g.Id
+                    )
+                ) AS HasPassword,
+                f.PlayerId AS CurrentPlayerTurn, 
+                ldr.DiceOne, 
+                ldr.DiceTwo, 
+                ldr.UtilityDiceOne, 
+                ldr.UtilityDiceTwo
+            FROM Game g
             LEFT JOIN FilteredTurnOrder AS f ON g.Id = f.GameId
             Left JOIN LastDiceRoll ldr ON g.id = ldr.GameId
             WHERE g.Id = @Id

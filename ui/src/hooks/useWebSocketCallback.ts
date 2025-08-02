@@ -81,6 +81,11 @@ export const useWebSocketCallback = () => {
                     gameDispatch({...gameData});
                 }
             },
+            [WebSocketEvents.PasswordValidated]:({gameId,valid}:{gameId:string,valid:boolean}) => {
+                if(valid){
+                    navigate(`/game/${gameId}`)
+                }
+            }
         }
     },[])
 

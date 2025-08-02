@@ -7,4 +7,5 @@ export interface SocketPlayer {
     playerId?: string;
     gameId?: string;
     socketId: string;
+    validatedGamePassword: boolean;
 }
