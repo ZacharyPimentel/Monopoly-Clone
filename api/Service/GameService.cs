@@ -62,7 +62,7 @@ public class GameService(
         var newGame = await gameRepository.CreateAndReturnAsync(gameCreateParams.GameCreateParams);
 
         //set up password record if required
-        if (gameCreateParams.Password is not null)
+        if (!string.IsNullOrEmpty(gameCreateParams.Password))
         {
             var hasher = new PasswordHasher<object>();
             string hashedPassword = hasher.HashPassword(null, gameCreateParams.Password);

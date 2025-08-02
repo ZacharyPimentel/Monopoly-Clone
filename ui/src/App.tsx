@@ -4,7 +4,6 @@ import { GamePage } from "./pages/GamePage/GamePage"
 import { GlobalModal } from "./globalComponents/GlobalModal/GlobalModal"
 import { GlobalStateProvider } from "./stateProviders/GlobalStateProvider"
 import { LobbyPage } from "./pages/LobbyPage/LobbyPage"
-import { GameMasterStateProvider } from "./stateProviders/GameMasterStateProvider"
 import { ToastContainer } from "react-toastify"
 
 export const App = () => {
@@ -13,7 +12,6 @@ export const App = () => {
       <Route path='/*' element={
         <GlobalStateProvider>
           <GameStateProvider>
-            <GameMasterStateProvider>
             <GlobalModal/>
             <ToastContainer/>
               <Routes>
@@ -25,7 +23,6 @@ export const App = () => {
                 }/>
                 <Route path='*' element={<Navigate to='lobby'/>}/>
               </Routes>
-            </GameMasterStateProvider>
           </GameStateProvider>
         </GlobalStateProvider>
       }>
