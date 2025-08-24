@@ -170,7 +170,7 @@ namespace api.hub
                     .IsCurrentTurn()
                     .PlayerAllowedToRoll();
 
-                await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame());
+                await playerService.RollForTurn(guardService.GetPlayer(), guardService.GetGame(), null, null);
             });
         }
         public async Task PayOutOfJail()

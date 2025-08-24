@@ -122,7 +122,7 @@ public class GameService(
             );
             await playerRepository.UpdateWhereAsync(
                 new PlayerUpdateParams { RollCount = 0 },
-                new PlayerWhereParams { InCurrentGame = true },
+                new PlayerWhereParams { InCurrentGame = true, GameId = game.Id },
                 new { }
             );
         }

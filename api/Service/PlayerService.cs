@@ -20,7 +20,7 @@ public interface IPlayerService
     public Task CreatePlayer(PlayerCreateParams playerCreateParams);
     public Task ReconnectToGame(Guid playerId);
     public Task EditPlayer(Guid playerId, PlayerUpdateParams playerRenameParams);
-    public Task RollForTurn(Player player, Game game);
+    public Task RollForTurn(Player player, Game game, int? forcedDieOne, int? forcedDieTwo);
     public Task RollForUtilities(Player player, Game game);
     public Task SetPlayerReadyStatus(Player player, Game game, bool isReadyToPlay);
     public Task PurchaseProperty(Player player, Game game, int gamePropertyId);
@@ -245,7 +245,7 @@ public class PlayerService(
             Players = updatedGroupPlayers
         });
     }
-    public async Task RollForTurn(Player player, Game game)
+    public async Task RollForTurn(Player player, Game game, int? forcedDieOne, int? forcedDieTwo)
     {
         var stopWatch = Stopwatch.StartNew();
         //send to the group that rolling is in progress before final save at the end
@@ -257,6 +257,9 @@ public class PlayerService(
         });
 
         (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
+
+        dieOne = forcedDieOne ?? dieOne;
+        dieTwo = forcedDieTwo ?? dieTwo;
 
         await diceRollService.RecordGameDiceRoll(game.Id, dieOne, dieTwo);
 

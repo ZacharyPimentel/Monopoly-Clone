@@ -121,14 +121,18 @@ public class SpaceLandingService(
         {
             await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
             {
-                Money = context.CurrentPlayer.Money + 100
+                Money = context.CurrentPlayer.Money + 300
             });
             updateParams.Players = true;
-            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO and collected and extra $100.");
+            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO and collected $300.");
         }
         else
         {
-            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO.");
+            await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams
+            {
+                Money = context.CurrentPlayer.Money + 200
+            });
+            await gameService.CreateGameLog(context.Game.Id, $"{context.CurrentPlayer.PlayerName} landed on GO and collected $200");
         }
         await socketMessageService.SendGameStateUpdate(context.Game.Id, updateParams);
     }
