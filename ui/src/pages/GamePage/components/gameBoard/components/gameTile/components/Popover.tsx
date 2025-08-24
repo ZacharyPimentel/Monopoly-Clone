@@ -69,7 +69,7 @@ export const Popover:React.FC<{
                     </button>
                 </div>
             )}
-            {property.playerId === player?.id && isCurrentTurn && (
+            {property.playerId === player?.id && isCurrentTurn && property.upgradeCount === 0 && (
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         if(!property.mortgaged){
