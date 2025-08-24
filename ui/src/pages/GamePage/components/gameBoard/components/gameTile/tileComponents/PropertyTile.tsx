@@ -1,16 +1,12 @@
 import { useMemo } from "react";
 import { useGameState } from "@stateProviders/GameStateProvider";
-import { usePlayer } from "@hooks/usePlayer";
 import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
-import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
-import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
 import { Popover } from "../components/Popover";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 
     const gameState = useGameState();
     const property = gameState.boardSpaces[position - 1]?.property;
-    const globalDispatch = useGlobalDispatch();
 
     //return the same content but in a different orientation depending on the property set
     if(!property) return null
