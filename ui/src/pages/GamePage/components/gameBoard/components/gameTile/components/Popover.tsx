@@ -26,7 +26,7 @@ export const Popover:React.FC<{
             return true
         }
         return false
-    },[property])
+    },[property,isCurrentTurn])
 
     return (
         <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>

@@ -54,7 +54,13 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 <p className='p-[5px] text-[12px] leading-tight'>
                     {gameState.boardSpaces[position - 1].boardSpaceName}
                 </p>
-                <span style={{backgroundColor:property.color}} className='flex'></span>
+                <span style={{backgroundColor:property.color}} className='flex relative items-center px-[5px] gap-[5px]'>
+                    {Array.from({length:property.upgradeCount}).map( () => {
+                        return (
+                            <span className='w-[10px] h-[10px] rounded-[50%] bg-black'></span>
+                        )
+                    })}
+                </span>
             </div>
             <Popover 
                 sideClass={sideClass}
