@@ -114,7 +114,8 @@ public class SpaceLandingService(
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
         GameStateIncludeParams updateParams = new()
         {
-            Game = true
+            Game = true,
+            GameLogs = true
         };
 
         if (context.Game.ExtraMoneyForLandingOnGo)
@@ -209,7 +210,8 @@ public class SpaceLandingService(
                     if (context.Game.FullSetDoublePropertyRent)
                     {
                         IEnumerable<BoardSpace> setSpaces = context.BoardSpaces.Where(bs => bs.Property?.SetNumber == landedOnProperty.SetNumber);
-                        if (setSpaces.All(bs => bs?.Property?.PlayerId == propertyOwnerId))
+                        //do not double the rent if property has a house/hotel on it
+                        if (setSpaces.All(bs => bs?.Property?.PlayerId == propertyOwnerId && landedOnProperty.UpgradeCount > 0))
                         {
                             paymentAmount *= 2;
                         }

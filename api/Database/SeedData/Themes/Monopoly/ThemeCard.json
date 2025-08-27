@@ -22,12 +22,12 @@
     {
         "CardId": 5,
         "ThemeId": 1,
-        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay wonder twice the rental to which they are otherwise entitled."
+        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay owner twice the rental to which they are otherwise entitled."
     },
     {
         "CardId": 6,
         "ThemeId": 1,
-        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay wonder twice the rental to which they are otherwise entitled."
+        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay owner twice the rental to which they are otherwise entitled."
     },
     {
         "CardId": 7,

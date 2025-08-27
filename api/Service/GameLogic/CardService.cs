@@ -101,17 +101,6 @@ public class CardService(
         await boardMovementService.AdvanceToSpaceWithCard(context.CurrentPlayer, card, context.Game);
         var movedToSpace = context.BoardSpaces.First(bs => bs.Id == card.AdvanceToSpaceId);
         string message = $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}.";
-
-        message = movedToSpace.Id == 1
-            ? $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName} and collected $200."
-            : $"{context.CurrentPlayer.PlayerName} advanced to {movedToSpace.BoardSpaceName}."
-        ;
-        // await gameLogRepository.CreateAsync(new GameLogCreateParams
-        // {
-        //     GameId = context.Game.Id,
-        //     Message = message
-        // });
-        //await socketMessageService.SendGamePlayers(context.Game.Id);
     }
 
     public async Task BackThreeSpaces(Card card, SpaceLandingServiceContext context)

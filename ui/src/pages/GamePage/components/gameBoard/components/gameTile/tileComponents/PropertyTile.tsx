@@ -11,32 +11,40 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
     //return the same content but in a different orientation depending on the property set
     if(!property) return null
 
-    const propertyStyles = useMemo( () => {
+    const propertyStyles:{position:string,flexDirection:'column'|'row'} = useMemo( () => {
         if(property.setNumber === 1) return({
-            position: 'absolute top-[70%] left-[50%] translate-x-[-50%]'
+            position: 'absolute top-[70%] left-[50%] translate-x-[-50%]',
+            flexDirection: 'row'
         })
         if(property.setNumber === 2) return({
-            position: 'absolute top-[100%] left-[50%] translate-x-[-50%]'
+            position: 'absolute top-[100%] left-[50%] translate-x-[-50%]',
+            flexDirection: 'row'
         })
         if(property.setNumber === 3) return({
-            position: 'right-[70%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+            position: 'right-[70%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            flexDirection: 'column'
         })
         if(property.setNumber === 4) return({
-            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            flexDirection: 'column'
         })
         if(property.setNumber === 5) return({
-            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'
+            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]',
+            flexDirection: 'row'
         })
         if(property.setNumber === 6) return({
-            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'
+            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]',
+            flexDirection: 'row'
         })
         if(property.setNumber === 7) return({
-            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            flexDirection: 'column'
         })
         if(property.setNumber === 8) return({
-            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            flexDirection: 'column'
         })
-        return {position:''};
+        return {position:'', flexDirection: 'row'};
     },[property])
 
     return (
@@ -54,7 +62,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 <p className='p-[5px] text-[12px] leading-tight'>
                     {gameState.boardSpaces[position - 1].boardSpaceName}
                 </p>
-                <span style={{backgroundColor:property.color}} className='flex relative items-center px-[5px] gap-[5px]'>
+                <span style={{backgroundColor:property.color, flexDirection: propertyStyles.flexDirection}} className='flex justify-center relative items-center px-[5px] gap-[5px]'>
                     {Array.from({length:property.upgradeCount}).map( () => {
                         return (
                             <span className='w-[10px] h-[10px] rounded-[50%] bg-black'></span>
