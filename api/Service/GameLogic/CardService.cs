@@ -27,7 +27,6 @@ public class CardService(
     IBoardMovementService boardMovementService,
     IJailService jailService,
     IGamePropertyRepository gamePropertyRepository,
-    IGameService gameService,
     IPaymentService paymentService
 ) : ICardService
 {

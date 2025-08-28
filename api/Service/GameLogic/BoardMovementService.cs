@@ -73,7 +73,7 @@ public class BoardMovementService(
         {
             throw new Exception(EnumExtensions.GetEnumDescription(Errors.CardMissingAdvanceToSpaceId));
         }
-        bool passedGo = validatedAdvanceToSpaceId <= player.BoardSpaceId;
+        bool passedGo = validatedAdvanceToSpaceId <= player.BoardSpaceId && validatedAdvanceToSpaceId != 1;
         player.PreviousBoardSpaceId = player.BoardSpaceId;
         player.BoardSpaceId = validatedAdvanceToSpaceId;
         if (passedGo)

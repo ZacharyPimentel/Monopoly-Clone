@@ -46,6 +46,16 @@ public class TestGameSeeder(
         await gameRepository.UpdateAsync(game3.Id, new GameUpdateParams { ExtraMoneyForLandingOnGo = true });
         await SeedGameStart(game3, game3Players);
         await SeedLandedOnGoTest(game3, game3Players);
+
+        // Game 4: Player lands on chance - Advance to GO
+        Game game4 = await SeedGame("Advance to GO test");
+        IEnumerable<Player> game4Players = await SeedPlayers(game4.Id, 2);
+        game4.ExtraMoneyForLandingOnGo = true;
+        await gameRepository.UpdateAsync(game4.Id, new GameUpdateParams { ExtraMoneyForLandingOnGo = true });
+        await SeedGameStart(game4, game4Players);
+        await SeedAdvanceToGoTest(game4, game4Players);
+
+        //Game 5: Advance to railroad and utility GO passing test
     }
 
     private async Task<Game> SeedGame(string gameName)
@@ -75,7 +85,7 @@ public class TestGameSeeder(
             });
         }
         IEnumerable<Player> players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = gameId }, null);
-        return players.OrderBy( p => p.PlayerName);
+        return players.OrderBy(p => p.PlayerName);
     }
 
     private async Task SeedGameStart(Game game, IEnumerable<Player> players)
@@ -166,5 +176,31 @@ public class TestGameSeeder(
         game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
         //roll for turn with forced dice roll to land just past GO
         await playerService.RollForTurn(players.OrderBy(p => p.PlayerName).Last(), game, 1, 3);
-    }   
+    }
+
+    public async Task SeedAdvanceToGoTest(Game game, IEnumerable<Player> players)
+    {
+        Player playerOne = players.OrderBy(p => p.PlayerName).First();
+        Player playerTwo = players.OrderBy(p => p.PlayerName).Last();
+        await playerRepository.UpdateAsync(playerOne.Id, new PlayerUpdateParams
+        {
+            BoardSpaceId = 8 //Chance
+        });
+
+        await gameCardRepository.UpdateWhereAsync(
+            new GameCardUpdateParams { Played = true },
+            new GameCardWhereParams { GameId = game.Id, },
+            new GameCardWhereParams { CardId = 2 }
+        );
+
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true },
+            new TurnOrderWhereParams { GameId = game.Id },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id }
+        );
+
+        game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
+        await spaceLandingService.HandleLandedOnSpace(players, game, true);
+    }
 }
