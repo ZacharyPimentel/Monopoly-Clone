@@ -334,7 +334,10 @@ public class PlayerService(
         //send to the group that rolling is in progress before final save at the end
         game.DiceRollInProgress = true;
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, game);
+        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
+        {
+            Game = game
+        });
         (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
         await diceRollService.RecordGameUtilityDiceRoll(game.Id, dieOne, dieTwo);
         IEnumerable<BoardSpace> boardSpaces = await boardSpaceRepository.GetAllForGameWithDetailsAsync(game.Id);
@@ -379,14 +382,23 @@ public class PlayerService(
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = false });
         Game updatedGame = await gameRepository.GetByIdWithDetailsAsync(game.Id);
 
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
+        {
+            RollingForUtilities = false
+        });
+
         //wait one second while dice roll animation finishes
         stopWatch.Stop();
 
         //wait for at least 500ms for animations to finish.
         await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
 
-        await socketMessageService.SendToGroup(WebSocketEvents.GameUpdate, updatedGame);
-        await socketMessageService.SendGamePlayers(game.Id);
+        await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            Players = true,
+            GameLogs = true
+        });
     }
 
     public async Task PurchaseProperty(Player player, Game game, int gamePropertyId)

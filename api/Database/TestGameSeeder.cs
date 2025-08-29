@@ -56,6 +56,12 @@ public class TestGameSeeder(
         await SeedAdvanceToGoTest(game4, game4Players);
 
         //Game 5: Advance to railroad and utility GO passing test
+
+        //Game 6: Roll for utilities  
+        Game game6 = await SeedGame("Test rolling for utilities");
+        IEnumerable<Player> game6Players = await SeedPlayers(game6.Id, 2);
+        await SeedGameStart(game6, game6Players);
+        await SeedRollForUtilitiesTest(game6, game6Players);
     }
 
     private async Task<Game> SeedGame(string gameName)
@@ -202,5 +208,25 @@ public class TestGameSeeder(
         game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
         players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
         await spaceLandingService.HandleLandedOnSpace(players, game, true);
+    }
+
+    public async Task SeedRollForUtilitiesTest(Game game, IEnumerable<Player> players)
+    {
+        Player playerOne = players.OrderBy(p => p.PlayerName).First();
+        Player playerTwo = players.OrderBy(p => p.PlayerName).Last();
+        await playerRepository.UpdateAsync(playerOne.Id, new PlayerUpdateParams
+        {
+            BoardSpaceId = 11 //Jail
+        });
+
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true },
+            new TurnOrderWhereParams { GameId = game.Id },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id }
+        );
+        await gamePropertyRepository.AssignAllToPlayer(game.Id, playerTwo.Id);
+        game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
+        await playerService.RollForTurn(players.OrderBy(p => p.PlayerName).First(), game, 1, 1);
     }
 }
