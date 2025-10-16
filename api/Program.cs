@@ -148,5 +148,9 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("CorsPolicy");
 app.MapHub<MonopolyHub>("/monopoly");
+
+// Endpoint for health checks
+app.MapGet("/monopoly-app/api/health", () => Results.Ok("Healthy"));
+
 app.MapControllers();
 app.Run();
