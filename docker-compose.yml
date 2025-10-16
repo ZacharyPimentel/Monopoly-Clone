@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final-api
+    ports: 
+      - "5131:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000  # Listen on all interfaces on port 5000
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final-ui
+    ports:
+      - "3001:80"

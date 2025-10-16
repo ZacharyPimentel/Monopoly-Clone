@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { ActionButtons } from "../ActionButtons";
 import { useWebSocket } from "@hooks/useWebSocket";
-import { useNavigate } from "react-router-dom";
 
 export const EnterPasswordModal:React.FC<{gameId:string}> = ({gameId}) => {
 
     const {invoke} = useWebSocket();
     const [password,setPassword] = useState('')
-    const navigate = useNavigate();
 
     return (
         <div className='flex flex-col gap-[20px]'>

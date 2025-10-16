@@ -13,7 +13,7 @@ export const Popover:React.FC<{
     sideClass:string,
     space:BoardSpace
     propertyStyles:{position:string}
-}> = ({property,sideClass,space,propertyStyles}) => {
+}> = ({property,space,propertyStyles}) => {
 
     const gameState = useGameState();
     const {player,isCurrentTurn} = usePlayer();

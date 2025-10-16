@@ -10,7 +10,7 @@ export const RailroadPopover:React.FC<{
     sideClass:string,
     space:BoardSpace
     propertyStyles:{position:string}
-}> = ({property,sideClass,space,propertyStyles}) => {
+}> = ({property,space,propertyStyles}) => {
 
     const {player,isCurrentTurn} = usePlayer();
     const globalDispatch = useGlobalDispatch();

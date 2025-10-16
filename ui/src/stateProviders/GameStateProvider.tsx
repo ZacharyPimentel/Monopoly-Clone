@@ -9,8 +9,6 @@ export const GameStateProvider:React.FC<{children:React.ReactNode}> = ({ childre
 
   const initialGameState:GameState = {
     players:[],
-    currentPlayer:null,
-    gameInProgress:false,
     theme: RichUpTheme,
     boardRotation:90,
     game:null,

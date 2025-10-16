@@ -1,16 +1,12 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { usePlayer } from "@hooks/usePlayer";
 import { useGameState } from "@stateProviders/GameStateProvider"
-import { BoardSpace, Property } from "@generated/index";
-import { useGlobalContext } from "@stateProviders/GlobalStateProvider";
-import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
-import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
+import { Property } from "@generated/index";
 
 export const OwnedProperties = () => {
 
     const gameState = useGameState();
     const {player} = usePlayer();
-    const {globalDispatch} = useGlobalContext();
 
     const propertyColor = useCallback( (property:Property) => {
         if(property.setNumber === 1) return 'bg-monopolyBrown'
@@ -22,22 +18,6 @@ export const OwnedProperties = () => {
         if(property.setNumber === 7) return 'bg-monopolyGreen'
         if(property.setNumber === 8) return 'bg-monopolyBlue'
     },[])
-
-    const playerSpaces = gameState.boardSpaces
-        .filter(space => space.property)
-        .filter(space => space.property?.playerId === player?.id) as BoardSpace[];
-
-    const groupedSets = useMemo( () => {
-        const sets:{[key:number]:BoardSpace[]} = {};
-        if(!playerSpaces) return sets;
-        for(let i=1; i<=8 ; i++){
-            const setProperties = playerSpaces.filter( space => space?.property?.setNumber === i);
-            if(setProperties.length > 0){
-                sets[i] = setProperties;
-            }    
-        }
-        return sets;
-    },[playerSpaces])
 
     return (
         <div className='flex flex-col gap-[10px] p-[30px] bg-totorogreen w-full flex-1'>

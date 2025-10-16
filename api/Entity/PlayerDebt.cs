@@ -1,4 +1,7 @@
+using TypeGen.Core.TypeAnnotations;
 namespace api.Entity;
+
+[ExportTsInterface]
 public class PlayerDebt
 {
     public int Id { get; set; }

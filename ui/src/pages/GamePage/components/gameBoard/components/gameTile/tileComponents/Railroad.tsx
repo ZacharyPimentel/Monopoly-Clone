@@ -1,5 +1,5 @@
 import { useGameState } from "@stateProviders/GameStateProvider";
-import { BoardSpace, BoardSpaceCategories } from "@generated/index"
+import { BoardSpace } from "@generated/index"
 import { RailroadPopover } from "../components/RailroadPopover";
 import { useMemo } from "react";
 
@@ -26,12 +26,6 @@ export const Railroad:React.FC<{space:BoardSpace,sideClass:string}> = ({space,si
             })
             return {position:''};
         },[property])
-
-    const numberOfOwnedRailroads = useMemo( () => {
-        const railroads = gameState.boardSpaces
-            .filter( space => space.boardSpaceCategoryId === BoardSpaceCategories.Railroard);
-        return
-    },[gameState.boardSpaces])
 
     return (
         <div className='h-full relative'>

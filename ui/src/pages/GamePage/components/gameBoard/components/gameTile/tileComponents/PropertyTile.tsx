@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useGameState } from "@stateProviders/GameStateProvider";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
 import { Popover } from "../components/Popover";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {

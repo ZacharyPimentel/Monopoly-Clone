@@ -1,4 +1,3 @@
-import { ReactNode } from "react"
 import { Player, BoardSpace, GameLog, SocketPlayer } from "@generated/index";
 import { Trade } from "../websocket/Trade"
 import { Game } from "@generated/Game"
@@ -6,19 +5,17 @@ import { Game } from "@generated/Game"
 export type GameState = {
     players:Player[]
     currentSocketPlayer: SocketPlayer | null
-    modalOpen:boolean
-    modalContent:ReactNode | null
-    theme:Theme
     boardRotation: 0 | 90 | 180 | 270
     game:Game | null,
-    lastDiceRoll:number[] | null
     rolling:boolean
     boardSpaces:BoardSpace[]
     gameId:string
     gameLogs:GameLog[]
     cardToastMessage:string
     trades:Trade[],
-    queueMessageCount:number
+    queueMessageCount:number,
+    //remove this later
+    theme: any
 }
 
 export type Theme = {
