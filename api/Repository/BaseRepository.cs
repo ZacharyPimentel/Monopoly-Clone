@@ -1,5 +1,4 @@
 using System.Data;
-using System.Linq;
 using api.Interface;
 using Dapper;
 using api.Helper;

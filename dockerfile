@@ -27,7 +27,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final-api
 WORKDIR /app
 COPY --from=publish-api /app/publish .
 EXPOSE 5000
-ENTRYPOINT ["dotnet", "dotnet-monopoly-api.dll"]
+ENTRYPOINT ["dotnet", "api.dll"]
 
 # Stage 5: Final image for UI
 FROM nginx:alpine AS final-ui
