@@ -22,5 +22,11 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="TypeGen" Version="6.0.2" />
   </ItemGroup>
+
+
+  <!-- Make sure seed data sql is brought over into the publish -->
+  <ItemGroup>
+    <None Include="Database\**\*.sql" CopyToOutputDirectory="Always" />
+  </ItemGroup>
   
 </Project>
