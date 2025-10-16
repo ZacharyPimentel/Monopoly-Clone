@@ -136,12 +136,12 @@ public class CardService(
 
     public async Task AdvanceToRailroad(SpaceLandingServiceContext context)
     {
-        await boardMovementService.MovePlayerToNearestRailroad(context.CurrentPlayer, context.BoardSpaces);
+        await boardMovementService.MovePlayerToNearestRailroad(context.CurrentPlayer, context.BoardSpaces, context.Game);
     }
 
     public async Task AdvanceToUtility(SpaceLandingServiceContext context)
     {
-        await boardMovementService.MovePlayerToNearestUtility(context.CurrentPlayer, context.BoardSpaces);
+        await boardMovementService.MovePlayerToNearestUtility(context.CurrentPlayer, context.BoardSpaces, context.Game);
     }
 
     public async Task PayPlayers(Card card, SpaceLandingServiceContext context)

@@ -10,8 +10,8 @@ public interface IBoardMovementService
     public string MovePlayerWithDiceRoll(Player player, Game game, int dieOne, int dieTwo);
     public Task AdvanceToSpaceWithCard(Player player, Card card, Game game);
     public Task MovePlayerBackThreeSpaces(Player player);
-    public Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces);
-    public Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces);
+    public Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces, Game game);
+    public Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces, Game game);
     public Task ToggleOffGameMovement(Guid gameId);
     public Task ToggleOnGameMovement(Guid gameId);
 }
@@ -95,7 +95,7 @@ public class BoardMovementService(
             BoardSpaceId = player.BoardSpaceId -= 3
         });
     }
-    public async Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces)
+    public async Task MovePlayerToNearestRailroad(Player player, IEnumerable<BoardSpace> boardspaces, Game game)
     {
         IEnumerable<BoardSpace> railRoads = boardspaces.Where(bs => bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard);
         BoardSpace? closestRailroad = railRoads.Where(rr => rr.Id > player.BoardSpaceId).FirstOrDefault();
@@ -103,21 +103,29 @@ public class BoardMovementService(
         if (closestRailroad != null)
         {
             passedGo = closestRailroad.Id <= player.BoardSpaceId;
-            if (passedGo) player.Money += 200;
+            if (passedGo)
+            {
+                player.Money += 200;
+                await socketMessageService.CreateAndSendLatestGameLogs(game.Id, $"{player.PlayerName} passed GO and collected $200.");
+            }
             player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = closestRailroad.Id;
         }
         else
         {
             passedGo = railRoads.First().Id <= player.BoardSpaceId;
-            if (passedGo) player.Money += 200;
+            if (passedGo)
+            {
+                player.Money += 200;
+                await socketMessageService.CreateAndSendLatestGameLogs(game.Id, $"{player.PlayerName} passed GO and collected $200.");
+            }
             player.BoardSpaceId = railRoads.First().Id;
         }
 
         await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
     }
 
-    public async Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces)
+    public async Task MovePlayerToNearestUtility(Player player, IEnumerable<BoardSpace> boardspaces, Game game)
     {
         IEnumerable<BoardSpace> utilities = boardspaces.Where(bs => bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Utility);
         BoardSpace? closestUtility = utilities.Where(rr => rr.Id > player.BoardSpaceId).FirstOrDefault();
@@ -125,7 +133,11 @@ public class BoardMovementService(
         if (closestUtility != null)
         {
             passedGo = closestUtility.Id <= player.BoardSpaceId;
-            if (passedGo) player.Money += 200;
+            if (passedGo)
+            {
+                player.Money += 200;
+                await socketMessageService.CreateAndSendLatestGameLogs(game.Id, $"{player.PlayerName} passed GO and collected $200.");
+            }
             player.PreviousBoardSpaceId = player.BoardSpaceId;
             player.BoardSpaceId = closestUtility.Id;
         }

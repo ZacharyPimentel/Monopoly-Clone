@@ -56,6 +56,10 @@ public class TestGameSeeder(
         await SeedAdvanceToGoTest(game4, game4Players);
 
         //Game 5: Advance to railroad and utility GO passing test
+        Game game5 = await SeedGame("Advance to RR / Util Passing GO");
+        IEnumerable<Player> game5Players = await SeedPlayers(game5.Id, 2);
+        await SeedGameStart(game5, game5Players);
+        await SeedAdvanceToRailroadUtilityTest(game5, game5Players);
 
         //Game 6: Roll for utilities  
         Game game6 = await SeedGame("Test rolling for utilities");
@@ -197,6 +201,32 @@ public class TestGameSeeder(
             new GameCardUpdateParams { Played = true },
             new GameCardWhereParams { GameId = game.Id, },
             new GameCardWhereParams { CardId = 2 }
+        );
+
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true },
+            new TurnOrderWhereParams { GameId = game.Id },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id }
+        );
+
+        game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
+        await spaceLandingService.HandleLandedOnSpace(players, game, true);
+    }
+
+    public async Task SeedAdvanceToRailroadUtilityTest(Game game, IEnumerable<Player> players)
+    {
+        Player playerOne = players.OrderBy(p => p.PlayerName).First();
+        Player playerTwo = players.OrderBy(p => p.PlayerName).Last();
+        await playerRepository.UpdateAsync(playerOne.Id, new PlayerUpdateParams
+        {
+            BoardSpaceId = 37 //Chance
+        });
+
+        await gameCardRepository.UpdateWhereAsync(
+            new GameCardUpdateParams { Played = true },
+            new GameCardWhereParams { GameId = game.Id, },
+            new GameCardWhereParams { CardId = 5 } //Advance to Railroad
         );
 
         await turnOrderRepository.UpdateWhereAsync(

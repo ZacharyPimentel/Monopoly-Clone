@@ -86,12 +86,15 @@ public class SocketMessageService(
         if (SuppressMessages) return;
 
         IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(gameId);
-        await SendToGroup(WebSocketEvents.GameLogUpdate, latestLogs);
+        var response = new GameStateResponse
+        {
+            GameLogs = latestLogs
+        };
+
+        await SendToGroup(WebSocketEvents.GameStateUpdate, response);
     }
     public async Task CreateAndSendLatestGameLogs(Guid gameId, string message)
     {
-        if (SuppressMessages) return;
-
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = gameId,

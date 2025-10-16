@@ -5,7 +5,6 @@ import { Player, PlayerUpdateParams, PlayerWhereParams } from "../types/controll
 import { PlayerIcon } from "../types/controllers/PlayerIcon";
 import { Theme } from "../types/controllers/Theme";
 import { useHttp } from "./useHttp";
-import { WebSocketEvents } from "@generated/WebSocketEvents";
 
 export const useApi = () => {
 
@@ -18,7 +17,6 @@ export const useApi = () => {
         },
         player:{
             search: async(whereParams:Partial<PlayerWhereParams>):Promise<Player[]> => {
-                console.log('19',whereParams)
                 return await request.get(`${apiUrl}/player`,whereParams)
             },
             update: async(playerId:string,updateParams:Partial<PlayerUpdateParams>) => {

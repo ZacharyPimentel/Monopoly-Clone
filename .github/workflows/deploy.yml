@@ -1,0 +1,205 @@
+name: Build and Deploy To OCI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Adjust this when deploying a new app     
+      APP_NAME: monopoly-app
+
+      OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+      OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+      OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+      OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+      OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+
+    # Checkout Repository
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Check if API code changed
+      - name: Check If API Changed
+        id: api-change-check
+        run: |
+          if git diff --quiet HEAD~1 HEAD -- api/; then
+            echo "api-changed=false" >> $GITHUB_ENV
+          else
+            echo "api-changed=true" >> $GITHUB_ENV
+          fi
+
+      # Check if UI code changed
+      - name: Check If UI Changed
+        id: ui-change-check
+        run: |
+          if git diff --quiet HEAD~1 HEAD -- ui/; then
+            echo "ui-changed=false" >> $GITHUB_ENV
+          else
+            echo "ui-changed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build Docker API image
+        if: env.api-changed == 'true'
+        run: |
+          docker build --target final-api -t ${{ env.APP_NAME}}-api:latest .
+
+      - name: Build Docker UI image
+        if: env.ui-changed == 'true'
+        run: |
+          docker build --target final-ui -t ${{ env.APP_NAME}}-ui:latest .
+
+      - name: Save Docker API image as tarball
+        if: env.api-changed == 'true'
+        run: docker save -o ${{ env.APP_NAME}}-api.tar ${{ env.APP_NAME}}-api:latest
+
+      - name: Save Docker UI image as tarball
+        if: env.ui-changed == 'true'
+        run: docker save -o ${{ env.APP_NAME}}-ui.tar ${{ env.APP_NAME}}-ui:latest
+
+      - name: Install OCI CLI
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        uses: oracle-actions/run-oci-cli-command@v1.3.2
+        with:
+          command: '--version'
+
+      - name: Push API Image Tarball to S3
+        if: env.api-changed == 'true'
+        run: |
+          oci os object put \
+            --bucket-name app-tarballs \
+            --name ${{ env.APP_NAME}}-api.tar \
+            --file ./${{ env.APP_NAME}}-api.tar \
+            --force
+            
+      - name: Push UI Image Tarball to S3
+        if: env.ui-changed == 'true'
+        run: |
+          oci os object put \
+            --bucket-name app-tarballs \
+            --name ${{ env.APP_NAME}}-ui.tar \
+            --file ./${{ env.APP_NAME}}-ui.tar \
+            --force
+
+      - name: Get Compute Instance Id
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        id: get-compute-instance-id
+        run: |
+          id=$(
+            oci compute instance list \
+              --compartment-id ${{ secrets.OCI_CLI_TENANCY }} \
+              --query 'data[?"lifecycle-state"==`RUNNING`].id | [0]' \
+          )
+          echo "::add-mask::$id"
+          echo "id=$id" >> $GITHUB_OUTPUT
+      
+      - name: Get VNIC id
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        id: get-vnic-id
+        run: |
+          id=$(
+            oci compute vnic-attachment list \
+              --compartment-id ${{ secrets.OCI_CLI_TENANCY }} \
+              --instance-id ${{ steps.get-compute-instance-id.outputs.id}} \
+              --query 'data[?"nic-index"==`0`]."vnic-id" | [0]'
+          )
+          # echo "::add-mask::$id"
+          echo "id=$id" >> $GITHUB_OUTPUT
+      
+      - name: Get Compute Instance Private IP
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        id: get-private-ip
+        run: |
+          ip=$(
+            oci network vnic get \
+              --vnic-id ${{ steps.get-vnic-id.outputs.id}} \
+              --query 'data."private-ip"'
+          )
+          # echo "::add-mask::$ip"
+          echo "ip=$ip" >> $GITHUB_OUTPUT
+        
+      - name: Get Bastion Instance
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        id: get-bastion-id
+        run: |
+          id=$(
+            oci bastion bastion list \
+              --compartment-id ${{ secrets.OCI_CLI_TENANCY }} \
+              --query 'data[0].id'
+          )
+          echo "::add-mask::$id"
+          echo "id=$id" >> $GITHUB_OUTPUT
+
+      - name: Write SSH Private Key to File
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > infra/id_rsa
+          chmod 600 infra/id_rsa
+
+      - name: Create Bastion Session
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        id: get-bastion-session-id
+        run: |
+          id=$(
+            oci bastion session create-port-forwarding \
+              --bastion-id ${{ steps.get-bastion-id.outputs.id }} \
+              --target-resource-id ${{ steps.get-compute-instance-id.outputs.id }} \
+              --display-name github-pipeline-session \
+              --session-ttl 1800 \
+              --ssh-public-key-file infra/id_rsa.pub \
+              --query 'data.id'
+          )
+          echo "::add-mask::$id"
+          echo "id=$id" >> $GITHUB_OUTPUT
+
+      - name: Wait For Bastion Session To Create
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        run: sleep 20
+
+      - name: Start SSH Tunnel And Copy Tar Files To VM
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        run: |
+          ssh -i infra/id_rsa -N -L 6000:${{steps.get-private-ip.outputs.ip}}:22 \
+          -p 22 \
+          -o StrictHostKeyChecking=no \
+          ${{ steps.get-bastion-session-id.outputs.id }}@host.bastion.us-ashburn-1.oci.oraclecloud.com & sleep 5
+
+          # Wait a few seconds to ensure tunnel is ready
+          sleep 10
+
+          if [ "${{ env.api-changed }}" == "true" ]; then
+            scp -i infra/id_rsa -o StrictHostKeyChecking=no -P 6000 ./${{ env.APP_NAME}}-api.tar ubuntu@127.0.0.1:/tmp/
+          fi
+
+          if [ "${{ env.ui-changed }}" == "true" ]; then
+            scp -i infra/id_rsa -o StrictHostKeyChecking=no -P 6000 ./${{ env.APP_NAME}}-ui.tar ubuntu@127.0.0.1:/tmp/
+          fi
+
+      - name: Run App Containers On VM
+        if: env.api-changed == 'true' || env.ui-changed == 'true'
+        run: |
+          ssh -i infra/id_rsa -p 6000 -o StrictHostKeyChecking=no ubuntu@127.0.0.1 <<'EOF'
+
+            if [ "${{ env.api-changed }}" == "true" ]; then
+              mv /tmp/${{ env.APP_NAME}}-api.tar images/
+              docker load -i images/${{ env.APP_NAME}}-api.tar
+              docker stop ${{ env.APP_NAME }}-api && docker rm ${{ env.APP_NAME }}-api
+              docker run -d -p 5130:5000 --name ${{env.APP_NAME}}-api --network vm_network -e ConnectionStrings__DefaultConnection="${{ secrets.DB_CONNECTION_STRING}}" ${{ env.APP_NAME}}-api:latest
+            fi
+
+            if [ "${{ env.ui-changed }}" == "true" ]; then
+              mv /tmp/${{ env.APP_NAME}}-ui.tar images/
+              docker load -i images/${{ env.APP_NAME}}-ui.tar
+              docker stop ${{ env.APP_NAME }}-ui && docker rm ${{ env.APP_NAME }}-ui
+              docker run -d -p 3000:80 --name ${{env.APP_NAME}}-ui ${{ env.APP_NAME}}-ui:latest
+            fi
+
+          EOF
