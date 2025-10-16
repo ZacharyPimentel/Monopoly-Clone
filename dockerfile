@@ -16,8 +16,11 @@ RUN dotnet publish "api.csproj" -c Release -o /app/publish
 FROM node:18 AS build-ui
 WORKDIR /app
 COPY ./ui/. ./
+# Set the environment variable for Vite build mode
+ARG BUILD_MODE=production
 RUN npm install
-RUN npm run build
+# Use the mode from the build argument
+RUN npm run build -- --mode ${BUILD_MODE}
 
 # Stage 4: Final image for API
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final-api
