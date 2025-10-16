@@ -128,7 +128,7 @@ if (app.Environment.IsDevelopment())
         TypeNameConverters = [],
         FileNameConverters = [new NoOpFileNameConverter()],
         CsNullableTranslation = TypeGen.Core.StrictNullTypeUnionFlags.Optional,
-    }; 
+    };
     var generator = new Generator(options); // create the generator instance
     var assembly = Assembly.GetExecutingAssembly(); // get the assembly to generate files for
     generator.Generate(assembly);
@@ -143,14 +143,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Endpoint for health checks
+app.MapGet("/monopoly-app/api/health", () => Results.Ok("Healthy"));
+
 //app.UseHttpsRedirection();
 //app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("CorsPolicy");
 app.MapHub<MonopolyHub>("/monopoly");
-
-// Endpoint for health checks
-app.MapGet("/monopoly-app/api/health", () => Results.Ok("Healthy"));
 
 app.MapControllers();
 app.Run();
