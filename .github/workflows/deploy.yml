@@ -11,8 +11,8 @@ jobs:
     env:
       # Adjust this when deploying a new app     
       APP_NAME: monopoly-app
-      UI_PORT: 3000
-      API_PORT: 5130
+      UI_PORT: 3001
+      API_PORT: 5131
 
       OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
       OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
