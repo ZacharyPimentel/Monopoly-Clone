@@ -13,7 +13,7 @@ FROM build-api AS publish-api
 RUN dotnet publish "api.csproj" -c Release -o /app/publish
 
 # Stage 3: Build UI
-FROM node:18 AS build-ui
+FROM node:22-alpine AS build-ui
 WORKDIR /app
 COPY ./ui/. ./
 # Set the environment variable for Vite build mode
