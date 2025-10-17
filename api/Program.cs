@@ -26,12 +26,15 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddSingleton(typeof(GameState<>), typeof(GameState<>));
 
 // Add Cors Policy
-builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>{
+builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+{
     builder
-        .AllowAnyOrigin()  
+        .AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader();
 }));
+
+builder.WebHost.UseUrls("http://*:5000");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
