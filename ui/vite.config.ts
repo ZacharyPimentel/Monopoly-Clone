@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     svgr(),
-    tsconfigPaths()
+    tsconfigPaths(),
   ],
+  base: '/chores-app/ui',
 })
