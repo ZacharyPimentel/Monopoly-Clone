@@ -10,5 +10,5 @@ export default defineConfig({
     svgr(),
     tsconfigPaths(),
   ],
-  base: '/chores-app/ui',
+  base: '/monopoly-app/ui',
 })
