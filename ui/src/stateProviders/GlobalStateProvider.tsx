@@ -33,7 +33,7 @@ export const GlobalStateProvider:React.FC<{children:React.ReactNode}> = ({ child
   //set up the web socket connection
   useEffect( () => {
     const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5014/monopoly",{
+    .withUrl(import.meta.env.VITE_SOCKET_URL,{
       skipNegotiation: true,
       transport: signalR.HttpTransportType.WebSockets
     })

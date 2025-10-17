@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using api.Entity; // or System.Data.SqlClient
 
 [ApiController]
-[Route("/monopoly/playerIcon")]
+[Route("/monopoly-app/api/playerIcon")]
 public class PlayerIconController(IDbConnection db, ICacheService cacheService) : ControllerBase {
 
     [HttpGet]

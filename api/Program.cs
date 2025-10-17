@@ -153,7 +153,7 @@ app.MapGet("/monopoly-app/api/health", () => Results.Ok("Healthy"));
 //app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("CorsPolicy");
-app.MapHub<MonopolyHub>("/monopoly");
+app.MapHub<MonopolyHub>("/monopoly-app/api/monopoly");
 
 app.MapControllers();
 app.Run();

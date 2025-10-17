@@ -15,8 +15,6 @@ migrations
 obj
 appsettings.Development.json
 
-/*/.env.development
-/*/.env.production
 /*/appsettings.Production.json
 
 # Editor directories and files

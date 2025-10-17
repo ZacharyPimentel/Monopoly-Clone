@@ -3,7 +3,7 @@ using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("/monopoly/theme")]
+[Route("/monopoly-app/api/theme")]
 public class ThemeController(IThemeRepository themeRepository, ICacheService cacheService) : ControllerBase {
 
     [HttpGet]

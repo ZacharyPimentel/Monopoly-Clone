@@ -4,7 +4,7 @@ using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("/monopoly/gamecard")]
+[Route("/monopoly-app/api/gamecard")]
 public class GameCardController(IDbConnection db) : ControllerBase {
 
     //Handles the logic of keeping a deck in sync while returning a Card in the end

@@ -4,7 +4,7 @@ using api.Interface;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("/monopoly/gameLog")]
+[Route("/monopoly-app/api/gameLog")]
 public class GameLogController(
     IDbConnection db,
     IGameLogRepository gameLogRepository
