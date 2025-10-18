@@ -6,7 +6,7 @@ using System.Data.SqlClient; // or System.Data.SqlClient
 using api.Entity; // or System.Data.SqlClient
 
 [ApiController]
-[Route("/monopoly-app/api/boardspace")]
+[Route("/api/boardspace")]
 public class BoardSpaceController(IDbConnection db) : ControllerBase {
 
     [HttpGet]

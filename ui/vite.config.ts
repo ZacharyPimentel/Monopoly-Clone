@@ -10,5 +10,4 @@ export default defineConfig({
     svgr(),
     tsconfigPaths(),
   ],
-  base: '/monopoly-app/ui',
 })

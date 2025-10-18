@@ -3,7 +3,7 @@ using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("/monopoly-app/api/card")]
+[Route("/api/card")]
 public class CardController(IDbConnection db) : ControllerBase {
 
     [HttpGet("{id}")]

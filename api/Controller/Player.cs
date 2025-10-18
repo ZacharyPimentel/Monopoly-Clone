@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controller;
 [ApiController]
-[Route("/monopoly-app/api/player")]
+[Route("/api/player")]
 public class PlayerController(IPlayerRepository playerRepository, ICacheService cacheService) : ControllerBase {
 
     [HttpGet]
