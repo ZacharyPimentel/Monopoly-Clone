@@ -15,4 +15,5 @@ public class LastDiceRollWhereParams
 }
 public interface ILastDiceRollRepository : IBaseRepository<LastDiceRoll, int>
 {
+    Task ResetUtilityDice(Guid gameId);
 }

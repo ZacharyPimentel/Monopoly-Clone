@@ -98,6 +98,8 @@ public class GameService(
                 new LastDiceRollWhereParams { GameId = game.Id },
                 new { }
             );
+
+            await lastDiceRollRepository.ResetUtilityDice(game.Id);
         }
 
         await turnOrderRepository.UpdateWhereAsync(

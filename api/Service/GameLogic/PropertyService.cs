@@ -131,7 +131,7 @@ public class PropertyService(
             UpgradeCount = gameProperty.UpgradeCount - 1,
         });
         int paymentAmount = (int)Math.Round((decimal)(gameProperty.UpgradeCost ?? 0) / 2) ;
-        await playerRepository.AddMoneyToPlayer(player.Id, paymentAmount / 2);
+        await playerRepository.AddMoneyToPlayer(player.Id, paymentAmount);
         await gameService.CreateGameLog(gameId, $"{player.PlayerName} downgraded {gameProperty.BoardSpaceName} for ${paymentAmount}.");
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {
