@@ -147,13 +147,13 @@ if (app.Environment.IsDevelopment())
 }
 
 // Endpoint for health checks
-app.MapGet("/monopoly-app/api/health", () => Results.Ok("Healthy"));
+app.MapGet("/api/health", () => Results.Ok("Healthy"));
 
 //app.UseHttpsRedirection();
 //app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("CorsPolicy");
-app.MapHub<MonopolyHub>("/monopoly-app/api/monopoly");
+app.MapHub<MonopolyHub>("/api/monopoly");
 
 app.MapControllers();
 app.Run();

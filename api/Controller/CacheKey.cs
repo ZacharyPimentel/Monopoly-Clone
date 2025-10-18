@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 
 [ApiController]
-[Route("/monopoly-app/api/cachekey")]
+[Route("/api/cachekey")]
 public class CacheKeyController(ICacheService cacheService)
 {
     [HttpGet]    
