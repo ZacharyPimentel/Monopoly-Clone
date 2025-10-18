@@ -211,7 +211,7 @@ public class SpaceLandingService(
                     {
                         IEnumerable<BoardSpace> setSpaces = context.BoardSpaces.Where(bs => bs.Property?.SetNumber == landedOnProperty.SetNumber);
                         //do not double the rent if property has a house/hotel on it
-                        if (setSpaces.All(bs => bs?.Property?.PlayerId == propertyOwnerId && landedOnProperty.UpgradeCount > 0))
+                        if (setSpaces.All(bs => bs?.Property?.PlayerId == propertyOwnerId) && landedOnProperty.UpgradeCount == 0)
                         {
                             paymentAmount *= 2;
                         }
