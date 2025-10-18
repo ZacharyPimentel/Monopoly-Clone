@@ -167,7 +167,7 @@ public class CardService(
 
         IEnumerable<GameProperty> gameProperties = await gamePropertyRepository.SearchAsync(
             new GamePropertyWhereParams { PlayerId = context.CurrentPlayer.Id },
-            new { }
+            new GamePropertyWhereParams{ UpgradeCount = 0 }
         );
 
         int numberOfHouses = gameProperties

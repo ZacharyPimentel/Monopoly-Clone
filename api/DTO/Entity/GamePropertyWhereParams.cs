@@ -4,4 +4,5 @@ public class GamePropertyWhereParams
 {
     public int Id { get; set; }
     public Guid PlayerId { get; set; }
+    public int UpgradeCount { get; set; }
 }

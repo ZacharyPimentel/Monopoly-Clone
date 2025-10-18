@@ -108,9 +108,9 @@ using (var scope = app.Services.CreateScope())
 {
     var dbConnection = scope.ServiceProvider.GetRequiredService<IDbConnection>();
     dbConnection.Open(); // Open the connection
-    DatabaseInitializer.Initialize(dbConnection); // Initialize the database
     if (app.Environment.IsDevelopment())
     {
+        DatabaseInitializer.Initialize(dbConnection); // Initialize the database
         var seeder = scope.ServiceProvider.GetRequiredService<TestGameSeeder>();
         await seeder.SeedTestingGameData();
     }
