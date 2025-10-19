@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS GAME(
     MovementInProgress BOOLEAN DEFAULT false,
     InLobby BOOLEAN DEFAULT true,
     GameOver BOOLEAN DEFAULT false,
+    Deleted BOOLEAN DEFAULT false,
     GameStarted BOOLEAN DEFAULT false,
     StartingMoney INTEGER DEFAULT 1500,
     ThemeId INTEGER NOT NULL,

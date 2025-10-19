@@ -66,6 +66,12 @@ public class TestGameSeeder(
         IEnumerable<Player> game6Players = await SeedPlayers(game6.Id, 2);
         await SeedGameStart(game6, game6Players);
         await SeedRollForUtilitiesTest(game6, game6Players);
+
+        //Game 7: Jail testing 
+        Game game7 = await SeedGame("Test jail");
+        IEnumerable<Player> game7Players = await SeedPlayers(game7.Id, 2);
+        await SeedGameStart(game7, game7Players);
+        await SeedJailTest(game7, game7Players);
     }
 
     private async Task<Game> SeedGame(string gameName)
@@ -258,5 +264,23 @@ public class TestGameSeeder(
         game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
         players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
         await playerService.RollForTurn(players.OrderBy(p => p.PlayerName).First(), game, 1, 1);
+    }
+
+    public async Task SeedJailTest(Game game, IEnumerable<Player> players)
+    {
+        Player playerOne = players.OrderBy(p => p.PlayerName).First();
+        Player playerTwo = players.OrderBy(p => p.PlayerName).Last();
+        await playerRepository.UpdateAsync(playerOne.Id, new PlayerUpdateParams
+        {
+            BoardSpaceId = 11, //Jail
+            InJail = true,
+            GetOutOfJailFreeCards = 1
+        });
+        await turnOrderRepository.UpdateWhereAsync(
+            new TurnOrderUpdateParams { HasPlayed = true },
+            new TurnOrderWhereParams { GameId = game.Id },
+            new TurnOrderWhereParams { PlayerId = playerOne.Id }
+        );
+
     }
 }

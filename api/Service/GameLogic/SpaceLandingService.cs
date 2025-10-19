@@ -276,6 +276,7 @@ public class SpaceLandingService(
                 //calculate payment amount and pay the owner
                 else
                 {
+
                     Player propertyOwner = await playerRepository.GetByIdAsync(railroadOwnerId);
                     int numberOfOwnedRailroads = context.BoardSpaces.Count(bs =>
                         bs.BoardSpaceCategoryId == (int)BoardSpaceCategories.Railroard &&
@@ -284,21 +285,8 @@ public class SpaceLandingService(
 
                     int paymentAmount = 25 * (int)Math.Pow(2, numberOfOwnedRailroads - 1);
                     if (context.CameFromCard) paymentAmount *= 2; //card says you pay double if owned
-                    await playerRepository.UpdateAsync(context.CurrentPlayer.Id, new PlayerUpdateParams { Money = context.CurrentPlayer.Money - paymentAmount });
-                    await playerRepository.UpdateAsync(railroadOwnerId, new PlayerUpdateParams { Money = propertyOwner.Money + paymentAmount });
-                    await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-                    await gameLogRepository.CreateAsync(new GameLogCreateParams
-                    {
-                        GameId = context.Game.Id,
-                        Message = $"{context.CurrentPlayer.PlayerName} paid {propertyOwner.PlayerName} ${paymentAmount}"
-                    });
-                    await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
-                    {
-                        Game = true,
-                        Players = true,
-                        GameLogs = true
-                    });
-                    return;
+
+                    await paymentService.PayPlayer(context.CurrentPlayer, propertyOwner, paymentAmount);
                 }
             }
         }

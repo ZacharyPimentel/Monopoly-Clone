@@ -194,6 +194,27 @@ namespace api.hub
                await jailService.PayOutOfJail(guardService.GetPlayer());
            });
         }
+        public async Task GetOutOfJailFree()
+        {
+            var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
+            await guardService.HandleGuardError(async () =>
+           {
+               IGuardClause guards = await guardService
+                   .SocketConnectionHasPlayerId()
+                   .SocketConnectionHasGameId()
+                   .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
+
+               guards
+                   .PlayerExists()
+                   .GameExists()
+                   .PlayerIsInCorrectGame()
+                   .IsCurrentTurn()
+                   .PlayerAllowedToRoll()
+                   .PlayerInJail();
+
+               await jailService.GetOutOfJailFree(guardService.GetPlayer());
+           });
+        }
         public async Task PlayerRollForUtilties()
         {
             var currentSocketPlayer = gameState.GetPlayer(Context.ConnectionId);
@@ -245,8 +266,15 @@ namespace api.hub
         public async Task GameGetAll()
         {
             var games = await gameRepository.GetAllWithPlayerCountAsync();
-            var activeGames = games.Where(g => g.GameOver == false);
+            var activeGames = games.Where(g => g.GameOver == false && g.Deleted == false);
             await SendToSelf(WebSocketEvents.GameUpdateAll, activeGames);
+        }
+        public async Task GameArchive(Guid gameId)
+        {
+            await guardService.HandleGuardError(async () =>
+            {
+                await gameService.ArchiveGame(gameId);
+            });
         }
         public async Task GameCreate(SocketEventGameCreate gameCreateParams)
         {

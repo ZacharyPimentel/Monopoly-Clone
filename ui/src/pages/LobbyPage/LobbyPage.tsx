@@ -5,6 +5,7 @@ import { useWebSocket } from "../../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
 import { WebSocketEvents } from "@generated/WebSocketEvents";
 import { EnterPasswordModal } from "@globalComponents/GlobalModal/modalContent/EnterPasswordModal";
+import { GameDeleteModal } from "@globalComponents/GlobalModal/modalContent/GameDeleteModal";
 
 export const LobbyPage = () => {
 
@@ -55,6 +56,15 @@ export const LobbyPage = () => {
                                     }
                                 } className='ml-auto bg-black text-white p-[10px] min-w-[100px]'>Join</button>
                                 <p>{game.activePlayerCount} Active Player{game.activePlayerCount !== 1 && 's'}</p>
+                                <div className='w-[20px] h-[20px]'>
+                                    {game.activePlayerCount == 0 && (
+                                        <button title="Delete Game" className='hover:fill-[tomato] transition'
+                                            onClick={() => globalDispatch({modalContent:<GameDeleteModal game={game}/>, modalOpen:true})}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                                        </button>
+                                    )}
+                                </div>
                             </li>
                             <hr></hr>
                         </Fragment>)

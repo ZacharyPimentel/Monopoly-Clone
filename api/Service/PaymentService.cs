@@ -43,6 +43,12 @@ public class PaymentService(
                 InDebtTo = receivingPlayer.Id,
                 Amount = amount
             });
+
+            await gameLogRepository.CreateAsync(new GameLogCreateParams
+            {
+                GameId = payingPlayer.GameId,
+                Message = $"{payingPlayer.PlayerName} can't afford to pay {receivingPlayer.PlayerName}"
+            });
         }
         //player has enough money, can pay without extra logic needed
         else

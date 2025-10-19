@@ -7,6 +7,7 @@ public enum WebSocketEvents
 {
     BoardSpaceUpdate,
     Error,
+    GameArchive,
     GameCreate,
     GameStateUpdate,
     GameRulesUpdate,
@@ -14,6 +15,7 @@ public enum WebSocketEvents
     GameUpdateAll,
     GameUpdateGroup,
     GameLogUpdate,
+    GetOutOfJailFree,
     PasswordValidate,
     PasswordValidated,
     PayOutOfJail,

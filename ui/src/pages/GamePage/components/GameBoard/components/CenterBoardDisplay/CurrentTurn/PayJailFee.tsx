@@ -1,17 +1,37 @@
+import { Player } from "@generated/Player";
 import { useWebSocket } from "@hooks/useWebSocket"
 
-export const PayJailFee:React.FC = () => {
+export const PayJailFee:React.FC<{player:Player}> = ({player}) => {
     
     const {invoke} = useWebSocket();
 
+    const canAffordToPay = player.money >= 50
+    const hasGetOutOfJailFree = player.getOutOfJailFreeCards > 0
+
+    if(!canAffordToPay && !hasGetOutOfJailFree) return null
+
     return (
-        <button
-            onClick={() => {
-                invoke.player.payOutOfJail();
-            }}
-            className='bg-white p-[5px]'
-        >
-            Pay $50
-        </button>
+        <>
+            {canAffordToPay && (
+                <button
+                    onClick={() => {
+                        invoke.player.payOutOfJail();
+                    }}
+                    className='bg-white p-[5px]'
+                >
+                    Pay $50
+                </button>
+                )}
+            {hasGetOutOfJailFree && (
+                <button
+                    onClick={() => {
+                        invoke.player.getOutOfJailFree();
+                    }}
+                    className='bg-white p-[5px] w-full'
+                >
+                    Use get out of jail free
+                </button>
+            )}
+        </>
     )
 }

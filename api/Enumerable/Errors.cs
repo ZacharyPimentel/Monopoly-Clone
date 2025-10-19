@@ -1,6 +1,7 @@
 
 using System.ComponentModel;
 namespace api.Enumerable;
+
 public enum Errors
 {
     [Description("Card does not exist.")]
@@ -8,7 +9,7 @@ public enum Errors
     
     [Description("Card is missing it's advance to space id.")]
     CardMissingAdvanceToSpaceId,
-    
+
     [Description("Card is missing it's payment amount.")]
     CardMissingPaymentAmount,
 
@@ -62,7 +63,7 @@ public enum Errors
 
     [Description("This player is not currently active.")]
     PlayerInactive,
-    
+
     [Description("Player is not able to continue rolling.")]
     PlayerNotAllowedToRoll,
 

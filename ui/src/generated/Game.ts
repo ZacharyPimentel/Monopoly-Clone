@@ -8,6 +8,7 @@ export interface Game {
     gameName: string;
     inLobby: boolean;
     gameOver: boolean;
+    deleted: boolean;
     gameStarted: boolean;
     startingMoney: number;
     themeId: number;

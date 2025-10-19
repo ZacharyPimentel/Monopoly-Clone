@@ -12,4 +12,5 @@ public class GameUpdateParams
     public int? MoneyInFreeParking { get; set; }
     public bool? DiceRollInProgress { get; set; }
     public bool? MovementInProgress { get; set; }
+    public bool? Deleted { get; set; }
 }

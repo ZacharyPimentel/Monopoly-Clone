@@ -19,7 +19,7 @@ export const CurrentTurn = () => {
     const currentPlayerDebtTotal = player.debts.reduce( (sum,debt) => sum + debt.amount, 0)
     
     return (
-        <div className='flex gap-[50px]'>
+        <div className='flex gap-[50px] flex-wrap justify-center'>
             {/* Show purchase button if property has no player id (not owned) */}
             {
                 currentBoardSpace?.property && 
@@ -47,8 +47,8 @@ export const CurrentTurn = () => {
                     ? <RollButton/>
                     : <EndTurn/>
             }
-            {player?.inJail && player.rollCount === 0 && player.money >= 50 && (
-                <PayJailFee/>
+            {player?.inJail && player.rollCount === 0 && (
+                <PayJailFee player={player}/>
             )}
         </div>
     )

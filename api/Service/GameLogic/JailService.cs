@@ -16,6 +16,7 @@ public interface IJailService
 {
     public string RunJailTurnLogic(Player player, Game game, int dieOne, int dieTwo);
     public Task PayOutOfJail(Player player);
+    public Task GetOutOfJailFree(Player player);
     public Task SendPlayerToJail(Player player);
 }
 
@@ -85,6 +86,31 @@ public class JailService(
         {
             GameId = player.GameId,
             Message = $"{player.PlayerName} paid $50 to get out of jail."
+        });
+        await socketMessageService.SendGameStateUpdate(player.GameId, new GameStateIncludeParams
+        {
+            Players = true,
+            GameLogs = true
+        });
+    }
+
+    public async Task GetOutOfJailFree(Player player)
+    {
+        if (player.GetOutOfJailFreeCards < 1)
+        {
+            throw new Exception("Player does not have a get out of jail free card.");
+        }
+
+        await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
+        {
+            InJail = false,
+            GetOutOfJailFreeCards = player.GetOutOfJailFreeCards - 1,
+            CanRoll = true
+        });
+        await gameLogRepository.CreateAsync(new GameLogCreateParams
+        {
+            GameId = player.GameId,
+            Message = $"{player.PlayerName} used a 'Get out of jail free card'"
         });
         await socketMessageService.SendGameStateUpdate(player.GameId, new GameStateIncludeParams
         {

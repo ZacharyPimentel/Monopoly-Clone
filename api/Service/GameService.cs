@@ -15,6 +15,7 @@ namespace api.Service;
 
 public interface IGameService
 {
+    Task ArchiveGame(Guid gameId);
     Task CreateGame(SocketEventGameCreate gameCreateParams);
     Task EndTurn(Player player, Game game);
     Task JoinGame(Guid gameId);
@@ -46,6 +47,21 @@ public class GameService(
     private IHubContext<MonopolyHub> HubContext => socketContextAccessor.RequireContext().HubContext;
     private SocketPlayer CurrentSocketPlayer => gameState.GetPlayer(SocketContext.ConnectionId);
 
+    public async Task ArchiveGame(Guid gameId)
+    {
+        var games = await gameRepository.GetAllWithPlayerCountAsync();
+        var game = games.First(x => x.Id == gameId);
+
+        if (game.ActivePlayerCount > 0)
+        {
+            throw new Exception("Cannot archive a game with active players.");
+        }
+
+        await gameRepository.UpdateAsync(gameId, new GameUpdateParams { Deleted = true });
+
+        var updatedGames = await gameRepository.GetAllWithPlayerCountAsync();
+        await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, updatedGames);
+    }
     public async Task CreateGame(SocketEventGameCreate gameCreateParams)
     {
         IEnumerable<Game> gamesWithName = await gameRepository.SearchAsync(

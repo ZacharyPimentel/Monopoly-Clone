@@ -16,7 +16,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
             g.*, COUNT(p.Id) AS ActivePlayerCount
             FROM Game g
             LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
-            WHERE 1=1";
+            WHERE g.Deleted = false";
 
         var parameters = new DynamicParameters();
 
@@ -44,6 +44,7 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
             FROM Game g
             LEFT JOIN Player p ON g.Id = p.GameId AND p.Active = true
             LEFT JOIN GamePassword gp on gp.GameId = g.Id
+            WHERE g.Deleted = false
             GROUP BY g.Id
             ORDER BY g.Id
         ";

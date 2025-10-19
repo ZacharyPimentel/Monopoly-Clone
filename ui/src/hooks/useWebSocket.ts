@@ -57,6 +57,9 @@ export const useWebSocket = () => {
                     getAll: () => {
                         globalState.ws.invoke('GameGetAll');
                     },
+                    archive: (gameId:string) => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.GameArchive),gameId)
+                    },
                     create: (createParams:SocketEventGameCreate) => {
                         globalState.ws.invoke('GameCreate',createParams);
                     },
@@ -111,6 +114,9 @@ export const useWebSocket = () => {
                     payOutOfJail: () => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PayOutOfJail));
                     },
+                    getOutOfJailFree: () => {
+                        globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.GetOutOfJailFree))
+                    },
                     purchaseProperty: (purchaseParams:SocketEventPurchaseProperty) => {
                         globalState.ws.invoke(getEnumNameFromValue(WebSocketEvents.PlayerPurchaseProperty),purchaseParams)
                     },
@@ -164,10 +170,10 @@ export const useWebSocket = () => {
                     }
                 }
             },
-            listen: (eventEnum:1|2|3|6|10|18) => {
+            listen: (eventEnum:1|3|4|7|12|20) => {
                 globalState.ws.on(eventEnum.toString(), webSocketCallbacks[eventEnum])
             },
-            stopListen: (eventEnum:1|2|3|6|10|18) => {
+            stopListen: (eventEnum:1|3|4|7|12|20) => {
                 globalState.ws.off(eventEnum.toString(),webSocketCallbacks[eventEnum])
             },
         }

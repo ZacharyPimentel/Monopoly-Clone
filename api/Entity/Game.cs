@@ -9,6 +9,7 @@ public class Game
     public required string GameName { get; set; }
     public bool InLobby { get; set; }
     public bool GameOver { get; set; }
+    public bool Deleted { get; set; }
     public bool GameStarted { get; set; }
     public int StartingMoney { get; set; }
     public int ThemeId { get; set; }
