@@ -1,9 +1,7 @@
 import { useState } from "react"
-
-import { ActionButtons } from "../../../globalComponents/GlobalModal/ActionButtons";
-import { useWebSocket } from "../../../hooks/useWebSocket";
-import { OptionSelectMenu } from "../../../globalComponents/FormElements/OptionSelectMenu";
-import { useApi } from "../../../hooks/useApi";
+import { ActionButtons } from "@globalComponents/GlobalModal";
+import { useWebSocket, useApi } from "@hooks";
+import { OptionSelectMenu } from "@globalComponents/formElements";
 
 export const GameCreateModal = () => {
 

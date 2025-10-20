@@ -1,10 +1,7 @@
-import { GameLog } from "src/types/controllers/GameLog";
-import { BoardSpace } from "../types/controllers/BoardSpace";
 import { Card } from "../types/controllers/Card";
-import { Player, PlayerUpdateParams, PlayerWhereParams } from "../types/controllers/Player";
-import { PlayerIcon } from "../types/controllers/PlayerIcon";
+import { Player, PlayerUpdateParams, PlayerWhereParams, PlayerIcon, BoardSpace, GameLog } from "@generated";
 import { Theme } from "../types/controllers/Theme";
-import { useHttp } from "./useHttp";
+import { useHttp } from "@hooks";
 
 export const useApi = () => {
 

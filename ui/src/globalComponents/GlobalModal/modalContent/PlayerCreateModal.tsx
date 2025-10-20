@@ -1,16 +1,14 @@
 import { useMemo, useState } from "react"
-import { useApi } from "@hooks/useApi"
-import { useGameState } from "@stateProviders/GameStateProvider";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
-import { PlayerIcon } from "@generated/index";
-import { useWebSocket } from "@hooks/useWebSocket";
-import { FetchWrapper } from "../../FetchWrapper";
+import { useApi, useWebSocket } from "@hooks"
+import { PlayerIcon } from "@generated";
+import { FetchWrapper } from "@globalComponents";
+import { useGlobalState, useGameState } from "@stateProviders";
 
 export const PlayerCreateModal = () => {
 
     const api = useApi();
-    const gameState = useGameState();
-    const globalDispatch = useGlobalDispatch();
+    const gameState = useGameState(['players','game']);
+    const {dispatch:globalDispatch} = useGlobalState([]);
     const [selectedInactivePlayerId,setSelectedInactivePlayerId] = useState('');
     const [selectedIconId,setSelectedIconId] = useState(0)
     const [name,setName] = useState('');

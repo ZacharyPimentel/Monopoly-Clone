@@ -1,9 +1,9 @@
-import { useGameState } from "@stateProviders/GameStateProvider"
-import { useWebSocket } from "@hooks/useWebSocket";
+import { useWebSocket } from "@hooks";
+import { useGameState } from "@stateProviders";
 
 export const Rules = () => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['currentSocketPlayer','game']);
     const {invoke} = useWebSocket();
     const startingMoneyOptions = [500,1000,1500,2000,2500,3000]
 

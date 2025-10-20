@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useGameDispatch, useGameState } from "@stateProviders/GameStateProvider"
-import { BoardSpace } from "@generated/index"
-import { usePlayer } from "@hooks/usePlayer";
+import { BoardSpace } from "@generated"
+import { usePlayer } from "@hooks";
+import { useGameState } from "@stateProviders";
 
 export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
 
-    const {cardToastMessage} = useGameState();
-    const gameDispatch = useGameDispatch();
+    const {cardToastMessage, dispatch:gameDispatch} = useGameState(['cardToastMessage']);
     const [toastVisible,setToastVisible] = useState(false);
     const {player} = usePlayer();
 

@@ -1,5 +1,5 @@
+import { useGlobalState } from "@stateProviders";
 import { useCallback, useMemo } from "react";
-import { useGlobalDispatch } from "../stateProviders/GlobalStateProvider";
 
 type ErrorResponse = {
     status:string
@@ -7,7 +7,7 @@ type ErrorResponse = {
 }
 
 export const useHttp = () => {
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     const formatErrors = useCallback( async(res:ErrorResponse) => {
         const messages = [res.status + ' Error']

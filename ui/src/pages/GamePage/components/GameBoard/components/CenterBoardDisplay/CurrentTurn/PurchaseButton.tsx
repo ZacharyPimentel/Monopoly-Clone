@@ -1,5 +1,5 @@
-import { useWebSocket } from "@hooks/useWebSocket"
-import { Player,Property } from "@generated/index"
+import { useWebSocket } from "@hooks"
+import { Player,Property } from "@generated"
 
 export const PurchaseButton:React.FC<{property:Property,player:Player,spaceName:string}> = ({property,player}) => {
     

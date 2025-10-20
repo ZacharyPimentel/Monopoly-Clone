@@ -1,12 +1,10 @@
-import { ActionButtons } from "../ActionButtons"
-import { usePlayer } from "@hooks/usePlayer"
-import { useGameState } from "@stateProviders/GameStateProvider"
+import { ActionButtons } from "@globalComponents/GlobalModal"
+import { usePlayer, useWebSocket } from "@hooks"
 import {useForm, FormProvider} from 'react-hook-form'
 import { PlayerOfferView } from "./components/PlayerOfferView"
-import { useWebSocket } from "@hooks/useWebSocket"
-import { Player } from "@generated/Player"
-import { PlayerTradeOffer } from "@generated/PlayerTradeOffer"
+import { Player, PlayerTradeOffer } from "@generated"
 import { useMemo } from "react"
+import { useGameState } from "@stateProviders"
 
 type CreateTradeInputs = {
     playerOne:PlayerTradeOffer
@@ -15,7 +13,7 @@ type CreateTradeInputs = {
 
 export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPlayer}) => {
 
-    const gameState = useGameState()
+    const gameState = useGameState(['gameId']);
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 

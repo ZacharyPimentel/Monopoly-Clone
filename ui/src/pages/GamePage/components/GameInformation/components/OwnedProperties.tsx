@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import { usePlayer } from "@hooks/usePlayer";
-import { useGameState } from "@stateProviders/GameStateProvider"
-import { Property } from "@generated/index";
+import { usePlayer } from "@hooks";
+import { Property } from "@generated";
+import { useGameState } from "@stateProviders";
 
 export const OwnedProperties = () => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['boardSpaces']);
     const {player} = usePlayer();
 
     const propertyColor = useCallback( (property:Property) => {

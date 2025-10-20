@@ -1,8 +1,7 @@
-import { BoardSpace, Property } from "@generated/index"
-import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
-import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
-import { usePlayer } from "@hooks/usePlayer";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
+import { BoardSpace, Property } from "@generated"
+import { MortgagePropertyModal, UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent";
+import { usePlayer } from "@hooks";
+import { useGlobalState } from "@stateProviders";
 import { useMemo } from "react";
 
 export const RailroadPopover:React.FC<{
@@ -13,7 +12,7 @@ export const RailroadPopover:React.FC<{
 }> = ({property,space,propertyStyles}) => {
 
     const {player,isCurrentTurn} = usePlayer();
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     const railroadRents = useMemo( () => {
         return [25,50,100,200]

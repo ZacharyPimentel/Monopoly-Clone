@@ -1,5 +1,4 @@
-import { useGameState } from "@stateProviders/GameStateProvider";
-import { BoardSpaceCategories } from "@generated/index";
+import { BoardSpaceCategories } from "@generated";
 import { ChanceTile } from "./tileComponents/ChanceTile";
 import { CommunityChestTile } from "./tileComponents/CommunityChestTile";
 import { GoToJail } from "./tileComponents/GoToJail";
@@ -10,11 +9,12 @@ import { StartTile } from "./tileComponents/StartTile";
 import { TaxTile } from "./tileComponents/TaxTile";
 import { UtilityTile } from "./tileComponents/UtilityTile";
 import { Vacation } from "./tileComponents/Vacation";
+import { useGameState } from "@stateProviders";
 
 export const GameTile:React.FC<{position:number, sideClass?:string}> = ({position,sideClass = ''}) => {
 
     let gameTileComponent = null;
-    const gameState = useGameState();
+    const gameState = useGameState(['boardSpaces','players','game']);
     const space = gameState.boardSpaces[position - 1];
     if(!space)return null
 

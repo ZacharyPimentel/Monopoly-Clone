@@ -1,12 +1,23 @@
-import { TradeCreateParams } from "@generated/TradeCreateParams";
-import { useGameState } from "../stateProviders/GameStateProvider"
-import { useGlobalState } from "../stateProviders/GlobalStateProvider";
-import { Game } from "../types/controllers/Game";
 import { PropertyUpdateParams } from "../types/controllers/Property";
-import {  SocketEventGameCreate, SocketEventPasswordValidate, SocketEventPlayerEdit, SocketEventPlayerReady, SocketEventPlayerUpdate, SocketEventPurchaseProperty, SocketEventRulesUpdate, SocketEventTradeAccept, SocketEventTradeDecline, SocketEventTradeUpdate, WebSocketEvents } from "@generated/index";
-import { getEnumNameFromValue } from "src/helpers/getEnumNameFromValue";
+import { 
+    SocketEventGameCreate, 
+    SocketEventPasswordValidate, 
+    SocketEventPlayerEdit, 
+    SocketEventPlayerReady, 
+    SocketEventPlayerUpdate, 
+    SocketEventPurchaseProperty, 
+    SocketEventRulesUpdate, 
+    SocketEventTradeAccept, 
+    SocketEventTradeDecline, 
+    SocketEventTradeUpdate, 
+    WebSocketEvents,
+    Game,
+    TradeCreateParams,
+} from "@generated";
+import { getEnumNameFromValue } from "@helpers";
 import { useCallback, useMemo, useRef } from "react";
-import { useWebSocketCallback } from "./useWebSocketCallback";
+import { useWebSocketCallback } from "@hooks";
+import { useGlobalState, useGameState } from "@stateProviders";
 
 type Queue = {
     [key:number]:{
@@ -16,8 +27,8 @@ type Queue = {
 }
 
 export const useWebSocket = () => {
-    const globalState = useGlobalState();
-    const gameState = useGameState();
+    const globalState = useGlobalState(['ws']);
+    const gameState = useGameState(['game']);
     const webSocketCallbacks = useWebSocketCallback();
     const queuedCallbacks = useRef<Queue>({});
     

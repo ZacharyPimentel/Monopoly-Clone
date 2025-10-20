@@ -1,9 +1,9 @@
-import { ViewLogsModal } from "src/globalComponents/GlobalModal/modalContent/ViewLogsModal"
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
+import { useGlobalState } from "@stateProviders";
+import { ViewLogsModal } from "src/globalComponents/GlobalModal/modalContent"
 
 export const GameStatus = () => {
     
-    const globalDispatch = useGlobalDispatch()
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <div className='flex flex-col gap-[10px] p-[30px] bg-totorogreen w-full'>

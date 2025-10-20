@@ -1,12 +1,11 @@
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
-import { useGameState } from "@stateProviders/GameStateProvider";
 import { Fragment } from "react";
-import { EditTradeModal } from "../../../../../../globalComponents/GlobalModal/modalContent/EditTradeModal";
+import { EditTradeModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState, useGameState } from "@stateProviders";
 
 export const Trades = () => {
 
-    const gameState = useGameState()
-    const globalDispatch = useGlobalDispatch()
+    const gameState = useGameState(['trades','players'])
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <div className='flex flex-col gap-[10px] p-[30px] bg-totorogreen w-full'>

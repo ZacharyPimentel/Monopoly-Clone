@@ -1,4 +1,4 @@
-import { Game } from "@generated/index"
+import { Game } from "@generated"
 import { ReactNode } from "react"
 
 export type GlobalState = {

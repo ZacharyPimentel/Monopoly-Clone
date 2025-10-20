@@ -1,7 +1,7 @@
-import { Player } from "@generated/index";
+import { Player } from "@generated";
 import React from "react";
-import { ActionButtons } from "../ActionButtons";
-import { useWebSocket } from "@hooks/useWebSocket";
+import { ActionButtons } from "@globalComponents/GlobalModal";
+import { useWebSocket } from "@hooks";
 
 export const CompletePaymentModal:React.FC<{player:Player}> = ({player}) => {
 

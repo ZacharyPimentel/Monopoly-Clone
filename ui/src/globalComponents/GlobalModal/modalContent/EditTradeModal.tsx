@@ -1,11 +1,10 @@
-import { usePlayer } from "../../../hooks/usePlayer"
-import { useGameState } from "../../../stateProviders/GameStateProvider"
+import { usePlayer, useWebSocket } from "@hooks"
 import {useForm, FormProvider} from 'react-hook-form'
 import React, { useMemo } from "react"
 import { PlayerOfferView } from "./components/PlayerOfferView"
-import { useWebSocket } from "../../../hooks/useWebSocket"
 import { Trade } from "../../../types/websocket/Trade"
-import { AdvancedActionButtons, AdvancedButtonConfig } from "../AdvancedActionButtons"
+import { AdvancedActionButtons, AdvancedButtonConfig } from "@globalComponents/GlobalModal"
+import { useGameState } from "@stateProviders"
 
 type EditTradeInputs = {
     playerOne:{
@@ -24,7 +23,7 @@ type EditTradeInputs = {
 
 export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
 
-    const gameState = useGameState()
+    const gameState = useGameState(['players'])
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 

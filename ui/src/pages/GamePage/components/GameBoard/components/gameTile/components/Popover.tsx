@@ -1,11 +1,12 @@
-import { BoardSpace, Property } from "@generated/index"
-import { DowngradePropertyModal } from "@globalComponents/GlobalModal/modalContent/DowngradePropertyModal";
-import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
-import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
-import { UpgradePropertyModal } from "@globalComponents/GlobalModal/modalContent/UpgradePropertyModal";
-import { usePlayer } from "@hooks/usePlayer";
-import { useGameState } from "@stateProviders/GameStateProvider"
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
+import { BoardSpace, Property } from "@generated"
+import { 
+    DowngradePropertyModal,
+    MortgagePropertyModal,
+    UnmortgagePropertyModal,
+    UpgradePropertyModal
+} from "@globalComponents/GlobalModal/modalContent";
+import { usePlayer } from "@hooks";
+import { useGameState, useGlobalState } from "@stateProviders";
 import { useMemo } from "react";
 
 export const Popover:React.FC<{
@@ -15,9 +16,9 @@ export const Popover:React.FC<{
     propertyStyles:{position:string}
 }> = ({property,space,propertyStyles}) => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['boardSpaces']);
     const {player,isCurrentTurn} = usePlayer();
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
     
     const playerOwnsAllSetProperties = useMemo( () => {
         if(!property.setNumber) return false;

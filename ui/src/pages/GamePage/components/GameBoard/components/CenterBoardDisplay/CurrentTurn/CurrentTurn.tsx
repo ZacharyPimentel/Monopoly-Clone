@@ -1,16 +1,16 @@
 import { RollButton } from "./RollButton"
 import { EndTurn } from "./EndTurn";
 import { PurchaseButton } from "./PurchaseButton";
-import { usePlayer } from "@hooks/usePlayer";
+import { usePlayer } from "@hooks";
 import { PayJailFee } from "./PayJailFee";
-import { useGameState } from "@stateProviders/GameStateProvider";
 import { BankruptButton } from "./BankruptButton";
 import { CompletePaymentButton } from "./CompletePaymentButton";
+import { useGameState } from "@stateProviders";
 
 export const CurrentTurn = () => {
 
     const {player,currentBoardSpace} = usePlayer();
-    const gameState = useGameState()
+    const gameState = useGameState(['queueMessageCount','game'])
 
     if(gameState.game?.diceRollInProgress || gameState.queueMessageCount > 0){
         return null

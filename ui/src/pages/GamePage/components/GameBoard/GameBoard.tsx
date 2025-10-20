@@ -2,14 +2,14 @@ import { useRef } from "react";
 import TotoroFamily from './assets/totorofamily.svg?react';
 import { CenterBoardDisplay } from "./components/CenterBoardDisplay/CenterBoardDisplay";
 import { GameTile } from "./components/gameTile/GameTile";
-import { useGameState } from "@stateProviders/GameStateProvider";
 import { PlayerMovementContainer } from "./components/PlayerMovementContainer";
-import { useCurrentPlayer } from "@hooks/useCurrentPlayer";
+import { useCurrentPlayer } from "@hooks";
+import { useGameState } from "@stateProviders";
 
 export const GameBoard = () => {
 
     const gameBoardRef = useRef<HTMLDivElement | null>(null);
-    const {game} = useGameState();
+    const {game} = useGameState(['game']);
     const tileRefs = useRef<Record<number,HTMLDivElement | null>>({})
     const currentPlayer = useCurrentPlayer();
     const currentPlayerWasInJailLastTurn = currentPlayer?.previousBoardSpaceId !== currentPlayer?.boardSpaceId

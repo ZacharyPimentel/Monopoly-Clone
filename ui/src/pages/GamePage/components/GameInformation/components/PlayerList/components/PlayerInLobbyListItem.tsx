@@ -1,4 +1,4 @@
-import { Player } from "@generated/index"
+import { Player } from "@generated"
 
 export const PlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
     return (

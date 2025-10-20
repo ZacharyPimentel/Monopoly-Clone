@@ -1,4 +1,4 @@
-import { BoardSpace } from "@generated/index"
+import { BoardSpace } from "@generated"
 
 export const Vacation:React.FC<{space:BoardSpace}> = ({space}) => {
     return (

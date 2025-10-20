@@ -1,15 +1,15 @@
-import { usePlayer } from "@hooks/usePlayer";
-import { useGameState } from "@stateProviders/GameStateProvider";
-import { useGlobalDispatch} from "@stateProviders/GlobalStateProvider";
-import { PlayerCreateModal } from "@globalComponents/GlobalModal/modalContent/PlayerCreateModal";
+import { usePlayer } from "@hooks";
+import { PlayerCreateModal } from "@globalComponents/GlobalModal/modalContent";
 import { CurrentPlayerInLobbyListItem } from "./components/CurrentPlayerInLobbyListItem";
 import { PlayerInGameListitem } from "./components/PlayerInGameListitem";
 import { PlayerInLobbyListItem } from "./components/PlayerInLobbyListItem";
+import { useGlobalState } from "@stateProviders";
+import { useGameState } from "@stateProviders";
 
 export const PlayerList = () => {
 
-    const gameState = useGameState();
-    const globalDispatch = useGlobalDispatch();
+    const gameState = useGameState(['game','players','currentSocketPlayer']);
+    const {dispatch:globalDispatch} = useGlobalState([]);
     const {player} = usePlayer();
         
     return (

@@ -1,4 +1,4 @@
-import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
+import { useGlobalState } from "@stateProviders";
 import { useState } from "react";
 
 export type AdvancedButtonConfig = {
@@ -9,7 +9,7 @@ export type AdvancedButtonConfig = {
 
 export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[]}> = ({buttonConfigs}) => {
     
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
     const [_loading,setLoading] = useState(false);
     const [_success,setSuccess] = useState(false);
     const [error,setError] = useState(false);

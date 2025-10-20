@@ -1,17 +1,16 @@
 import { useEffect } from "react"
-import { useApi } from "@hooks/useApi"
-import { Player, PlayerIcon, SocketEventPlayerEdit } from "@generated/index";
-import { useGameState } from "@stateProviders/GameStateProvider";
+import { useApi,useWebSocket } from "@hooks"
+import { Player, PlayerIcon, SocketEventPlayerEdit } from "@generated";
 import React from "react";
-import { useWebSocket } from "@hooks/useWebSocket";
-import { FetchWrapper } from "../../FetchWrapper";
-import { ActionButtons } from "../ActionButtons";
+import { FetchWrapper } from "@globalComponents";
+import { ActionButtons } from "@globalComponents/GlobalModal";
 import { useForm } from "react-hook-form";
+import { useGameState } from "@stateProviders";
 
 export const PlayerEditModal:React.FC<{player:Player}> = ({player}) => {
 
     const api = useApi();
-    const gameState = useGameState();
+    const gameState = useGameState(['players']);
     const {invoke} = useWebSocket();
 
     const form = useForm<SocketEventPlayerEdit>({defaultValues:{

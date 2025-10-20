@@ -1,6 +1,6 @@
-import { Game } from "@generated/Game";
-import { ActionButtons } from "../ActionButtons";
-import { useWebSocket } from "@hooks/useWebSocket";
+import { Game } from "@generated";
+import { ActionButtons } from "@globalComponents/GlobalModal";
+import { useWebSocket } from "@hooks";
 
 export const GameDeleteModal:React.FC<{game: Game}> = ({game}) => {
 

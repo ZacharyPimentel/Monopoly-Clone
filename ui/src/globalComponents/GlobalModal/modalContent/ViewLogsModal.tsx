@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { useApi } from "@hooks/useApi";
-import { useGameState } from "@stateProviders/GameStateProvider";
-import { GameLog } from "src/types/controllers/GameLog";
+import { useApi } from "@hooks";
+import { GameLog } from "@generated";
+import { useGameState } from "@stateProviders";
 
 export const ViewLogsModal = () => {
 
     const api = useApi();
-    const gameState = useGameState();
+    const gameState = useGameState(['game']);
     const [logs,setLogs] = useState<GameLog[]>([]);
 
     useEffect( () => {

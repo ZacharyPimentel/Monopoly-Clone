@@ -1,11 +1,10 @@
-import { usePlayer } from "@hooks/usePlayer";
-import { useWebSocket } from "@hooks/useWebSocket";
-import { useGameState } from "@stateProviders/GameStateProvider"
+import { usePlayer, useWebSocket } from "@hooks";
+import { useGameState } from "@stateProviders";
 import { useEffect, useState } from "react";
 
 export const RollButton = () => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['game']);
     const {player} = usePlayer();
     const [rollInProgress,setRollInProgress] = useState(false);
     const {invoke} = useWebSocket();

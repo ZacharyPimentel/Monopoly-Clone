@@ -1,9 +1,9 @@
-import { DeclareBankruptcyModal } from "@globalComponents/GlobalModal/modalContent/DeclareBankruptcyModal";
-import { useGlobalContext } from "@stateProviders/GlobalStateProvider"
+import { DeclareBankruptcyModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState } from "@stateProviders";
 
 export const BankruptButton = () => {
 
-    const {globalDispatch} = useGlobalContext();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <button

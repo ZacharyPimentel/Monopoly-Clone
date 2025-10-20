@@ -1,9 +1,9 @@
-import { useGameState } from "@stateProviders/GameStateProvider";
+import { useGameState } from "@stateProviders";
 import { Die } from "./Die";
 
 export const DiceRoller = () => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['game']);
 
     return (
         <div className='flex gap-[50px]'>

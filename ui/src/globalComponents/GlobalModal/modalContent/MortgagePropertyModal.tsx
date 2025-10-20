@@ -1,6 +1,6 @@
-import { BoardSpace, Property } from "@generated/index";
+import { BoardSpace, Property } from "@generated";
 import React from "react";
-import { useWebSocket } from "@hooks/useWebSocket";
+import { useWebSocket } from "@hooks";
 import { ActionButtons } from "../ActionButtons";
 
 export const MortgagePropertyModal:React.FC<{space:BoardSpace}> = ({space}) => {

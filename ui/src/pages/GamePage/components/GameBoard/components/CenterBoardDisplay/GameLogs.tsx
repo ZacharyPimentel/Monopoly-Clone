@@ -1,10 +1,10 @@
-import { GameLog } from "@generated/index";
-import { useCallbackQueue } from "@hooks/useCallbackQueue";
-import { useGameState } from "@stateProviders/GameStateProvider"
+import { GameLog } from "@generated";
+import { useCallbackQueue } from "@hooks";
+import { useGameState } from "@stateProviders";
 import { useCallback, useEffect, useState } from "react";
 
 export const GameLogs = () => {
-    const {gameLogs} = useGameState();
+    const {gameLogs} = useGameState(['gameLogs']);
     const [displayedLogs,setDisplayedLogs] = useState(gameLogs);
 
     const delay = 200;

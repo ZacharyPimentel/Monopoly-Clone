@@ -1,4 +1,4 @@
-import { useGameState } from "@stateProviders/GameStateProvider";
+import { useGameState } from "@stateProviders";
 import { useEffect, useMemo, useRef } from "react";
 
 export const PlayerMovementContainer:React.FC<{
@@ -6,7 +6,7 @@ export const PlayerMovementContainer:React.FC<{
 }> = ({tileRefs}) => {
 
     const divRef = useRef<HTMLDivElement>(null);
-    const gameState = useGameState();
+    const gameState = useGameState(['players','game']);
     const currentPlayer = gameState?.players.find( player => player.id === gameState?.game?.currentPlayerTurn);
     
     const tileCoordinates = useMemo( () => {

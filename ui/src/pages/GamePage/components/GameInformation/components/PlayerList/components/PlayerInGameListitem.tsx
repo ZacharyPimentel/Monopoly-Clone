@@ -1,14 +1,13 @@
-import { usePlayer } from "@hooks/usePlayer";
-import { useGameState } from "@stateProviders/GameStateProvider"
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
-import { Player } from "@generated/index"
-import { CreateTradeModal } from "../../../../../../../globalComponents/GlobalModal/modalContent/CreateTradeModal";
+import { usePlayer } from "@hooks";
+import { Player } from "@generated"
+import { CreateTradeModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState, useGameState } from "@stateProviders";
 
 export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
     
-    const gameState = useGameState();
+    const gameState = useGameState(['game']);
     const currentPlayer = usePlayer();
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <li style={{opacity:player.active ? '1' : '0.5'}} key={player.id} className='flex flex-col gap-[20px]'>

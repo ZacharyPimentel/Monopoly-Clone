@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState} from "react";
-import { useGlobalDispatch, useGlobalState } from "../../stateProviders/GlobalStateProvider";
 import { useLocation } from "react-router-dom";
-import { useCallbackQueue } from "@hooks/useCallbackQueue";
+import { useCallbackQueue } from "@hooks";
+import { useGlobalState } from "@stateProviders";
 
 export const GlobalModal = () => {
     const globalModalRef = useRef<HTMLDialogElement | null>(null);
-    const globalState = useGlobalState();
-    const globalDispatch = useGlobalDispatch()
+    const {dispatch, ...globalState} = useGlobalState(['modalContent','modalOpen'])
     const location = useLocation();
     const [opacity,setOpacity] = useState(1);
     const [scale,setScale] = useState(0)
@@ -34,7 +33,7 @@ export const GlobalModal = () => {
     //close the modal on route change
     useEffect( () => {
         return () => {
-            globalDispatch({modalOpen:false,modalContent:null})
+            dispatch({modalOpen:false,modalContent:null})
         }
     },[location])
     
@@ -45,7 +44,7 @@ export const GlobalModal = () => {
                 setOpacity(0)
                 setScale(0)
                 setTimeout( () => {
-                    globalDispatch({modalOpen:false,modalContent:null})
+                    dispatch({modalOpen:false,modalContent:null})
                 },300)}
              } className='absolute z-[1] top-[-14px] right-[20px] border-2 border-black rounded-[50%] bg-white hover:rotate-[90deg] transition-[0.2s]'>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>

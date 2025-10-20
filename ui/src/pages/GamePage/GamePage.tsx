@@ -1,19 +1,17 @@
 import { GameInformation } from "./components/GameInformation/GameInformation";
 import { GameBoard } from "./components/GameBoard/GameBoard";
 import { useEffect } from "react";
-import { useGameState } from "../../stateProviders/GameStateProvider";
-import { useWebSocket } from "../../hooks/useWebSocket";
-import { LoadingSpinner } from "../../globalComponents/LoadingSpinner";
-import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
+import { useWebSocket } from "@hooks";
+import { LoadingSpinner } from "@globalComponents";
 import { useParams } from "react-router-dom";
-import { PlayerCreateModal } from "../../globalComponents/GlobalModal/modalContent/PlayerCreateModal";
-import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { GameOverModal } from "@globalComponents/GlobalModal/modalContent/GameOverModal";
+import { PlayerCreateModal, GameOverModal } from "@globalComponents/GlobalModal/modalContent";
+import { WebSocketEvents } from "@generated";
+import { useGlobalState, useGameState } from "@stateProviders";
 
 export const GamePage = () => {
 
-    const globalDispatch = useGlobalDispatch()
-    const gameState = useGameState();
+    const {dispatch:globalDispatch} = useGlobalState([])
+    const gameState = useGameState(['currentSocketPlayer','game','boardSpaces']);
     const {listen,invoke,stopListen} = useWebSocket()
     const {gameId} = useParams();
 

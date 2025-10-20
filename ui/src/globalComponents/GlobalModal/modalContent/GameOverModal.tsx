@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
-import { ActionButtons } from "../ActionButtons";
-import { useGameState } from "@stateProviders/GameStateProvider";
+import { ActionButtons } from "@globalComponents/GlobalModal";
 import { useNavigate } from "react-router-dom";
+import { useGameState } from "@stateProviders";
 
 export const GameOverModal:React.FC<{}> = ({}) => {
 
-    const {players} = useGameState();
+    const {players} = useGameState(['players']);
     const navigate = useNavigate();
 
     const gameWinner = useMemo( () => {

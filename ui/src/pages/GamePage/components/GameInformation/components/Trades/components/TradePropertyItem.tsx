@@ -1,5 +1,5 @@
 import { useFormContext } from "react-hook-form";
-import { BoardSpace } from "@generated/index";
+import { BoardSpace } from "@generated";
 import { useMemo } from "react";
 
 export const TradePropertyItem:React.FC<{space:BoardSpace, formControl:string}> = ({space,formControl}) => {

@@ -1,11 +1,11 @@
-import { useWebSocket } from "@hooks/useWebSocket";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
-import { Player } from "@generated/index"
-import { PlayerEditModal } from "@globalComponents/GlobalModal/modalContent/PlayerEditModal";
+import { useWebSocket } from "@hooks";
+import { Player } from "@generated"
+import { PlayerEditModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState } from "@stateProviders";
 
 export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {
 
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
     const {invoke} = useWebSocket();
     
     return (

@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { usePlayer } from "@hooks/usePlayer";
-import { useGameState, useGameDispatch } from "@stateProviders/GameStateProvider";
-import { BoardSpace } from "@generated/index"
+import { usePlayer } from "@hooks";
+import { BoardSpace } from "@generated"
+import { useGameState } from "@stateProviders";
 
 export const CommunityChestTile:React.FC<{space:BoardSpace}> = ({space}) => {
 
-    const {cardToastMessage} = useGameState();
-    const gameDispatch = useGameDispatch();
+    const {cardToastMessage,dispatch:gameDispatch} = useGameState(['cardToastMessage']);
     const [toastVisible,setToastVisible] = useState(false);
     const {player} = usePlayer();
 

@@ -1,10 +1,10 @@
-import { Player } from "@generated/index";
-import { CompletePaymentModal } from "@globalComponents/GlobalModal/modalContent/CompletePaymentModal";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider"
+import { Player } from "@generated";
+import { CompletePaymentModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState } from "@stateProviders";
 
 export const CompletePaymentButton:React.FC<{player:Player}> = ({player}) => {
 
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <button

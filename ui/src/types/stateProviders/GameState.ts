@@ -1,4 +1,4 @@
-import { Player, BoardSpace, GameLog, SocketPlayer } from "@generated/index";
+import { Player, BoardSpace, GameLog, SocketPlayer } from "@generated";
 import { Trade } from "../websocket/Trade"
 import { Game } from "@generated/Game"
 

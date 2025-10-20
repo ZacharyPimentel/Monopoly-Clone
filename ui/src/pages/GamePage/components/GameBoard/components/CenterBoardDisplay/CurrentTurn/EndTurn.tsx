@@ -1,10 +1,10 @@
-import { useWebSocket } from "../../../../../../../hooks/useWebSocket"
-import { useGameState } from "../../../../../../../stateProviders/GameStateProvider";
+import { useWebSocket } from "@hooks"
+import { useGameState } from "@stateProviders";
 
 export const EndTurn = () => {
     
     const {invoke} = useWebSocket();
-    const gameState = useGameState()
+    const gameState = useGameState(['game'])
 
     return (
         <button

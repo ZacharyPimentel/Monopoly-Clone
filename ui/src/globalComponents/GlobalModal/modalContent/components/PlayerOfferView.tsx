@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import { Player } from "@generated/index"
-import { useGameState } from "@stateProviders/GameStateProvider";
+import { Player } from "@generated"
 import React from "react";
 import { TradePropertyItem } from "../../../../pages/GamePage/components/GameInformation/components/Trades/components/TradePropertyItem";
-import { NumberInput } from "../../../FormElements/NumberInput";
+import { NumberInput } from "@globalComponents/formElements";
+import { useGameState } from "@stateProviders";
 
 export const PlayerOfferView:React.FC<{formControlPrefix:string, player:Player}> = ({formControlPrefix,player}) => {
     
-    const gameState = useGameState();
+    const gameState = useGameState(['boardSpaces']);
 
     const playerProperties = useMemo( () => {
         return gameState.boardSpaces.filter( (space) => space.property && space.property?.playerId === player.id);

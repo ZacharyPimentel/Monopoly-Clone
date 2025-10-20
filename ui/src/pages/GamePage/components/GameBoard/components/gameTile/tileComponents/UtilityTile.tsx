@@ -1,10 +1,10 @@
-import { useGameState } from "@stateProviders/GameStateProvider";
-import { BoardSpace } from "@generated/index"
+import { BoardSpace } from "@generated"
 import { UtilityPopover } from "../components/UtilityPopover";
 import { useMemo } from "react";
+import { useGameState } from "@stateProviders";
 
 export const UtilityTile:React.FC<{space:BoardSpace,sideClass:string}> = ({space,sideClass}) => {
-    const gameState = useGameState();
+    const gameState = useGameState(['players']);
 
     if(!space.property)return null
 

@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { useGameState } from "@stateProviders/GameStateProvider";
 import { Popover } from "../components/Popover";
+import { useGameState } from "@stateProviders";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['boardSpaces','players']);
     const property = gameState.boardSpaces[position - 1]?.property;
 
     //return the same content but in a different orientation depending on the property set

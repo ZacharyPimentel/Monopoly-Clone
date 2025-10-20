@@ -1,7 +1,8 @@
-import { useGameState } from "@stateProviders/GameStateProvider"
+import { useGameState } from "@stateProviders";
+
 export const NotCurrentTurn = () => {
 
-    const gameState = useGameState();
+    const gameState = useGameState(['players','game']);
     const currentTurnPlayer = gameState.players.find( (player) => player.id === gameState.game?.currentPlayerTurn)
 
     return (

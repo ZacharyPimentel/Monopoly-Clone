@@ -1,5 +1,5 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { BoardSpace } from "@generated/index"
+import { BoardSpace } from "@generated"
 import CatBus from '../assets/catbus.svg?react';
 
 export const GoToJail:React.FC<{space:BoardSpace}> = ({space}) => {

@@ -1,9 +1,9 @@
-import { useGameState } from "@stateProviders/GameStateProvider"
-import { BoardSpace } from "@generated/index"
+import { BoardSpace } from "@generated"
+import { useGameState } from "@stateProviders";
 
 export const Jail:React.FC<{space:BoardSpace}> = ({space}) => {
 
-    const {players,game} = useGameState();
+    const {players,game} = useGameState(['players','game']);
 
     return (
         <div className='h-full bg-totorolightgreen shadow-lg border border-totorodarkgreen rounded-[5px] relative'>

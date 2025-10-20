@@ -1,18 +1,17 @@
 import { Fragment, useEffect } from "react";
-import { useGlobalDispatch, useGlobalState } from "../../stateProviders/GlobalStateProvider"
 import { GameCreateModal } from "./modal/CreateGameModal";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { useWebSocket } from "@hooks";
 import { useNavigate } from "react-router-dom";
-import { WebSocketEvents } from "@generated/WebSocketEvents";
-import { EnterPasswordModal } from "@globalComponents/GlobalModal/modalContent/EnterPasswordModal";
-import { GameDeleteModal } from "@globalComponents/GlobalModal/modalContent/GameDeleteModal";
+import { WebSocketEvents } from "@generated";
+import { EnterPasswordModal, GameDeleteModal } from "@globalComponents/GlobalModal/modalContent";
+import { useGlobalState } from "@stateProviders";
 
 export const LobbyPage = () => {
 
-    const globalDispatch = useGlobalDispatch();
     const {listen,stopListen,invoke} = useWebSocket();
     const navigate = useNavigate();
-    const globalState = useGlobalState();
+
+    const {dispatch:globalDispatch, ...globalState} = useGlobalState(['availableGames'])
 
     useEffect( () => {
         listen(WebSocketEvents.GameUpdateAll)

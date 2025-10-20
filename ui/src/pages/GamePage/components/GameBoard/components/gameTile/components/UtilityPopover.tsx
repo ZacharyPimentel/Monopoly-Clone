@@ -1,8 +1,7 @@
-import { BoardSpace, Property } from "@generated/index"
-import { MortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/MortgagePropertyModal";
-import { UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent/UnmortgagePropertyModal";
-import { usePlayer } from "@hooks/usePlayer";
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
+import { BoardSpace, Property } from "@generated"
+import { MortgagePropertyModal, UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent";
+import { usePlayer } from "@hooks";
+import { useGlobalState } from "@stateProviders";
 
 export const UtilityPopover:React.FC<{
     property:Property,
@@ -12,7 +11,7 @@ export const UtilityPopover:React.FC<{
 }> = ({property,space,propertyStyles}) => {
 
     const {player,isCurrentTurn} = usePlayer();
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
         <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>

@@ -1,5 +1,5 @@
-import { LoadingSpinner } from "../LoadingSpinner";
-import { useGlobalDispatch } from "../../stateProviders/GlobalStateProvider";
+import { useGlobalState } from "@stateProviders";
+import { LoadingSpinner } from "@globalComponents";
 import { useState } from "react";
 
 export const ActionButtons:React.FC<{
@@ -9,10 +9,12 @@ export const ActionButtons:React.FC<{
     confirmDisabled?:boolean
 }> = ({confirmCallback,confirmButtonStyle,confirmButtonText, confirmDisabled}) => {
     
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:globalDispatch} = useGlobalState([]);
+    
     const [loading,setLoading] = useState(false);
     const [success,setSuccess] = useState(false);
     const [error,setError] = useState(false);
+    
     
     return (
         <div className='flex gap-[20px] flex-wrap'>

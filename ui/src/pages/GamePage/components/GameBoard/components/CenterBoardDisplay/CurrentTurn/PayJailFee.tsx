@@ -1,5 +1,5 @@
-import { Player } from "@generated/Player";
-import { useWebSocket } from "@hooks/useWebSocket"
+import { Player } from "@generated";
+import { useWebSocket } from "@hooks"
 
 export const PayJailFee:React.FC<{player:Player}> = ({player}) => {
     

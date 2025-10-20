@@ -1,10 +1,8 @@
-import { Game, GameStateResponse, WebSocketEvents } from "@generated/index";
-import { useGameDispatch } from "@stateProviders/GameStateProvider"
-import { useGlobalDispatch } from "@stateProviders/GlobalStateProvider";
-import { SocketPlayer } from "@generated/index";
+import { Game, GameStateResponse, WebSocketEvents,SocketPlayer } from "@generated";
 import { MutableRefObject, useCallback, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useGlobalState,  useGameState } from "@stateProviders";
 
 type Queue = {
     processingQueue:boolean
@@ -13,8 +11,8 @@ type Queue = {
 
 export const useWebSocketCallback = () => {
 
-    const gameDispatch = useGameDispatch();
-    const globalDispatch = useGlobalDispatch();
+    const {dispatch:gameDispatch} = useGameState([]);
+    const {dispatch:globalDispatch} = useGlobalState([]);
     const navigate = useNavigate();
 
     const queueRef: MutableRefObject<Queue> = useRef({
