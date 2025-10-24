@@ -66,7 +66,7 @@ public class GameService(
     {
         IEnumerable<Game> gamesWithName = await gameRepository.SearchAsync(
             new GameWhereParams { GameName = gameCreateParams.GameCreateParams.GameName },
-            new { }
+            new GameWhereParams{ Deleted = true }
         );
 
         if (gamesWithName.Any())

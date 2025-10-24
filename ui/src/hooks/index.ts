@@ -7,6 +7,7 @@ export * from "./useCallbackQueue";
 export * from "./useCurrentPlayer";
 export * from "./useHttp";
 export * from "./usePlayer";
+export * from "./useTradeForm";
 export * from "./useWebSocket";
 export * from "./useWebSocketCallback";
 export * from "./useWindowSize";

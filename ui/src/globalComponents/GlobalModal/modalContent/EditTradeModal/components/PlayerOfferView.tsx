@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Player } from "@generated"
 import React from "react";
-import { TradePropertyItem } from "../../../../../pages/GamePage/components/GameInformation/components/Trades/components/TradePropertyItem";
+import { TradePropertyItem } from "./TradePropertyItem";
 import { NumberInput } from "@globalComponents";
 import { useGameState } from "@stateProviders";
 
@@ -14,8 +14,8 @@ export const PlayerOfferView:React.FC<{formControlPrefix:string, player:Player}>
     },[player])
     
     return (
-        <div className='flex flex-col gap-[20px]' >
-            <div className='flex flex-col gap-[10px]'>
+        <div className='flex flex-col gap-[20px] h-full' >
+            <div className='flex flex-col gap-[10px] mb-auto'>
                 {playerProperties.length > 0 && <>
                     <div className='h-[150px] overflow-y-scroll flex flex-col'>
                         {playerProperties.map( (space) => {

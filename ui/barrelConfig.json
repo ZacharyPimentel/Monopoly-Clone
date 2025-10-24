@@ -1,10 +1,10 @@
 {
   "directory": [
-    "./src/hooks",
-    "./src/stateProviders",
-    "./src/helpers",
-    "./src/globalComponents"
-],
+      "./src/hooks",
+      "./src/stateProviders",
+      "./src/helpers",
+      "./src/globalComponents"
+  ],
   "delete": true,
   "singleFile": true,
   "barrelName": "index.ts",

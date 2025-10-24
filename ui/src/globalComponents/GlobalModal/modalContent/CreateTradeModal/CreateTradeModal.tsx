@@ -1,16 +1,11 @@
 import { ActionButtons } from "@globalComponents"
-import { usePlayer, useWebSocket } from "@hooks"
-import {useForm, FormProvider} from 'react-hook-form'
-import { Player, PlayerTradeOffer } from "@generated"
+import { usePlayer, useTradeForm, useWebSocket } from "@hooks"
+import {FormProvider} from 'react-hook-form'
+import { Player } from "@generated"
 import { useMemo } from "react"
 import { useGameState } from "@stateProviders"
 import { ArrowLeftRight } from "lucide-react"
-import { PlayerOfferEdit } from "../EditTradeModal/components/PlayerOfferEdit"
-
-type CreateTradeInputs = {
-    playerOne:PlayerTradeOffer
-    playerTwo:PlayerTradeOffer
-}
+import { PlayerOfferEdit } from "./components/PlayerOfferEdit"
 
 export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPlayer}) => {
 
@@ -18,31 +13,14 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 
-    const defaultValues = {
-        playerOne:{
-            playerId:player.id,
-            money:0,
-            getOutOfJailFreeCards:0,
-            gamePropertyIds:[]
-        },
-        playerTwo:{
-            playerId:tradeWithPlayer.id,
-            money:0,
-            getOutOfJailFreeCards:0,
-            gamePropertyIds:[]
-        },
-    }
-
-    const form = useForm<CreateTradeInputs>({
-        mode:'onBlur',
-        defaultValues:defaultValues
-    })
-
-    console.log('43',form)
+    const form = useTradeForm({tradePartnerId:tradeWithPlayer.id})
+ 
+    const defaultValues = useMemo(() => {
+        return form.getValues()
+    },[])
 
     const tradeHasSomethingFilledOut = useMemo( () => {
-        const defaultsHaveChanged = JSON.stringify(form.watch()) !== JSON.stringify(defaultValues)
-        console.log(defaultsHaveChanged)
+        let defaultsHaveChanged = JSON.stringify(form.watch()) !== JSON.stringify(defaultValues)
         return defaultsHaveChanged
     },[form.watch()])
 
@@ -51,7 +29,6 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
             <div className='flex flex-col gap-[20px]'>
                 <p className='font-bold'>Create a Trade</p>
                 
-
                 <div className='flex justify-between'>
                     <div className='flex items-center gap-[20px]'>
                         <img className='w-[30px] h-[30px]' src={player.iconUrl}/>
@@ -65,7 +42,6 @@ export const CreateTradeModal:React.FC<{tradeWithPlayer:Player}> = ({tradeWithPl
                     
                 </div>
                 
-
                 <div className='grid grid-cols-2'>
                     {/* Initiating Trade Player (The Current Client Player) */}
                     <div className='border-r border-black pr-[10px] flex flex-col'>

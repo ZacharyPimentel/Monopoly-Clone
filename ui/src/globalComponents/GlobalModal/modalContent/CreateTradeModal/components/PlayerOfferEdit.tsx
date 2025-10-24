@@ -4,7 +4,7 @@ import React from "react";
 import { MultiSelect, MultiSelectData, NumberInput } from "@globalComponents";
 import { useGameState } from "@stateProviders";
 
-export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player,}> = ({formControlPrefix,player}) => {
+export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}> = ({formControlPrefix,player}) => {
     
     const gameState = useGameState(['boardSpaces']);
 
@@ -30,7 +30,7 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player,}
                 <label className='flex flex-col'>
                     <p className=''>Money (${player.money})</p>
                     <NumberInput 
-                        formControl={`playerOne.money`}
+                        formControl={`${formControlPrefix}.money`}
                         min={0}
                         max={player.money < 0 ? 0 : player.money}
                     />
@@ -38,7 +38,7 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player,}
                 <label className='flex flex-col'>
                     <p className=''>Get Out Of Jail Free Cards ({player.getOutOfJailFreeCards})</p>
                     <NumberInput 
-                        formControl={`playerOne.getOutOfJailFreeCards`}
+                        formControl={`${formControlPrefix}.getOutOfJailFreeCards`}
                         min={0}
                         max={player.getOutOfJailFreeCards}
                         disabled={player.getOutOfJailFreeCards === 0}
