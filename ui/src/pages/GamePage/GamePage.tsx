@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useWebSocket } from "@hooks";
 import { LoadingSpinner } from "@globalComponents";
 import { useParams } from "react-router-dom";
-import { PlayerCreateModal, GameOverModal } from "@globalComponents/GlobalModal/modalContent";
+import { PlayerCreateModal, GameOverModal } from "@globalComponents";
 import { WebSocketEvents } from "@generated";
 import { useGlobalState, useGameState } from "@stateProviders";
 

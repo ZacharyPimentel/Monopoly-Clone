@@ -4,7 +4,7 @@ import {
     MortgagePropertyModal,
     UnmortgagePropertyModal,
     UpgradePropertyModal
-} from "@globalComponents/GlobalModal/modalContent";
+} from "@globalComponents";
 import { usePlayer } from "@hooks";
 import { useGameState, useGlobalState } from "@stateProviders";
 import { useMemo } from "react";

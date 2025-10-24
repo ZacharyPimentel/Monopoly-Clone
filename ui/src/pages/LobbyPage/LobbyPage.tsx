@@ -3,7 +3,7 @@ import { GameCreateModal } from "./modal/CreateGameModal";
 import { useWebSocket } from "@hooks";
 import { useNavigate } from "react-router-dom";
 import { WebSocketEvents } from "@generated";
-import { EnterPasswordModal, GameDeleteModal } from "@globalComponents/GlobalModal/modalContent";
+import { EnterPasswordModal, GameDeleteModal } from "@globalComponents";
 import { useGlobalState } from "@stateProviders";
 
 export const LobbyPage = () => {

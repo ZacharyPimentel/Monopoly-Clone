@@ -1,7 +1,7 @@
 import { BoardSpace, Property } from "@generated";
 import React from "react";
 import { useWebSocket } from "@hooks";
-import { ActionButtons } from "@globalComponents/GlobalModal";
+import { ActionButtons } from "@globalComponents";
 
 export const UnmortgagePropertyModal:React.FC<{space:BoardSpace}> = ({space}) => {
 

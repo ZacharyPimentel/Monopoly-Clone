@@ -1,5 +1,5 @@
 import { useGlobalState } from "@stateProviders";
-import { ViewLogsModal } from "src/globalComponents/GlobalModal/modalContent"
+import { ViewLogsModal } from "@globalComponents"
 
 export const GameStatus = () => {
     

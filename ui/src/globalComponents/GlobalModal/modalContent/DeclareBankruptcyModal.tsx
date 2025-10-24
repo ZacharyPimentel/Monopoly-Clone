@@ -1,5 +1,5 @@
 import { useWebSocket } from "@hooks";
-import { ActionButtons } from '@globalComponents/GlobalModal'
+import { ActionButtons } from '@globalComponents'
 
 export const DeclareBankruptcyModal = () => {
 

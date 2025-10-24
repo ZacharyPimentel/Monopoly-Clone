@@ -1,10 +1,11 @@
 import { usePlayer, useWebSocket } from "@hooks"
 import {useForm, FormProvider} from 'react-hook-form'
 import React, { useMemo } from "react"
-import { PlayerOfferView } from "./components/PlayerOfferView"
-import { Trade } from "../../../types/websocket/Trade"
-import { AdvancedActionButtons, AdvancedButtonConfig } from "@globalComponents/GlobalModal"
+import { PlayerOfferView } from "../CreateTradeModal/components/PlayerOfferView"
+import { Trade } from "../../../../types/websocket/Trade"
+import { AdvancedActionButtons, AdvancedButtonConfig } from "@globalComponents"
 import { useGameState } from "@stateProviders"
+import { ArrowLeftRight } from "lucide-react"
 
 type EditTradeInputs = {
     playerOne:{
@@ -27,23 +28,31 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 
-    const currentPlayerOffer = useMemo( () => {
-        for(let i=0 ; i<trade.playerTrades.length ; i++){
-            if(trade.playerTrades[i].playerId === player.id){
-                return trade.playerTrades[i]
-            }
+    const leftSideOffer = useMemo( () => {
+        const tradePlayerIds = trade.playerTrades.map( trade => trade.playerId);
+        //if player is part of the trade, should always be listed on the left
+        if(tradePlayerIds.includes(player.id)){
+            return trade.playerTrades.find(pt => pt.playerId === player.id)
+        //otherwise display the player who updated last on the left
+        }else{
+            return trade.playerTrades.find(pt => pt.playerId === trade.lastUpdatedBy)
         }
     },[])
 
-    const otherPlayerOffer = useMemo( () => {
-        for(let i=0 ; i<trade.playerTrades.length ; i++){
-            if(trade.playerTrades[i].playerId !== player.id){
-                return trade.playerTrades[i]
-            }
+    const leftSidePlayer = gameState.players.find( p => p.id === leftSideOffer?.playerId)
+
+    const rightSideOffer = useMemo( () => {
+        const tradePlayerIds = trade.playerTrades.map( trade => trade.playerId);
+        //if player is part of the trade, trade partner is always on the right
+        if(tradePlayerIds.includes(player.id)){
+            return trade.playerTrades.find(pt => pt.playerId !== player.id)
+        //otherwise display the player who didn't update last on the right
+        }else{
+            return trade.playerTrades.find(pt => pt.playerId !== trade.lastUpdatedBy)
         }
     },[])
 
-    const otherPlayer = gameState.players.find( x => x.id === otherPlayerOffer?.playerId)
+    const rightSidePlayer = gameState.players.find( x => x.id === rightSideOffer?.playerId)
 
     const advancedbuttonConfig:AdvancedButtonConfig[] =  useMemo( () => {
         
@@ -83,22 +92,35 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
         mode:'onBlur',
         defaultValues:{
             playerOne:{
-                ...currentPlayerOffer,
-                gamePropertyIds: currentPlayerOffer?.tradeProperties.map( property => property.gamePropertyId)
+                ...leftSideOffer,
+                gamePropertyIds: leftSideOffer?.tradeProperties.map( property => property.gamePropertyId)
             },
             playerTwo:{
-                ...otherPlayerOffer,
-                gamePropertyIds: otherPlayerOffer?.tradeProperties.map( property => property.gamePropertyId)
+                ...rightSideOffer,
+                gamePropertyIds: rightSideOffer?.tradeProperties.map( property => property.gamePropertyId)
             }
         }
     })
 
-    if(!otherPlayer)return
+    if(!rightSidePlayer)return
 
     return (
         <FormProvider {...form}>
             <div className='flex flex-col gap-[20px]'>
-                <p className='font-bold'>Create a Trade</p>
+                <p className='font-bold'>View Trade</p>
+
+                <div className='flex justify-between'>
+                    <div className='flex items-center gap-[20px]'>
+                        <img className='w-[30px] h-[30px]' src={leftSidePlayer?.iconUrl}/>
+                        <p>{player.playerName}</p>
+                    </div>
+                    <ArrowLeftRight size={32} />
+                    <div className='flex items-center gap-[20px]'>
+                        <img className='w-[30px] h-[30px]' src={rightSidePlayer?.iconUrl}/>
+                        <p>{rightSidePlayer.playerName}</p>
+                    </div>
+                    
+                </div>
                 
                 <div className='grid grid-cols-2'>
                     {/* Initiating Trade Player (The Current Client Player) */}
@@ -107,7 +129,7 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                     </div>
                     {/* Other Trade Player */}
                     <div className='border-l border-black pl-[10px] '>
-                        <PlayerOfferView formControlPrefix="playerTwo" player={otherPlayer}/>
+                        <PlayerOfferView formControlPrefix="playerTwo" player={rightSidePlayer}/>
                     </div>
                 </div>
                 <AdvancedActionButtons

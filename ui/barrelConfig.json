@@ -3,14 +3,11 @@
     "./src/hooks",
     "./src/stateProviders",
     "./src/helpers",
-    "./src/globalComponents",
-    "./src/globalComponents/GlobalModal",
-    "./src/globalComponents/FormElements",
-    "./src/globalComponents/GlobalModal/modalContent"
+    "./src/globalComponents"
 ],
   "delete": true,
   "singleFile": true,
   "barrelName": "index.ts",
   "structure": "flat",
-  "local": true
+  "local": false
 }

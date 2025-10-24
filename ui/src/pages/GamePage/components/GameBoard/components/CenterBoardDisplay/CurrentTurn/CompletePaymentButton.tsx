@@ -1,5 +1,5 @@
 import { Player } from "@generated";
-import { CompletePaymentModal } from "@globalComponents/GlobalModal/modalContent";
+import { CompletePaymentModal } from "@globalComponents";
 import { useGlobalState } from "@stateProviders";
 
 export const CompletePaymentButton:React.FC<{player:Player}> = ({player}) => {

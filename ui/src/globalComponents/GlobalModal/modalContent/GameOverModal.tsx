@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ActionButtons } from "@globalComponents/GlobalModal";
+import { ActionButtons } from "@globalComponents";
 import { useNavigate } from "react-router-dom";
 import { useGameState } from "@stateProviders";
 

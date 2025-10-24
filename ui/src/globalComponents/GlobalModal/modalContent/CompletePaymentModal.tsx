@@ -1,6 +1,6 @@
 import { Player } from "@generated";
 import React from "react";
-import { ActionButtons } from "@globalComponents/GlobalModal";
+import { ActionButtons } from "@globalComponents";
 import { useWebSocket } from "@hooks";
 
 export const CompletePaymentModal:React.FC<{player:Player}> = ({player}) => {

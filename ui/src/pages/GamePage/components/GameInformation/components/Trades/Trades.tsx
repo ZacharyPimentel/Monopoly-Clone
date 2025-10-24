@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { EditTradeModal } from "@globalComponents/GlobalModal/modalContent";
+import { EditTradeModal } from "@globalComponents";
 import { useGlobalState, useGameState } from "@stateProviders";
 
 export const Trades = () => {
