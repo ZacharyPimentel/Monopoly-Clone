@@ -52,9 +52,9 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
         <div ref={multiSelectRef} className='flex flex-col relative'>
             
             <div className='bg-white flex py-[5px] pl-[5px] cursor-pointer'>
-                <div className='flex flex-wrap gap-[10px] text-[14px]'>
+                <div className='flex flex-wrap gap-[10px] text-[14px] items-center'>
                     {selectedData.length === 0 && (
-                        <p className='opacity-[0.]'>Select Properties...</p>
+                        <p className='opacity-[0.5]'>Select Properties...</p>
                     )}
                     {selectedData.map( (item) => {
                         return (
