@@ -1,6 +1,5 @@
 import { PlayerTradeOffer, Trade } from "@generated";
 import { usePlayer } from "./usePlayer";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 type TradeInputs = {

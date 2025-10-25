@@ -1,6 +1,6 @@
 import { ChevronDown, X } from "lucide-react"
 import { SubmenuWrapper } from "../SubmenuWrapper"
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { MultiselectOption } from "./components/MultiSelectOption";
 import { MultiSelectSelection } from "./components/MultiSelectSelection";
 import { useFormContext } from "react-hook-form";

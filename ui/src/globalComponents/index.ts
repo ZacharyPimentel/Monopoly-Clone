@@ -28,6 +28,7 @@ export * from "./GlobalModal/modalContent/UnmortgagePropertyModal";
 export * from "./GlobalModal/modalContent/UpgradePropertyModal";
 export * from "./GlobalModal/modalContent/ViewLogsModal";
 export * from "./GlobalModal/modalContent/Trades/CreateTradeModal";
-export * from "./GlobalModal/modalContent/Trades/components/PlayerOfferEdit";
+export * from "./GlobalModal/modalContent/Trades/EditTradeModal";
 export * from "./GlobalModal/modalContent/Trades/ViewTradeModal";
+export * from "./GlobalModal/modalContent/Trades/components/PlayerOfferEdit";
 export * from "./GlobalModal/modalContent/Trades/components/PlayerOfferView";
