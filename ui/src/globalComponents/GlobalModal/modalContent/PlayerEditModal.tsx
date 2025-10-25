@@ -3,7 +3,7 @@ import { useApi,useWebSocket } from "@hooks"
 import { Player, PlayerIcon, SocketEventPlayerEdit } from "@generated";
 import React from "react";
 import { FetchWrapper } from "@globalComponents";
-import { ActionButtons } from "@globalComponents/GlobalModal";
+import { ActionButtons } from "@globalComponents";
 import { useForm } from "react-hook-form";
 import { useGameState } from "@stateProviders";
 

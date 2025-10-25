@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { GamePage } from "./pages/GamePage/GamePage"
-import { GlobalModal } from "@globalComponents/GlobalModal"
+import { GlobalModal } from "@globalComponents"
 import { LobbyPage } from "./pages/LobbyPage/LobbyPage"
 import { ToastContainer } from "react-toastify"
 import { useEffect } from "react"

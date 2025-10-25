@@ -5,6 +5,8 @@ export type AdvancedButtonConfig = {
     buttonStyle:'success' | 'warning'
     buttonCallback:Function
     buttonText:string
+    closeOnAction?:boolean
+    disabled?:boolean
 }
 
 export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[]}> = ({buttonConfigs}) => {
@@ -23,7 +25,7 @@ export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[
             </button>
             {buttonConfigs.map( (config,index) => {
                 return (
-                    <button key={index} onClick={() => runCallback(config.buttonCallback)} className={`${config.buttonStyle === 'success' && !error ? 'bg-lime-500':'bg-[tomato]'} min-w-[100px] rounded p-[10px] text-white disabled:bg-[lightgrey] enabled:hover:opacity-[0.8] transition-[0.2s] flex justify-center`}>
+                    <button disabled={config.disabled ?? false} key={index} onClick={() => runCallback(config.buttonCallback, config.closeOnAction)} className={`${config.buttonStyle === 'success' && !error ? 'bg-lime-500':'bg-[tomato]'} min-w-[100px] rounded p-[10px] text-white disabled:bg-[lightgrey] enabled:hover:opacity-[0.8] transition-[0.2s] flex justify-center`}>
                         {config.buttonText}
                     </button>
                 )
@@ -31,7 +33,7 @@ export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[
         </div>
     )
 
-    async function runCallback(configCallback:Function){
+    async function runCallback(configCallback:Function, closeOnAction:boolean = true){
         setLoading(true);
         
         configCallback()
@@ -39,7 +41,9 @@ export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[
                 setLoading(false);
                 setSuccess(true);
                 setError(false);
-                globalDispatch({modalOpen:false,modalContent:null})
+                if(closeOnAction){
+                    globalDispatch({modalOpen:false,modalContent:null})
+                }
             }).catch( (error: any) => {
                 console.log(error)
                 setLoading(false);

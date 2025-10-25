@@ -1,6 +1,11 @@
 import { ReactNode, useEffect, useRef, useState } from "react"
 
-export const SubmenuWrapper:React.FC<{submenuOpen:boolean,updateHeightDeps?:any[],children:ReactNode}> = ({submenuOpen,updateHeightDeps = [],children}) => {
+export const SubmenuWrapper:React.FC<{
+    submenuOpen:boolean,
+    updateHeightDeps?:any[],
+    children:ReactNode
+    side: 'top' | 'right' | 'bottom' | 'left'
+}>= ({submenuOpen,updateHeightDeps = [],children}) => {
 
     const submenuRef = useRef<HTMLDivElement | null>(null)
     const [submenuHeight,setSubmenuHeight] = useState(0);
@@ -16,8 +21,8 @@ export const SubmenuWrapper:React.FC<{submenuOpen:boolean,updateHeightDeps?:any[
     },[submenuOpen,[...updateHeightDeps]]);
 
     return (
-        <div style={{height:submenuHeight}} className='absolute bg-white top-[100%] left-0 border w-full overflow-hidden duration-[0.5s] shadow-lg'>
-            <div ref={submenuRef} className='px-[10px] py-[20px]'>
+        <div style={{height:submenuHeight}} className='max-h-[200px] absolute bg-white top-[100%] left-0 w-full overflow-y-scroll shadow-lg'>
+            <div ref={submenuRef}>
                 {children}
             </div>
         </div>

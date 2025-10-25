@@ -1,5 +1,5 @@
 import { BoardSpace, Property } from "@generated"
-import { MortgagePropertyModal, UnmortgagePropertyModal } from "@globalComponents/GlobalModal/modalContent";
+import { MortgagePropertyModal, UnmortgagePropertyModal } from "@globalComponents";
 import { usePlayer } from "@hooks";
 import { useGlobalState } from "@stateProviders";
 import { useMemo } from "react";

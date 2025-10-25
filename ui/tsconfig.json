@@ -26,9 +26,6 @@
       "@stateProviders": ["src/stateProviders/index"],
       "@types/*": ["src/types/*"],
       "@globalComponents":["src/globalComponents/index"],
-      "@globalComponents/formElements":["src/globalComponents/FormElements/index"],
-      "@globalComponents/GlobalModal":["src/globalComponents/GlobalModal/index"],
-      "@globalComponents/GlobalModal/modalContent":["src/globalComponents/GlobalModal/modalContent/index"],
       "@helpers":["src/helpers/index"],
       "@generated":["src/generated/index"]
     }

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS THEME(
 CREATE TABLE IF NOT EXISTS GAME(
     Id UUID PRIMARY KEY,
     DiceRollInProgress BOOLEAN DEFAULT false,
-    GameName TEXT UNIQUE,
+    GameName TEXT,
     Password TEXT,
     MovementInProgress BOOLEAN DEFAULT false,
     InLobby BOOLEAN DEFAULT true,

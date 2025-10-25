@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { EditTradeModal } from "@globalComponents/GlobalModal/modalContent";
+import { ViewTradeModal } from "@globalComponents";
 import { useGlobalState, useGameState } from "@stateProviders";
 
 export const Trades = () => {
@@ -30,7 +30,7 @@ export const Trades = () => {
                                         </div>
                                     </Fragment>)
                                 })}
-                                <button onClick={() => globalDispatch({modalOpen:true,modalContent:<EditTradeModal trade={trade}/>})} className='p-[5px] border ml-auto'>View</button>
+                                <button onClick={() => globalDispatch({modalOpen:true,modalContent:<ViewTradeModal trade={trade}/>})} className='p-[5px] border ml-auto'>View</button>
                             </div>
                         </li>
                     )

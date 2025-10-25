@@ -1,5 +1,5 @@
 import { usePlayer } from "@hooks";
-import { PlayerCreateModal } from "@globalComponents/GlobalModal/modalContent";
+import { PlayerCreateModal } from "@globalComponents";
 import { CurrentPlayerInLobbyListItem } from "./components/CurrentPlayerInLobbyListItem";
 import { PlayerInGameListitem } from "./components/PlayerInGameListitem";
 import { PlayerInLobbyListItem } from "./components/PlayerInLobbyListItem";

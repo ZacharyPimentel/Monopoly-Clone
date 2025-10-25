@@ -1,6 +1,6 @@
 import { Player, BoardSpace, GameLog, SocketPlayer } from "@generated";
 import { Trade } from "../websocket/Trade"
-import { Game } from "@generated/Game"
+import { Game } from "@generated"
 
 export type GameState = {
     players:Player[]

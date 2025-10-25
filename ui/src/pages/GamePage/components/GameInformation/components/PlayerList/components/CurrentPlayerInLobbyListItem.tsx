@@ -1,6 +1,6 @@
 import { useWebSocket } from "@hooks";
 import { Player } from "@generated"
-import { PlayerEditModal } from "@globalComponents/GlobalModal/modalContent";
+import { PlayerEditModal } from "@globalComponents";
 import { useGlobalState } from "@stateProviders";
 
 export const CurrentPlayerInLobbyListItem:React.FC<{player:Player}> = ({player}) => {

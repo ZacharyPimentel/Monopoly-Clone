@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActionButtons } from "@globalComponents/GlobalModal";
+import { ActionButtons } from "@globalComponents";
 import { useWebSocket } from "@hooks";
 
 export const EnterPasswordModal:React.FC<{gameId:string}> = ({gameId}) => {

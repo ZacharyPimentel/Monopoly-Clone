@@ -1,4 +1,4 @@
-import { DeclareBankruptcyModal } from "@globalComponents/GlobalModal/modalContent";
+import { DeclareBankruptcyModal } from "@globalComponents";
 import { useGlobalState } from "@stateProviders";
 
 export const BankruptButton = () => {

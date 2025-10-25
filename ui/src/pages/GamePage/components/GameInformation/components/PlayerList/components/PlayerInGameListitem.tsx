@@ -1,6 +1,6 @@
 import { usePlayer } from "@hooks";
 import { Player } from "@generated"
-import { CreateTradeModal } from "@globalComponents/GlobalModal/modalContent";
+import { CreateTradeModal } from "@globalComponents";
 import { useGlobalState, useGameState } from "@stateProviders";
 
 export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
