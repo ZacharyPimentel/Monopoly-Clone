@@ -24,7 +24,7 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}>
         },[player])
     
     return (
-        <div className='flex flex-col gap-[20px]' >
+        <div className='flex flex-col gap-[20px] h-full'>
             <MultiSelect formControlPrefix={`${formControlPrefix}.gamePropertyIds`} data={multiSelectData}/>
             <div className='mt-auto'>
                 <label className='flex flex-col'>

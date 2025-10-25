@@ -12,7 +12,7 @@ export const NumberInput:React.FC<{
     
     return (
         <input 
-            className='pl-[5px]'
+            className='pl-[5px] disabled:cursor-not-allowed'
             {...form.register(formControl,
                 {
                     min,

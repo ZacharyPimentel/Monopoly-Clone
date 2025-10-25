@@ -1,78 +1,49 @@
-import { usePlayer, useWebSocket } from "@hooks"
-import {useForm, FormProvider} from 'react-hook-form'
+import { usePlayer, useTradeForm, useWebSocket } from "@hooks"
+import { FormProvider } from 'react-hook-form'
 import React, { useMemo } from "react"
 import { PlayerOfferView } from "./components/PlayerOfferView"
-import { Trade } from "../../../../types/websocket/Trade"
 import { AdvancedActionButtons, AdvancedButtonConfig } from "@globalComponents"
-import { useGameState } from "@stateProviders"
+import { useGameState, useGlobalState } from "@stateProviders"
 import { ArrowLeftRight } from "lucide-react"
+import { Trade } from "@generated"
+import { EditTradeModal } from "./EditTradeModal"
 
-type EditTradeInputs = {
-    playerOne:{
-        playerId:string,
-        money:number,
-        getOutOfJailFreeCards:number
-        gamePropertyIds: number[]
-    },
-    playerTwo:{
-        playerId:string
-        money:number,
-        getOutOfJailFreeCards:number
-        gamePropertyIds: number[]
-    }
-}
-
-export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
+export const ViewTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
 
     const gameState = useGameState(['players'])
+    const {dispatch} = useGlobalState([]);
     const {player} = usePlayer()
     const {invoke} = useWebSocket();
 
-    const leftSideOffer = useMemo( () => {
-        const tradePlayerIds = trade.playerTrades.map( trade => trade.playerId);
-        //if player is part of the trade, should always be listed on the left
-        if(tradePlayerIds.includes(player.id)){
-            return trade.playerTrades.find(pt => pt.playerId === player.id)
-        //otherwise display the player who updated last on the left
-        }else{
-            return trade.playerTrades.find(pt => pt.playerId === trade.lastUpdatedBy)
-        }
-    },[])
+    const form = useTradeForm({trade});
 
-    const leftSidePlayer = gameState.players.find( p => p.id === leftSideOffer?.playerId)
+    const leftSidePlayer = gameState.players.find( p => p.id === form.getValues("playerOne.playerId"))
 
-    const rightSideOffer = useMemo( () => {
-        const tradePlayerIds = trade.playerTrades.map( trade => trade.playerId);
-        //if player is part of the trade, trade partner is always on the right
-        if(tradePlayerIds.includes(player.id)){
-            return trade.playerTrades.find(pt => pt.playerId !== player.id)
-        //otherwise display the player who didn't update last on the right
-        }else{
-            return trade.playerTrades.find(pt => pt.playerId !== trade.lastUpdatedBy)
-        }
-    },[])
-
-    const rightSidePlayer = gameState.players.find( x => x.id === rightSideOffer?.playerId)
+    const rightSidePlayer = gameState.players.find( x => x.id === form.getValues("playerTwo.playerId"))
 
     const advancedbuttonConfig:AdvancedButtonConfig[] =  useMemo( () => {
         
         const config:AdvancedButtonConfig[] = [];
+
+        //if not a member of the trade, should not see any action buttons
+        if(leftSidePlayer?.id !== player.id && rightSidePlayer?.id !== player.id){
+            return config
+        }
+
         // allow modify trade
         if(player.id !== trade.lastUpdatedBy){
             config.push({
                 buttonText:'Modify',
                 buttonStyle:'success',
+                closeOnAction:false,
                 buttonCallback: async() => {
-                    invoke.trade.update({
-                        tradeId: trade.id,
-                        playerOne:form.getValues().playerOne,
-                        playerTwo:form.getValues().playerTwo
-                    })
+                    dispatch({modalContent: <EditTradeModal trade={trade}/>, modalOpen:true})
                 }
             })
             config.push({
                 buttonText:'Accept',
                 buttonStyle:'success',
+                closeOnAction:true,
                 buttonCallback: async() => {
                     invoke.trade.accept({tradeId:trade.id})
                 }
@@ -81,26 +52,13 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
         config.push({
             buttonText:'Decline',
             buttonStyle:'warning',
+            closeOnAction:true,
             buttonCallback: async() => {
                 invoke.trade.decline({ tradeId: trade.id });
             }
         })
         return config;
     },[])
-
-    const form = useForm<EditTradeInputs>({
-        mode:'onBlur',
-        defaultValues:{
-            playerOne:{
-                ...leftSideOffer,
-                gamePropertyIds: leftSideOffer?.tradeProperties.map( property => property.gamePropertyId)
-            },
-            playerTwo:{
-                ...rightSideOffer,
-                gamePropertyIds: rightSideOffer?.tradeProperties.map( property => property.gamePropertyId)
-            }
-        }
-    })
 
     if(!rightSidePlayer)return
 
