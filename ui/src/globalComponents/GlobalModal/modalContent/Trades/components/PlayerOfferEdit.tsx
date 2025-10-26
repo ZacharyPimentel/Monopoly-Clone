@@ -15,7 +15,6 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}>
                 .sort( space => space.id) // want them to appear in board order in the trade window
                 .map( (space) => {
                     return {
-                        id:space.property.id,
                         display:space.boardSpaceName,
                         value: space.property.gamePropertyId as number,
                         color: space.property.color  ?? 'white'

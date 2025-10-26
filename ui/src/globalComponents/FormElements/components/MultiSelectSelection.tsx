@@ -14,7 +14,7 @@ export const MultiSelectSelection:React.FC<{selection:MultiSelectData, formContr
             <button className='relative' onClick={(e) => {
                 e.stopPropagation();
                 const formControlValues = form.getValues(formControlPrefix);
-                const newValues = formControlValues.filter((value:string|number) => value !== selection.id)
+                const newValues = formControlValues.filter((value:string|number) => value !== selection.value)
                 form.setValue(formControlPrefix, newValues)
             }}>
                 <X size={14} className='hover:bg-black hover:stroke-white'/>

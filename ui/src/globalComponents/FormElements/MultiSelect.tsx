@@ -6,7 +6,6 @@ import { MultiSelectSelection } from "./components/MultiSelectSelection";
 import { useFormContext } from "react-hook-form";
 
 export type MultiSelectData = {
-    id: string | number
     display:string
     value:string | number
     color:string
@@ -22,11 +21,11 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
     const multiSelectRef = useRef<HTMLDivElement>(null)
 
     const selectedData = useMemo( () => {
-        return data.filter( (item) => selected.includes(item.id))
+        return data.filter( (item) => selected.includes(item.value))
     },[selected])
 
     const unselectedData = useMemo( () => {
-        return data.filter( (item) => !selected.includes(item.id))
+        return data.filter( (item) => !selected.includes(item.value))
     },[selected])
 
     useEffect( () => {
@@ -58,7 +57,7 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
                     )}
                     {selectedData.map( (item) => {
                         return (
-                            <Fragment key={item.id}>
+                            <Fragment key={item.value}>
                                 <MultiSelectSelection formControlPrefix={formControlPrefix} selection={item}/>
                             </Fragment>
                         )
@@ -85,7 +84,7 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
                     )}
                     {unselectedData.map( (item) => {
                         return (
-                            <Fragment key={item.id}>
+                            <Fragment key={item.value}>
                                 <MultiselectOption formControlPrefix={formControlPrefix} option={item} />
                             </Fragment>
                         )

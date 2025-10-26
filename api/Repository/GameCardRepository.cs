@@ -61,14 +61,17 @@ public class GameCardRepository(IDbConnection db) : BaseRepository<GameCard, int
         {
             var cardsInsertSql = @"
                 UPDATE 
-                    GameCard
+                    GameCard AS gc
                 SET 
-                    Played = TRUE,
+                    Played = FALSE,
                     PlayedAt = NULL
+                FROM Card AS c
                 WHERE 
-                    GameId = @GameId
+                    gc.CardId = c.Id
+                AND
+                    gc.GameId = @GameId
                 AND 
-                    CardTypeId = @CardTypeId
+                    c.CardTypeId = @CardTypeId
             ";
             await db.ExecuteAsync(cardsInsertSql, new { GameId = gameId, CardTypeId = (int)cardTypeId });
 
@@ -78,7 +81,7 @@ public class GameCardRepository(IDbConnection db) : BaseRepository<GameCard, int
                 (gameCard, card, themeCard) =>
                 {
                     gameCard.Card = card;
-                    gameCard.CardDescription = themeCard.CardDescription;
+                    gameCard.Card.CardDescription = themeCard.CardDescription;
                     return gameCard;
                 },
                 new { CardTypeId = (int)cardTypeId, GameId = gameId },

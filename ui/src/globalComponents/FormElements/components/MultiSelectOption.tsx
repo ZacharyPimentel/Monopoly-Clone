@@ -9,7 +9,7 @@ export const MultiselectOption:React.FC<{option:MultiSelectData, formControlPref
     return (
         <button className='p-[5px] relative group w-full text-left' onClick={() => {
             const formValues = form.getValues(formControlPrefix)
-            const newValues = [...formValues,option.id].sort();
+            const newValues = [...formValues,option.value].sort();
             form.setValue(formControlPrefix,newValues)
         }}>
             <p className='relative z-[1] flex items-center gap-[5px]' style={{color:fixColorContrast(option.color,option.color)}}>

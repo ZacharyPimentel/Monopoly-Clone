@@ -33,18 +33,17 @@ export const useTradeForm = ({trade, tradePartnerId}:UseTradeFormParams) => {
             playerId: leftSidePlayerTrade?.playerId ?? player.id,
             money:  leftSidePlayerTrade?.money ?? 0,
             getOutOfJailFreeCards: leftSidePlayerTrade?.getOutOfJailFreeCards ?? 0,
-            gamePropertyIds: leftSidePlayerTrade?.tradeProperties?.map( (tp) => tp.id) ?? []
+            gamePropertyIds: leftSidePlayerTrade?.tradeProperties?.map( (tp) => tp.gamePropertyId) ?? []
         },
         playerTwo:{
             playerId: rightSidePlayerTrade?.playerId ?? tradePartnerId,
             money:  rightSidePlayerTrade?.money ?? 0,
             getOutOfJailFreeCards:  rightSidePlayerTrade?.getOutOfJailFreeCards ?? 0,
-            gamePropertyIds: rightSidePlayerTrade?.tradeProperties?.map( (tp) => tp.id) ?? []
+            gamePropertyIds: rightSidePlayerTrade?.tradeProperties?.map( (tp) => tp.gamePropertyId) ?? []
         },
     }
 
-    console.log(defaultValues)
-    
+
     const form = useForm<TradeInputs>({
         mode:'onBlur',
         defaultValues:defaultValues

@@ -45,6 +45,7 @@ export const ViewTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                 buttonStyle:'success',
                 closeOnAction:true,
                 buttonCallback: async() => {
+                    console.log(trade)
                     invoke.trade.accept({tradeId:trade.id})
                 }
             })

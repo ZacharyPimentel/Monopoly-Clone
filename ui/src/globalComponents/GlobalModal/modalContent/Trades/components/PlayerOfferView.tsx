@@ -11,7 +11,7 @@ export const PlayerOfferView:React.FC<{formControlPrefix:string, player:Player}>
     const form = useFormContext();
     const {boardSpaces} = useGameState(['boardSpaces'])
 
-    const tradeBoardSpaces = boardSpaces.filter( (bs) => form.getValues(`${formControlPrefix}.gamePropertyIds`).includes(bs?.property?.id))
+    const tradeBoardSpaces = boardSpaces.filter( (bs) => form.getValues(`${formControlPrefix}.gamePropertyIds`).includes(bs?.property?.gamePropertyId))
 
 
 
