@@ -444,7 +444,7 @@ public class PlayerService(
         player.Money = 0;
         await playerRepository.UpdateAsync(player.Id, PlayerUpdateParams.FromPlayer(player));
 
-        //unassign properties
+        //unassign and reset properties
         await gamePropertyRepository.UnassignAllFromPlayer(player.GameId, player.Id);
 
         Game game = await gameRepository.GetByIdWithDetailsAsync(player.GameId);

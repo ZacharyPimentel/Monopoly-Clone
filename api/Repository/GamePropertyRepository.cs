@@ -81,8 +81,14 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
     {
         var sql = @"
             UPDATE GameProperty
-            SET PlayerId = NULL
-            WHERE GameId = @GameId
+            SET 
+                PlayerId = NULL,
+                UpgradeCount = 0,
+            WHERE 
+                GameId = @GameId
+            AND
+                PlayerId = @PlayerId
+
         ";
         var result = await db.ExecuteAsync(sql, new { GameId, PlayerId });
         return result > 0;
