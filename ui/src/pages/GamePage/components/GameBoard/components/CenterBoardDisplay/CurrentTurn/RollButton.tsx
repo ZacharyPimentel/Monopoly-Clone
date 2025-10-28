@@ -16,7 +16,7 @@ export const RollButton = () => {
 
     return (
         <button
-            disabled={rollInProgress || player.rollCount === 3}
+            disabled={rollInProgress || (!player.rollingForUtilities && player.rollCount === 3)}
             onClick={() => {
                 setRollInProgress(true);
                 if(player.rollingForUtilities){
