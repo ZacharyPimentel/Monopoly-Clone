@@ -30,11 +30,11 @@ export const Popover:React.FC<{
     },[property,isCurrentTurn])
 
     return (
-        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
-            <p className='mb-[5px]'>{space.boardSpaceName}</p>
+        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>
+            <p className='game-text mb-[5px] font-bold'>{space.boardSpaceName}</p>
             <div className='flex justify-between border-b border-black'>
-                <p>Upgrades</p>
-                <p>Rent</p>
+                <p className='game-text'>Upgrades</p>
+                <p className='game-text'>Rent</p>
             </div>
             {property.propertyRents.map( (propertyRent,index) => {
                 return (
@@ -43,14 +43,14 @@ export const Popover:React.FC<{
                         style={{fontWeight:property.upgradeCount === index ? 'bold' : 'normal'}} 
                         className='flex justify-between'
                     >
-                        <p>{propertyRent.upgradeNumber}</p>
-                        <p>${propertyRent.rent}</p>
+                        <p className='game-text'>{propertyRent.upgradeNumber}</p>
+                        <p className='game-text'>${propertyRent.rent}</p>
                     </div>
                 )
             })}
             <div className='border-t border-black pt-[5px]'>
-                <p>House Cost: ${property.upgradeCost}</p>
-                <p>Mortgage Value: ${property.mortgageValue}</p>
+                <p className='game-text'>House Cost: <b>${property.upgradeCost}</b></p>
+                <p className='game-text'>Mortgage Value: <b>${property.mortgageValue}</b></p>
             </div>
             {playerOwnsAllSetProperties && isCurrentTurn && property.upgradeCount < 5 && (
                 <div className='mt-[10px]'>

@@ -14,22 +14,22 @@ export const UtilityPopover:React.FC<{
     const {dispatch:globalDispatch} = useGlobalState([]);
 
     return (
-        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
-            <p className='mb-[5px]'>{space.boardSpaceName}</p>
+        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>
+            <p className='game-text mb-[5px] font-bold'>{space.boardSpaceName}</p>
             <div className='flex justify-between border-b border-black'>
-                <p>Owned</p>
-                <p>Payment</p>
+                <p className='game-text'>Owned</p>
+                <p className='game-text'>Payment</p>
             </div>
             <div className='flex justify-between'>
-                <p>1</p>
-                <p>4x Dice Roll</p>
+                <p className='game-text'>1</p>
+                <p className='game-text'>4x Dice Roll</p>
             </div>
             <div className='flex justify-between'>
-                <p>2</p>
-                <p>10x Dice Roll</p>
+                <p className='game-text'>2</p>
+                <p className='game-text'>10x Dice Roll</p>
             </div>
             <div className='border-t border-black pt-[5px]'>
-                <p>Mortgage Value: ${property.mortgageValue}</p>
+                <p className='game-text'>Mortgage Value: <b>${property.mortgageValue}</b></p>
             </div>
             {property.playerId === player?.id && isCurrentTurn && (
                 <div className='mt-[10px]'>

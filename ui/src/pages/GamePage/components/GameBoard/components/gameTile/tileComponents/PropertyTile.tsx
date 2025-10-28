@@ -20,35 +20,35 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
 
     const propertyStyles:{position:string,flexDirection:'column'|'row'} = useMemo( () => {
         if(property.setNumber === 1) return({
-            position: 'absolute top-[100%] left-[50%] translate-x-[-50%]',
+            position: 'absolute top-[100%] left-0',
             flexDirection: 'row'
         })
         if(property.setNumber === 2) return({
-            position: 'absolute top-[100%] left-[50%] translate-x-[-50%]',
+            position: 'absolute top-[100%] right-0',
             flexDirection: 'row'
         })
         if(property.setNumber === 3) return({
-            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            position: 'right-[100%] absolute top-[0]',
             flexDirection: 'column'
         })
         if(property.setNumber === 4) return({
-            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            position: 'right-[100%] absolute bottom-0',
             flexDirection: 'column'
         })
         if(property.setNumber === 5) return({
-            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]',
+            position: 'absolute bottom-full right-0',
             flexDirection: 'row'
         })
         if(property.setNumber === 6) return({
-            position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]',
+            position: 'absolute bottom-full left-0',
             flexDirection: 'row'
         })
         if(property.setNumber === 7) return({
-            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            position: 'left-[100%] absolute bottom-0',
             flexDirection: 'column'
         })
         if(property.setNumber === 8) return({
-            position: 'left-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            position: 'left-[100%] absolute top-0',
             flexDirection: 'column'
         })
         return {position:'', flexDirection: 'row'};

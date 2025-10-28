@@ -19,11 +19,11 @@ export const RailroadPopover:React.FC<{
     },[])
 
     return (
-        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px]`}>
-            <p className='mb-[5px]'>{space.boardSpaceName}</p>
+        <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>
+            <p className='game-text mb-[5px] font-bold'>{space.boardSpaceName}</p>
             <div className='flex justify-between border-b border-black'>
-                <p>Owned</p>
-                <p>Rent</p>
+                <p className='game-text'>Owned</p>
+                <p className='game-text'>Rent</p>
             </div>
             {railroadRents.map( (rent,index) => {
                 return (
@@ -31,13 +31,13 @@ export const RailroadPopover:React.FC<{
                         key={rent}
                         className='flex justify-between'
                     >
-                        <p>{index + 1}</p>
-                        <p>${rent}</p>
+                        <p className='game-text'>{index + 1}</p>
+                        <p className='game-text'>${rent}</p>
                     </div>
                 )
             })}
             <div className='border-t border-black pt-[5px]'>
-                <p>Mortgage Value: ${property.mortgageValue}</p>
+                <p>Mortgage Value: <b>${property.mortgageValue}</b></p>
             </div>
             {property.playerId === player?.id && isCurrentTurn && (
                 <div className='mt-[10px]'>

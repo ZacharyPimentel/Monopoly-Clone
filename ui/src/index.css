@@ -59,6 +59,10 @@ p{
     @apply bg-white p-[5px] disabled:opacity-[0.6] min-w-[50px] md:min-w-[100px] text-[8px] md:text-lg rounded
 }
 
+.game-text{
+    @apply text-[8px] md:text-[16px] leading-3 md:leading-6;
+}
+
 /*Styles for game tile text rotations*/
 .tile-top{
     flex-direction: column;
