@@ -2,10 +2,13 @@ import { GameLog } from "@generated";
 import { useCallbackQueue } from "@hooks";
 import { useGameState } from "@stateProviders";
 import { useCallback, useEffect, useState } from "react";
+import useWindowSize from "src/hooks/useWindowSize";
 
 export const GameLogs = () => {
     const {gameLogs} = useGameState(['gameLogs']);
     const [displayedLogs,setDisplayedLogs] = useState(gameLogs);
+
+    const {width} = useWindowSize();
 
     const delay = 200;
     const {pushToQueue} = useCallbackQueue(delay);
@@ -27,9 +30,12 @@ export const GameLogs = () => {
         pushToQueue(() => gameLogScollCallback(gameLogs))
     },[gameLogs])
 
+    
+    const sizeFactor = width < 768 ? 12 : 24
+
     return (
-        <div className='flex flex-col-reverse w-full overflow-hidden h-[120px]'>
-            <ul style={{transform:`translateY(${(displayedLogs.length - 5) * 24}px)`}} className="duration-500">
+        <div style={{height:`${sizeFactor * 5}px`}} className='flex flex-col-reverse w-full overflow-hidden'>
+            <ul style={{transform:`translateY(${(displayedLogs.length - 5) * sizeFactor}px)`}} className="duration-500">
                 {displayedLogs.map( (log,index) => {
                     const opacity = 1 / (index + 1);
                     return (
@@ -37,7 +43,7 @@ export const GameLogs = () => {
                         style={{opacity}}
                             key={log.id}
                             title={log.message}
-                            className="text-white transition duration-1000 text-center px-[10px] truncate"
+                            className="text-white transition duration-1000 text-center text-[8px] md:text-[16px] px-[10px] truncate"
                         >
                             {log.message}
                         </li>

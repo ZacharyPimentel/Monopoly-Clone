@@ -11,7 +11,7 @@ export const CompletePaymentButton:React.FC<{player:Player}> = ({player}) => {
             onClick={() => {
                 globalDispatch({modalContent:<CompletePaymentModal player={player}/>,modalOpen:true})
             }}
-            className='bg-white p-[5px] disabled:opacity-[0.6] min-w-[100px]'
+            className='game-button'
         >
             Complete Payment
         </button>

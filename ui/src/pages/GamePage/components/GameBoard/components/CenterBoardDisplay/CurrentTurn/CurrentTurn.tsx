@@ -31,17 +31,20 @@ export const CurrentTurn = () => {
             )}
             {player.money < 0 || player.debts.length > 0
                 ? 
-                    <div className='flex flex-col items-center gap-[20px]'>
+                    <div className='flex flex-col items-center'>
                         {player.money < player.debts[0].amount && (
                             <>
-                                <p className='text-white'>You don't have enough money to make your payment(s).</p>
-                                <p className='text-white text-[20px]'>
+                                <p className='text-white text-[8px]'>You don't have enough money to make your payment(s).</p>
+                                <p className='text-white text-[8px]'>
                                     You still need ${currentPlayerDebtTotal - player.money} in total
                                 </p>
                             </>
                         )}
-                        <CompletePaymentButton player={player}/>
-                        <BankruptButton/>
+                        <div className='flex gap-[5px] md:gap-[20px]'>
+
+                            <CompletePaymentButton player={player}/>
+                            <BankruptButton/>
+                        </div>
                     </div>
                 : player.canRoll || player.rollingForUtilities
                     ? <RollButton/>

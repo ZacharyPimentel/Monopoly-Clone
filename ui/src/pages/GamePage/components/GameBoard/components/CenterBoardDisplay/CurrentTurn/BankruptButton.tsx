@@ -10,7 +10,7 @@ export const BankruptButton = () => {
             onClick={() => {
                 globalDispatch({modalOpen:true,modalContent:<DeclareBankruptcyModal/>})
             }}
-            className='bg-white p-[5px] disabled:opacity-[0.6] min-w-[100px]'
+            className='game-button'
         >
             Declare Bankruptcy
         </button>

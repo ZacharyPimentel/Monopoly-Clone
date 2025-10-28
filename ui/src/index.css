@@ -55,6 +55,10 @@ p{
     @apply px-[20px] md:px-[32px] max-w-[1300px] mx-auto
 }
 
+.game-button{
+    @apply bg-white p-[5px] disabled:opacity-[0.6] min-w-[50px] md:min-w-[100px] text-[8px] md:text-lg rounded
+}
+
 /*Styles for game tile text rotations*/
 .tile-top{
     flex-direction: column;
