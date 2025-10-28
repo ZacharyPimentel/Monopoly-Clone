@@ -21,10 +21,10 @@ export const Railroad:React.FC<{space:BoardSpace,sideClass:string}> = ({space,si
 
     const propertyStyles = useMemo( () => {
             if(property.boardSpaceId === 6) return({
-                position: 'absolute top-[70%] left-[50%] translate-x-[-50%]'
+                position: 'absolute top-[100%] left-[50%] translate-x-[-50%]'
             })
             if(property.boardSpaceId === 16) return({
-                position: 'right-[70%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+                position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
             })
             if(property.boardSpaceId === 26) return({
                 position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'
