@@ -85,10 +85,20 @@ public class PlayerRepository : BaseRepository<Player, Guid>, IPlayerRepository
         ";
         var playerDebts = await _db.QueryAsync<PlayerDebt>(playerDebtSql, new { PlayerIds = playerIds });
 
+        var turnOrderSql = @"
+            SELECT * FROM TurnOrder
+            WHERE PlayerId = ANY(@PlayerIds);
+        ";
+        var playerTurnOrders = await _db.QueryAsync<TurnOrder>(turnOrderSql, new { PlayerIds = playerIds });
+
         foreach (var player in players)
         {
             player.IconUrl = playerIcons.First(pi => pi.Id == player.IconId).IconUrl;
             player.Debts = playerDebts.Where(pd => pd.PlayerId == player.Id);
+            if(playerTurnOrders.FirstOrDefault(to => to.PlayerId == player.Id) is TurnOrder turnOrder)
+            {
+                player.TurnOrder = turnOrder.PlayOrder;
+            }
         }
 
         return players.AsList();

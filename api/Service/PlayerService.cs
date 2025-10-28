@@ -84,9 +84,9 @@ public class PlayerService(
         SocketPlayer currentSocketPlayer = gameState.GetPlayer(SocketContext.ConnectionId);
         await playerRepository.UpdateAsync(playerId, new PlayerUpdateParams { Active = true });
         currentSocketPlayer.PlayerId = playerId;
-        var allPlayers = await playerRepository.GetAllWithIconsAsync();
+        var gamePlayers = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams{GameId = currentSocketPlayer.GameId});
 
-        var currentPlayer = allPlayers.First(x => x.Id == playerId);
+        var currentPlayer = gamePlayers.First(x => x.Id == playerId);
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = currentPlayer.GameId,
@@ -96,7 +96,7 @@ public class PlayerService(
 
         await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
         {
-            Players = allPlayers.Where(p => p.GameId == currentPlayer.GameId),
+            Players = gamePlayers,
             GameLogs = latestLogs,
         });
         await socketMessageService.SendToSelf(WebSocketEvents.PlayerUpdate, currentSocketPlayer);

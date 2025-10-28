@@ -26,4 +26,5 @@ export interface Player {
     iconUrl: string;
     iconName: string;
     debts: PlayerDebt[];
+    turnOrder: number;
 }

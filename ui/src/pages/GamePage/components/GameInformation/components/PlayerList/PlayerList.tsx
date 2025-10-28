@@ -11,7 +11,7 @@ export const PlayerList = () => {
     const gameState = useGameState(['game','players','currentSocketPlayer']);
     const {dispatch:globalDispatch} = useGlobalState([]);
     const {player} = usePlayer();
-        
+
     return (
         <div className='flex flex-col gap-[10px] p-[10px] bg-totorogreen'>
             {/* Valid players are players who have nickname / profile icon set */}
@@ -25,7 +25,7 @@ export const PlayerList = () => {
             </div>
             {gameState.players.length > 0 && (
                 <ul className='flex flex-col gap-[10px]'>
-                    {gameState.players.map( (player) => {
+                    {gameState.players.sort((a,b) => a.turnOrder - b.turnOrder).map( (player) => {
                         const isCurrentPlayer = player.id === gameState.currentSocketPlayer?.playerId;
                         return (
                             gameState.game?.gameStarted 

@@ -28,4 +28,7 @@ public class Player
 
     //Joined from PlayerDebt
     public IEnumerable<PlayerDebt> Debts { get; set; } = [];
+
+    //Joined from TurnOrder
+    public int TurnOrder { get; set; }
 }

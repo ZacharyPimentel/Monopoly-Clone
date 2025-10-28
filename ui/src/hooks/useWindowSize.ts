@@ -16,12 +16,19 @@ const useWindowSize = () => {
   }, []);
 
   useEffect(() => {
+
+    let timeout: number | null | undefined = null;
+
     // Define a function to handle the resize event
+    // Debounce to prevent spam updates
     const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      if(timeout) clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }, 100);
     };
 
     // Add the event listener

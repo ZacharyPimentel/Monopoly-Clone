@@ -51,7 +51,7 @@ export const GamePage = () => {
         <div className='flex flex-col relative'>
             <div className='justify-center w-full h-full flex flex-wrap'>
                 <GameBoard/>
-                <div className='h-[100vh] min-w-[300px] flex-1 relative overflow-y-scroll'>
+                <div className='xl:h-[100vh] min-w-[300px] flex-1 relative xl:overflow-y-scroll'>
                     <GameInformation />
                 </div>
             </div>
