@@ -31,11 +31,11 @@ export const CurrentTurn = () => {
             )}
             {player.money < 0 || player.debts.length > 0
                 ? 
-                    <div className='flex flex-col items-center'>
+                    <div className='flex flex-col items-center gap-[10px] md:gap-[20px]'>
                         {player.money < player.debts[0].amount && (
                             <>
-                                <p className='text-white text-[8px]'>You don't have enough money to make your payment(s).</p>
-                                <p className='text-white text-[8px]'>
+                                <p className='text-white game-text'>You don't have enough money to make your payment(s).</p>
+                                <p className='text-white game-text'>
                                     You still need ${currentPlayerDebtTotal - player.money} in total
                                 </p>
                             </>
