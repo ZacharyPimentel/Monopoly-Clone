@@ -17,9 +17,9 @@ export const ViewTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
 
     const form = useTradeForm({trade});
 
-    const leftSidePlayer = gameState.players.find( p => p.id === form.getValues("playerOne.playerId"))
+    const leftSidePlayer = gameState.players.find( p => p.id === form.getValues("playerOne.playerId"))!
 
-    const rightSidePlayer = gameState.players.find( x => x.id === form.getValues("playerTwo.playerId"))
+    const rightSidePlayer = gameState.players.find( x => x.id === form.getValues("playerTwo.playerId"))!
 
     const advancedbuttonConfig:AdvancedButtonConfig[] =  useMemo( () => {
         
@@ -84,7 +84,7 @@ export const ViewTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                 <div className='grid grid-cols-2'>
                     {/* Initiating Trade Player (The Current Client Player) */}
                     <div className='border-r border-black pr-[10px] '>
-                        <PlayerOfferView formControlPrefix="playerOne" player={player}/>
+                        <PlayerOfferView formControlPrefix="playerOne" player={leftSidePlayer}/>
                     </div>
                     {/* Other Trade Player */}
                     <div className='border-l border-black pl-[10px] '>

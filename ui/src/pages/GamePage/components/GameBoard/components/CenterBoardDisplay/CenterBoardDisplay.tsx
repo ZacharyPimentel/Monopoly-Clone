@@ -13,7 +13,7 @@ export const CenterBoardDisplay = () => {
     if(gameState.game?.inLobby){
         return (
             <div className='rounded flex flex-col justify-center items-center w-full h-full gap-[20px]'>
-                <p className='text-white font-bold'>Waiting to start the game until all players are ready.</p>
+                <p className='text-white font-bold text-center px-[10px]'>Waiting to start the game until all players are ready.</p>
                 <GameLogs/>
             </div>
         )
