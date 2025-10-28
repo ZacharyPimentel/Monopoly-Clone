@@ -49,11 +49,11 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
 
     return (
         <div ref={multiSelectRef} className='flex flex-col relative'>
-            
+            <p className='md:hidden'>Select Properties</p>
             <div className='bg-white flex py-[5px] pl-[5px] cursor-pointer'>
-                <div className='flex flex-wrap gap-[10px] text-[14px] items-center'>
+                <div className='flex flex-wrap gap-[10px] text-[14px] items-center truncate'>
                     {selectedData.length === 0 && (
-                        <p className='opacity-[0.5]'>Select Properties...</p>
+                        <p className='opacity-[0.5] hidden md:flex'>Select Properties</p>
                     )}
                     {selectedData.map( (item) => {
                         return (
@@ -63,16 +63,16 @@ export const MultiSelect:React.FC<{data:MultiSelectData[], formControlPrefix:str
                         )
                     })}
                 </div>
-                <div className='ml-auto px-[5px] flex'>
+                <div className='ml-auto px-[5px] flex items-start'>
                     <button onClick={(e) => {
                         e.stopPropagation(); 
                         form.setValue(formControlPrefix,[]);
                     }} className='border-r-2 flex h-fit hover:bg-black group'
                     >
-                        <X className='group-hover:stroke-white' size={24}/>
+                        <X className='group-hover:stroke-white w-4 h-4 md:w-6 md:h-6'/>
                     </button>
                     <button className='flex h-fit'>
-                        <ChevronDown size={24}/>
+                        <ChevronDown className='w-4 h-4 md:w-6 md:h-6' />
                     </button>
                 </div>
             </div>

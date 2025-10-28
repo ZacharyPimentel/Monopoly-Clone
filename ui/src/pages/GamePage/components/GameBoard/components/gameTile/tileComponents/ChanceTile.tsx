@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BoardSpace } from "@generated"
 import { usePlayer } from "@hooks";
 import { useGameState } from "@stateProviders";
+import { CircleQuestionMark } from "lucide-react";
 
 export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
 
@@ -40,8 +41,9 @@ export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
 
     return (
         <div className='h-full relative'>
-            <div className='bg-[green] flex items-center justify-center w-full h-full shadow-lg border border-totorodarkgreen rounded-[5px]'>
-                <p className='text-[12px]'>{space.boardSpaceName}</p>
+            <div className='bg-[green] flex flex-col items-center justify-center w-full h-full shadow-lg border border-totorodarkgreen rounded-[5px]'>
+                <p className='text-[12px] hidden lg:flex'>{space.boardSpaceName}</p>
+                <CircleQuestionMark opacity={'50%'} width={'50%'}/>
             </div>
             <div style={{display: toastVisible ? 'flex' : 'none'}} className={`${positionStyles} bg-white flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px] z-[1]`}>
                 {cardToastMessage}

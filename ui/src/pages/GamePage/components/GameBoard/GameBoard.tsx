@@ -57,7 +57,7 @@ export const GameBoard = () => {
                 </div>
                 {/* Big Center Square */}
                 <div className='flex-1 aspect-square relative z-[0]'>
-                    <div className='absolute w-full h-full flex items-center justify-center'>
+                    <div className='absolute w-full h-full'>
                         <CenterBoardDisplay/>
                     </div>
                     <div className='absolute z-[-1] w-full h-full flex items-center justify-center opacity-[0.3]'>

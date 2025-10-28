@@ -25,7 +25,7 @@ export const RollButton = () => {
                     invoke.player.rollForTurn();
                 }
             }}
-            className='bg-white p-[5px] disabled:opacity-[0.6] min-w-[100px]'
+            className='bg-white p-[5px] disabled:opacity-[0.6] min-w-[50px] md:min-w-[100px] text-xs md:text-lg rounded'
         >
             {gameState.game?.utilityDiceOne && gameState.game?.utilityDiceTwo 
                 ? "Continue Turn"

@@ -10,12 +10,15 @@ import { TaxTile } from "./tileComponents/TaxTile";
 import { UtilityTile } from "./tileComponents/UtilityTile";
 import { Vacation } from "./tileComponents/Vacation";
 import { useGameState } from "@stateProviders";
+import { usePlayer } from "@hooks";
 
 export const GameTile:React.FC<{position:number, sideClass?:string}> = ({position,sideClass = ''}) => {
 
     let gameTileComponent = null;
     const gameState = useGameState(['boardSpaces','players','game']);
     const space = gameState.boardSpaces[position - 1];
+    const {player} = usePlayer();
+
     if(!space)return null
 
     switch (space.boardSpaceCategoryId) {
@@ -53,7 +56,7 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
     return (
         <div className={`flex hover:scale-[1.05] hover:z-[1] w-full h-full duration-[0.3s] relative`}>
             <div className='absolute w-full h-full group'>
-                <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-5px] z-[1]`}>
+                <ul className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex space-x-[-25%] z-[1]`}>
                     {space.boardSpaceCategoryId !== BoardSpaceCategories.Jail && 
                         gameState.players
                             .filter((player) => player.inCurrentGame)
@@ -68,6 +71,11 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
                                     return true
                                 }
                             })
+                            .sort((a,b) => {
+                                if(a.id === player?.id) return 1
+                                if(b.id === player?.id) return 1
+                                return 0
+                            })
                             .map((player) => {
                                 if(player.boardSpaceId !== position)return null
                                 if(player.bankrupt)return null
@@ -76,7 +84,7 @@ export const GameTile:React.FC<{position:number, sideClass?:string}> = ({positio
                                     <div key={player.id} className='relative' >
                                         <span className={`${isThisPlayersTurn ? 'bg-pink-500 animate-ping' : ''} absolute w-full h-full rounded-[50%]`}></span>
                                         <img 
-                                            className='w-[30px] h-[30px] bg-white border border-black rounded-[50%] relative pointer-events-none' 
+                                            className='min-w-4 h-4 md:min-w-7 md:h-7 bg-white border border-black rounded-[50%] relative pointer-events-none' 
                                             src={player.iconUrl}
                                         />
                                     </div>

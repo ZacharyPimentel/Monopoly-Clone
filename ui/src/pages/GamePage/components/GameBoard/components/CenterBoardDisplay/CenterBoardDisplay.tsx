@@ -20,7 +20,7 @@ export const CenterBoardDisplay = () => {
     }
 
     return (
-        <div className='rounded flex flex-col justify-center items-center w-full h-full gap-[20px]'>
+        <div className='rounded flex flex-col justify-center items-center h-full'>
             <div className='flex-1 flex justify-center items-center w-full'>
                 <DiceRoller/>
             </div>

@@ -29,6 +29,19 @@
     scrollbar-color:grey;
 }
 
+p{
+    @apply text-xs md:text-sm
+}
+
+.modal-title{
+    font-weight: bold;
+    font-size:medium
+}
+
+.icon{
+    @apply min-w-4 h-4 md:min-w-6 md:h-6;
+}
+
 .text-input{
     @apply border border-black p-[5px] rounded;
 }
@@ -49,11 +62,12 @@
     width:100%
 }
 .tile-top p:first-child{
-    @apply px-[5px]
+    @apply px-[3px] md:px-[5px]
 }
 .tile-top > span{
-    height:20%;
+    min-height:20%;
     width:100%;
+    @apply rounded-b-sm;
 }
 .tile-right{
     scale:-1;
@@ -64,30 +78,46 @@
 }
 .tile-right p{
     writing-mode: vertical-rl;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1; /* number of characters/lines vertically */
+    overflow: hidden;
 }
+
+@media (min-width:1024px) {
+    .tile-right p,
+    .tile-left p{
+        display:flex;
+        justify-content: center;
+    }
+}
+
 .tile-right p:first-child{
-    @apply py-[5px]
+    @apply py-[3px] md:py-[5px]
 }
 .tile-right > span{
-    width:20%;
+    min-width:20%;
     height:100%;
+    @apply rounded-r-sm
 }
 .tile-bottom{
     flex-direction: column-reverse;
 }
 .tile-bottom > span{
-    height:20%;
+    min-height:20%;
     width:100%;
+    @apply rounded-t-sm
 }
 .tile-bottom p:first-child{
-    @apply px-[5px];
+    @apply px-[3px] md:px-[5px];
 }
 .tile-left > span{
-    width:20%;
+    min-width:20%;
     height:100%;
+    @apply rounded-r-sm;
 }
 .tile-left p:first-child{
-    @apply py-[5px]
+    @apply py-[3px] md:py-[5px]
 }
 .tile-left p{
     writing-mode: vertical-rl;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const useWindowSize = () => {
   // Set the initial window size
@@ -6,6 +6,14 @@ const useWindowSize = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  // function to manually trigger an update
+  const recalculate = useCallback(() => {
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
 
   useEffect(() => {
     // Define a function to handle the resize event
@@ -25,7 +33,11 @@ const useWindowSize = () => {
     };
   }, []);
 
-  return windowSize;
+  return {
+    width:windowSize.width,
+    height:windowSize.height,
+    recalculate
+  };
 };
 
 export default useWindowSize;

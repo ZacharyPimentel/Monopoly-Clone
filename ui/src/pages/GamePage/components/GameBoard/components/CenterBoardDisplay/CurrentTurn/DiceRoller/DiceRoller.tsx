@@ -6,7 +6,7 @@ export const DiceRoller = () => {
     const gameState = useGameState(['game']);
 
     return (
-        <div className='flex gap-[50px]'>
+        <div className='flex gap-[50px] scale-[0.5] md:scale-[1]'>
             <Die dieNumber={gameState.game?.utilityDiceOne || gameState.game?.diceOne || 1}/>
             <Die dieNumber={gameState.game?.utilityDiceTwo || gameState.game?.diceTwo || 1}/>
         </div>

@@ -25,7 +25,7 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}>
     return (
         <div className='flex flex-col gap-[20px] h-full'>
             <MultiSelect formControlPrefix={`${formControlPrefix}.gamePropertyIds`} data={multiSelectData}/>
-            <div className='mt-auto'>
+            <div className='mt-auto flex flex-col gap-2'>
                 <label className='flex flex-col'>
                     <p className=''>Money (${player.money})</p>
                     <NumberInput 
@@ -35,7 +35,7 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}>
                     />
                 </label>
                 <label className='flex flex-col'>
-                    <p className=''>Get Out Of Jail Free Cards ({player.getOutOfJailFreeCards})</p>
+                    <p>Get Out Of Jail Free Cards ({player.getOutOfJailFreeCards})</p>
                     <NumberInput 
                         formControl={`${formControlPrefix}.getOutOfJailFreeCards`}
                         min={0}

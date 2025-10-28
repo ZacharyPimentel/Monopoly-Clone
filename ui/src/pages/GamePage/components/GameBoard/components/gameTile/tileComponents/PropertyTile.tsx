@@ -1,11 +1,19 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { Popover } from "../components/Popover";
 import { useGameState } from "@stateProviders";
+import useWindowSize from "src/hooks/useWindowSize";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 
     const gameState = useGameState(['boardSpaces','players']);
     const property = gameState.boardSpaces[position - 1]?.property;
+
+    const truncateWrapperDiv = useRef<HTMLDivElement>(null)
+    const {recalculate} = useWindowSize();
+
+    useLayoutEffect( () => {
+        recalculate();
+    },[]) 
 
     //return the same content but in a different orientation depending on the property set
     if(!property) return null
@@ -49,18 +57,27 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
     return (
         <div className='h-full relative'>
             {/* The tile */}
-            <div className={`${sideClass} w-full h-full bg-white flex items-center text-center justify-between shadow-lg border border-totorodarkgreen rounded-[5px] overflow-hidden relative`}>
+            <div className={`${sideClass} w-full h-full bg-white flex items-center text-center justify-between shadow-lg border border-totorodarkgreen rounded-[5px] relative`}>
                 {property.mortgaged && 
                     <div className='absolute bg-black inset-0 opacity-[0.5]'></div>
                 }
                 {property.playerId
-                    ? <img className='w-[30px] h-[30px] opacity-[0.7]' src={gameState.players.find( (player) => player.id === property.playerId)?.iconUrl}/>
-                    : <p className='text-center bg-[#eaeaea]'>${property.purchasePrice}</p>
+                    ? <img className='w-3 h-3 md:w-7 md:h-7 opacity-[0.7]' src={gameState.players.find( (player) => player.id === property.playerId)?.iconUrl}/>
+                    : <p className='text-center bg-[#eaeaea] text-[8px] w-full md:w-fit leading-tight md:leading-normal rounded'>${property.purchasePrice}</p>
 
                 }
-                <p className='p-[5px] text-[12px] leading-tight'>
-                    {gameState.boardSpaces[position - 1].boardSpaceName}
-                </p>
+                <div ref={truncateWrapperDiv} className='w-full h-full relative flex items-center justify-center'>
+                    {sideClass === 'tile-right' || sideClass === 'tile-left' 
+                        ? 
+                            <p style={{height:truncateWrapperDiv?.current?.offsetHeight || 0}} className='text-[6px] md:text-[10px] leading-tight truncate lg:overflow-visible lg:whitespace-normal'>
+                                {gameState.boardSpaces[position - 1].boardSpaceName}
+                            </p>
+                        :
+                            <p className='text-[6px] md:text-[10px] leading-tight truncate lg:overflow-visible lg:whitespace-normal'>
+                                {gameState.boardSpaces[position - 1].boardSpaceName}
+                            </p>
+                    }
+                </div>
                 <span style={{backgroundColor:property.color, flexDirection: propertyStyles.flexDirection}} className='flex justify-center relative items-center px-[5px] gap-[5px]'>
                     {Array.from({length:property.upgradeCount}).map( () => {
                         return (
