@@ -174,16 +174,15 @@ public class PlayerService(
             IsReadyToPlay = isReadyToPlay
         });
 
-        var activeGroupPlayers = await playerRepository.SearchAsync(new PlayerWhereParams
+        var gamePlayers = await playerRepository.SearchAsync(new PlayerWhereParams
         {
-            Active = true,
             GameId = game.Id
         },
         new { }
         );
 
         //if at least two players are all ready and the game is in lobby, start the game
-        if (game.InLobby && activeGroupPlayers.All(x => x.IsReadyToPlay == true) && activeGroupPlayers.AsList().Count >= 2)
+        if (game.InLobby && gamePlayers.All(x => x.IsReadyToPlay == true) && gamePlayers.AsList().Count >= 2)
         {
             await gameRepository.UpdateAsync(game.Id, new GameUpdateParams
             {
@@ -200,7 +199,6 @@ public class PlayerService(
                 },
                 new PlayerWhereParams
                 {
-                    Active = true,
                     GameId = game.Id
                 },
                 new { }
@@ -208,7 +206,7 @@ public class PlayerService(
 
             //randomize and set the turn order
             Random random = new();
-            var shuffledActivePlayers = activeGroupPlayers.OrderBy(x => random.Next()).ToArray();
+            var shuffledActivePlayers = gamePlayers.OrderBy(x => random.Next()).ToArray();
             foreach (var (shuffledPlayer, index) in shuffledActivePlayers.Select((value, i) => (value, i)))
             {
                 TurnOrderCreateParams turnOrderCreateParams = new()

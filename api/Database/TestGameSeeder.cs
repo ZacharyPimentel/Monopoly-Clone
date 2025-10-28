@@ -274,7 +274,8 @@ public class TestGameSeeder(
         {
             BoardSpaceId = 11, //Jail
             InJail = true,
-            GetOutOfJailFreeCards = 1
+            GetOutOfJailFreeCards = 1,
+            CanRoll = true
         });
         await turnOrderRepository.UpdateWhereAsync(
             new TurnOrderUpdateParams { HasPlayed = true },

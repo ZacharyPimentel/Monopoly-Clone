@@ -17,7 +17,7 @@ export const PayJailFee:React.FC<{player:Player}> = ({player}) => {
                     onClick={() => {
                         invoke.player.payOutOfJail();
                     }}
-                    className='bg-white p-[5px]'
+                    className='game-button'
                 >
                     Pay $50
                 </button>
@@ -27,7 +27,7 @@ export const PayJailFee:React.FC<{player:Player}> = ({player}) => {
                     onClick={() => {
                         invoke.player.getOutOfJailFree();
                     }}
-                    className='bg-white p-[5px] w-full'
+                    className='game-button'
                 >
                     Use get out of jail free
                 </button>

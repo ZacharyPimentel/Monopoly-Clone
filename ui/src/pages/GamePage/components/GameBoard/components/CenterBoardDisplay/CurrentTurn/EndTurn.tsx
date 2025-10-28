@@ -12,7 +12,7 @@ export const EndTurn = () => {
                 if(!gameState.game)return
                 invoke.game.endTurn();
             }}
-            className='bg-white p-[5px] min-w-[50px] md:min-w-[100px] text-xs md:text-lg rounded'
+            className='game-button'
         >
             End Turn
         </button>

@@ -19,7 +19,7 @@ export const CurrentTurn = () => {
     const currentPlayerDebtTotal = player.debts.reduce( (sum,debt) => sum + debt.amount, 0)
     
     return (
-        <div className='flex gap-[50px] flex-wrap justify-center'>
+        <div className='flex gap-[20px] flex-wrap justify-center'>
             {/* Show purchase button if property has no player id (not owned) */}
             {
                 currentBoardSpace?.property && 

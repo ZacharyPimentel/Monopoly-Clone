@@ -20,7 +20,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
 
     const propertyStyles:{position:string,flexDirection:'column'|'row'} = useMemo( () => {
         if(property.setNumber === 1) return({
-            position: 'absolute top-[70%] left-[50%] translate-x-[-50%]',
+            position: 'absolute top-[100%] left-[50%] translate-x-[-50%]',
             flexDirection: 'row'
         })
         if(property.setNumber === 2) return({
@@ -28,7 +28,7 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
             flexDirection: 'row'
         })
         if(property.setNumber === 3) return({
-            position: 'right-[70%] absolute top-[50%] top-[50%] translate-y-[-50%]',
+            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]',
             flexDirection: 'column'
         })
         if(property.setNumber === 4) return({
