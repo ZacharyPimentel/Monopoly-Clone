@@ -12,7 +12,7 @@ export const PurchaseButton:React.FC<{property:Property,player:Player,spaceName:
                 if(!property.gamePropertyId)return
                 invoke.player.purchaseProperty({gamePropertyId:property.gamePropertyId})
             }}
-            className='bg-white p-[5px] disabled:opacity-[0.6]'
+            className='game-button'
         >
             Purchase (${property.purchasePrice})
         </button>

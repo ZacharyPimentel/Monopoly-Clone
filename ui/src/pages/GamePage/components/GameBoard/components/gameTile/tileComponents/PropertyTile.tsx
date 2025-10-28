@@ -63,7 +63,9 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                 }
                 {property.playerId
                     ? <img className='w-3 h-3 md:w-7 md:h-7 opacity-[0.7]' src={gameState.players.find( (player) => player.id === property.playerId)?.iconUrl}/>
-                    : <p className='text-center bg-[#eaeaea] text-[8px] w-full md:w-fit leading-tight md:leading-normal rounded'>${property.purchasePrice}</p>
+                        : sideClass === 'tile-right' || sideClass === 'tile-left' 
+                            ? <p className='bg-[#eaeaea] text-[6px] md:text-[12px] md:min-w-[20px] h-full md:w-fit rounded leading-tight md:leading-5'>${property.purchasePrice}</p>
+                            : <p className='text-center bg-[#eaeaea] text-[6px] md:text-[12px] w-full rounded leading-tight md:leading-5'>${property.purchasePrice}</p>
 
                 }
                 <div ref={truncateWrapperDiv} className='w-full h-full relative flex items-center justify-center'>

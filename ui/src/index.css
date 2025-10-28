@@ -80,12 +80,15 @@ p{
 .tile-right img{
     transform:rotate(90deg)
 }
+.tile-left img{
+    transform:rotate(90deg);
+}
 .tile-right p{
     writing-mode: vertical-rl;
-    display: -webkit-box;
+    /* display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1; /* number of characters/lines vertically */
-    overflow: hidden;
+    -webkit-line-clamp: 1; 
+    overflow: hidden; */
 }
 
 @media (min-width:1024px) {
