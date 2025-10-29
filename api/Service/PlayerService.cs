@@ -251,7 +251,8 @@ public class PlayerService(
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
         await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
         {
-            Game = game
+            Game = game,
+            AudioFile = AudioFiles.RollStart
         });
 
         (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
@@ -301,18 +302,21 @@ public class PlayerService(
             });
         }
 
-        IEnumerable<GameLog> latestLogs = await gameLogRepository.GetLatestFive(updatedGame.Id);
 
         //wait one second while dice roll animation finishes
         stopWatch.Stop();
 
-        //wait for at least 500ms for dice roll to play.
-        //await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds));
-        await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new
+        await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
         {
-            Players = gamePlayers,
-            Game = updatedGame,
-            GameLogs = latestLogs
+            AudioFile = AudioFiles.RollEnd
+        });
+
+        await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
+        {
+            Game = true,
+            Players = true,
+            GameLogs = true,
+            AudioFile = AudioFiles.PlayerMovement
         });
 
         //run all the logic needed to handle the space that was landed on
@@ -424,13 +428,15 @@ public class PlayerService(
         await gameLogRepository.CreateAsync(new GameLogCreateParams
         {
             GameId = game.Id,
-            Message = $"{player.PlayerName} purchased {gameProperty.BoardSpaceName}"
+            Message = $"{player.PlayerName} purchased {gameProperty.BoardSpaceName}",
+            
         });
         await socketMessageService.SendGameStateUpdate(game.Id, new GameStateIncludeParams
         {
             Players = true,
             BoardSpaces = true,
-            GameLogs = true
+            GameLogs = true,
+            AudioFile = AudioFiles.PropertyPurchased
         });
     }
 

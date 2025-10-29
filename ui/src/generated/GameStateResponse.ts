@@ -8,6 +8,7 @@ import { Player } from "./Player";
 import { GameLog } from "./GameLog";
 import { BoardSpace } from "./BoardSpace";
 import { Trade } from "./Trade";
+import { AudioFiles } from "./AudioFiles";
 
 export interface GameStateResponse {
     game?: Game;
@@ -15,4 +16,5 @@ export interface GameStateResponse {
     gameLogs?: GameLog[];
     boardSpaces?: BoardSpace[];
     trades?: Trade[];
+    audioFile?: AudioFiles;
 }

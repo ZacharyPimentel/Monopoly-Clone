@@ -15,6 +15,7 @@ public class GameStateIncludeParams {
     public bool GameLogs { get; set; } = false;
     public bool BoardSpaces { get; set; } = false;
     public bool Trades { get; set; } = false;
+    public AudioFiles? AudioFile { get; set; }
 }
 
 public interface ISocketMessageService
@@ -150,6 +151,10 @@ public class SocketMessageService(
         if (includeParams.Trades)
         {
             response.Trades = await tradeRepository.GetActiveFullTradesForGameAsync(gameId);
+        }
+        if (includeParams.AudioFile is not null)
+        {
+            response.AudioFile = includeParams.AudioFile;
         }
 
         await SendToGroup(WebSocketEvents.GameStateUpdate, response);

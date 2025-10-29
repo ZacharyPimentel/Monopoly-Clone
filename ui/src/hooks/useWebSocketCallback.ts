@@ -1,8 +1,9 @@
-import { Game, GameStateResponse, WebSocketEvents,SocketPlayer } from "@generated";
+import { Game, GameStateResponse, WebSocketEvents,SocketPlayer, AudioFiles } from "@generated";
 import { MutableRefObject, useCallback, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useGlobalState,  useGameState } from "@stateProviders";
+import { useAudio } from "@context";
 
 type Queue = {
     processingQueue:boolean
@@ -14,6 +15,7 @@ export const useWebSocketCallback = () => {
     const {dispatch:gameDispatch} = useGameState([]);
     const {dispatch:globalDispatch} = useGlobalState([]);
     const navigate = useNavigate();
+    const audio = useAudio();
 
     const queueRef: MutableRefObject<Queue> = useRef({
         processingQueue:false,
@@ -55,6 +57,8 @@ export const useWebSocketCallback = () => {
                     navigate('/lobby')
                     return
                 }
+
+                console.log('61',gameData.audioFile)
                 //logic to determine if messages should be queued or not
 
                 if(gameData.game){
@@ -64,6 +68,9 @@ export const useWebSocketCallback = () => {
                     ){
                         queueRef.current.queue.push( () => {
                             gameDispatch({...gameData})
+                            if(gameData.audioFile !== undefined){
+                                audio[gameData.audioFile].play();
+                            }
                         })
                         if (!queueRef.current.processingQueue) {
                             queueRef.current.processingQueue = true;
@@ -71,10 +78,16 @@ export const useWebSocketCallback = () => {
                         }
                     }else{
                         gameDispatch({...gameData});
+                        if(gameData.audioFile !== undefined){
+                            audio[gameData.audioFile].play();
+                        }
                     }
                 }else{
                     if(gameData.game == null){
                         delete gameData.game;
+                    }
+                    if(gameData.audioFile !== undefined){
+                        audio[gameData.audioFile].play();
                     }
                     gameDispatch({...gameData});
                 }

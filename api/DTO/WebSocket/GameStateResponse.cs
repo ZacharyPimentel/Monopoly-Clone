@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using api.Entity;
+using api.Enumerable;
 using TypeGen.Core.TypeAnnotations;
 
 namespace api.DTO.Websocket;
@@ -16,4 +17,7 @@ public class GameStateResponse
     public IEnumerable<BoardSpace>? BoardSpaces { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IEnumerable<Trade>? Trades { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public AudioFiles? AudioFile { get; set; }
+
 }

@@ -27,7 +27,8 @@
       "@types/*": ["src/types/*"],
       "@globalComponents":["src/globalComponents/index"],
       "@helpers":["src/helpers/index"],
-      "@generated":["src/generated/index"]
+      "@generated":["src/generated/index"],
+      "@context":["src/context/index"]
     }
   },
   "include": ["src"],

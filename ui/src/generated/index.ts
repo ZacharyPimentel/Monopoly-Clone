@@ -1,3 +1,4 @@
+export * from './AudioFiles';
 export * from './BoardSpace';
 export * from './BoardSpaceCategories';
 export * from './CardActionIds';

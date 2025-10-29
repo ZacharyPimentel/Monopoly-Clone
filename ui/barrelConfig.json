@@ -3,7 +3,8 @@
       "./src/hooks",
       "./src/stateProviders",
       "./src/helpers",
-      "./src/globalComponents"
+      "./src/globalComponents",
+      "./src/context"
   ],
   "delete": true,
   "singleFile": true,

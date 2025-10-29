@@ -6,11 +6,20 @@ import { PayJailFee } from "./PayJailFee";
 import { BankruptButton } from "./BankruptButton";
 import { CompletePaymentButton } from "./CompletePaymentButton";
 import { useGameState } from "@stateProviders";
+import { useEffect } from "react";
+import { useAudio } from "@context";
+import { AudioFiles } from "@generated";
 
 export const CurrentTurn = () => {
 
     const {player,currentBoardSpace} = usePlayer();
     const gameState = useGameState(['queueMessageCount','game'])
+    const audio = useAudio();
+
+    useEffect( () => {
+        audio[AudioFiles.TurnNotification].play();
+    },[])
+
 
     if(gameState.game?.diceRollInProgress || gameState.queueMessageCount > 0){
         return null
