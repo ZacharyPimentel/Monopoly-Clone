@@ -1,5 +1,5 @@
 import { AudioFiles } from '@generated';
-import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
+import { createContext, useCallback, useContext, useRef } from 'react';
 
 const AudioContext = createContext<any | null>(null);
 

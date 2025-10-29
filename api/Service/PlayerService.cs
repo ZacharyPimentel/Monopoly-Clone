@@ -338,7 +338,8 @@ public class PlayerService(
         await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { DiceRollInProgress = true });
         await socketMessageService.SendToGroup(WebSocketEvents.GameStateUpdate, new GameStateResponse
         {
-            Game = game
+            Game = game,
+            AudioFile = AudioFiles.RollStart
         });
         (int dieOne, int dieTwo) = await diceRollService.RollTwoDice();
         await diceRollService.RecordGameUtilityDiceRoll(game.Id, dieOne, dieTwo);
@@ -399,7 +400,8 @@ public class PlayerService(
         {
             Game = true,
             Players = true,
-            GameLogs = true
+            GameLogs = true,
+            AudioFile = AudioFiles.RollEnd
         });
     }
 

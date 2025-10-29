@@ -1,4 +1,4 @@
-import { Game, GameStateResponse, WebSocketEvents,SocketPlayer, AudioFiles } from "@generated";
+import { Game, GameStateResponse, WebSocketEvents,SocketPlayer } from "@generated";
 import { MutableRefObject, useCallback, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
