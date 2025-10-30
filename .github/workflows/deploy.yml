@@ -181,7 +181,6 @@ jobs:
            oci os object get \
             --bucket-name app-tarballs \
             --name "${{ env.APP_NAME}}-api.tar" \
-            --auth instance_principal \
             --file - | docker load
 
             docker stop ${{ env.APP_NAME }}-api && docker rm ${{ env.APP_NAME }}-api
@@ -192,7 +191,6 @@ jobs:
             oci os object get \
               --bucket-name app-tarballs \
               --name "${{ env.APP_NAME}}-ui.tar" \
-              --auth instance_principal \
               --file - | docker load
 
             docker stop ${{ env.APP_NAME }}-ui && docker rm ${{ env.APP_NAME }}-ui

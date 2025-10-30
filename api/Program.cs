@@ -50,7 +50,7 @@ if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnec
     );
 //if found db connection string
 }else{
-    Console.WriteLine("Found connectionString, setting up database connection");
+    Console.WriteLine("Found connectionString, setting up database connection.");
     builder.Services.AddScoped<IDbConnection>(sp =>
          new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
