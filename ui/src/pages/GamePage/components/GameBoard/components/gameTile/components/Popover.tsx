@@ -56,7 +56,7 @@ export const Popover:React.FC<{
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<UpgradePropertyModal space={space}/>})
-                    }} className={'bg-totorolightgreen p-[5px] w-full'}>
+                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px]'}>
                         Upgrade
                     </button>
                 </div>
@@ -65,7 +65,7 @@ export const Popover:React.FC<{
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<DowngradePropertyModal space={space}/>})
-                    }} className={'bg-totorolightgreen p-[5px] w-full'}>
+                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px]'}>
                         Downgrade
                     </button>
                 </div>
@@ -84,7 +84,7 @@ export const Popover:React.FC<{
                                 modalContent: <UnmortgagePropertyModal space={space}/> 
                             })
                         }
-                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full`}>
+                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full text-[8px] md:text-[12px]`}>
                         {space?.property?.mortgaged
                             ? 'Unmortgage'
                             : 'Mortgage'

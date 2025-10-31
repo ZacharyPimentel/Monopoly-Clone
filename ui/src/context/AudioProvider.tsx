@@ -46,6 +46,7 @@ export const AudioProvider:React.FC<{children:React.ReactNode}> = ({ children })
 
     const playAudio = useCallback( (audioElement:HTMLAudioElement) => {
         audioElement.currentTime = 0;
+        audioElement.volume = 0.5;
         audioElement.play();
     },[])
 

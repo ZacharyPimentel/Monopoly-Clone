@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { Popover } from "../components/Popover";
 import { useGameState } from "@stateProviders";
 import useWindowSize from "src/hooks/useWindowSize";
+import { fixColorContrast } from "@helpers";
 
 export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({position,sideClass}) => {
 
@@ -81,11 +82,17 @@ export const PropertyTile:React.FC<{position:number,sideClass:string}> = ({posit
                     }
                 </div>
                 <span style={{backgroundColor:property.color, flexDirection: propertyStyles.flexDirection}} className='flex justify-center relative items-center px-[5px] gap-[5px]'>
-                    {Array.from({length:property.upgradeCount}).map( () => {
+                    {Array.from({length:property.upgradeCount}).map( (_,index) => {
                         return (
-                            <span className='w-[10px] h-[10px] rounded-[50%] bg-black'></span>
+                            <span key={index} className='w-[10px] h-[10px] rounded-[50%] bg-black hidden lg:flex'></span>
                         )
                     })}
+                    <span style={{
+                        color:fixColorContrast('white',property!.color),
+                        scale:property.setNumber === 3 || property.setNumber === 4 ? -1 : 1
+                    }} className='w-full lg:hidden text-[6px] md:text-[12px] font-bold'>
+                        {property.upgradeCount > 0 && property.upgradeCount}
+                    </span>
                 </span>
             </div>
             <Popover 

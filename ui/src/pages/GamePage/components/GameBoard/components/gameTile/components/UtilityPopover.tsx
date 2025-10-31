@@ -45,7 +45,7 @@ export const UtilityPopover:React.FC<{
                                 modalContent: <UnmortgagePropertyModal space={space}/> 
                             })
                         }
-                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full`}>
+                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full text-[8px] md:text-[12px]`}>
                         {space?.property?.mortgaged
                             ? 'Unmortgage'
                             : 'Mortgage'
