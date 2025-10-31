@@ -44,7 +44,7 @@ builder.Services.AddHttpContextAccessor();
 
 //if no db connection string
 if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnection"))){
-    Console.WriteLine("No connection string configured");
+    Console.WriteLine("No connection string configured.");
     builder.Services.AddScoped<IDbConnection>(sp =>
         new SqliteConnection("Data Source=:memory:") // In-memory SQLite DB
     );
