@@ -35,7 +35,8 @@ public class TradeService(
         await socketMessageService.SendGameStateUpdate(createParams.GameId, new GameStateIncludeParams
         {
             Trades = true,
-            GameLogs = true
+            GameLogs = true,
+            AudioFile = AudioFiles.TradeUpdated
         });
     }
     public async Task DeclineTrade(Player player, int tradeId)
@@ -92,7 +93,8 @@ public class TradeService(
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {
             Trades = true,
-            GameLogs = true
+            GameLogs = true,
+            AudioFile = AudioFiles.TradeUpdated
         });
     }
     

@@ -9,4 +9,7 @@ export enum AudioFiles {
     PlayerMovement = 2,
     RollStart = 3,
     RollEnd = 4,
+    TradeUpdated = 5,
+    LandedOnEventTile = 6,
+    MoneyPaid = 7,
 }

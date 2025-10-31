@@ -10,6 +10,9 @@ const audioFiles = {
     [AudioFiles.PlayerMovement]: '/audio/playerMoved.wav',
     [AudioFiles.RollStart]: '/audio/woosh.mp3',
     [AudioFiles.RollEnd]: '/audio/tap.wav',
+    [AudioFiles.TradeUpdated]:'/audio/notificationDing.mp3',
+    [AudioFiles.LandedOnEventTile]:'/audio/event.mp3',
+    [AudioFiles.MoneyPaid]:'/audio/chaChing.mp3'
 } as const;
 
 type AudioControl = {

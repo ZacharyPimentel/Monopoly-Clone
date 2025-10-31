@@ -8,5 +8,8 @@ public enum AudioFiles
     TurnNotification,
     PlayerMovement,
     RollStart,
-    RollEnd
+    RollEnd,
+    TradeUpdated,
+    LandedOnEventTile,
+    MoneyPaid
 }

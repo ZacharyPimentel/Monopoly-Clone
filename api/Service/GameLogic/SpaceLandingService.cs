@@ -222,7 +222,8 @@ public class SpaceLandingService(
                     {
                         Game = true,
                         Players = true,
-                        GameLogs = true
+                        GameLogs = true,
+                        AudioFile = AudioFiles.MoneyPaid
                     });
                     return;
                 }
@@ -245,6 +246,10 @@ public class SpaceLandingService(
             var errorMessage = EnumExtensions.GetEnumDescription(Errors.NoBoardSpaceProperty);
             throw new Exception(errorMessage);
         }
+
+
+        bool paymentMade = false;
+
         //property is owned
         if (context.LandedOnSpace.Property.PlayerId is Guid railroadOwnerId)
         {
@@ -287,16 +292,25 @@ public class SpaceLandingService(
                     if (context.CameFromCard) paymentAmount *= 2; //card says you pay double if owned
 
                     await paymentService.PayPlayer(context.CurrentPlayer, propertyOwner, paymentAmount);
+                    paymentMade = true;
                 }
             }
         }
         // Nothing needs to happen, front end can handle the next step
         await boardMovementService.ToggleOffGameMovement(context.Game.Id);
-        await socketMessageService.SendGameStateUpdate(context.Game.Id, new GameStateIncludeParams
+
+        GameStateIncludeParams gameStateIncludeParams = new()
         {
             Game = true,
-            GameLogs = true
-        });
+            GameLogs = true,
+        };
+
+        if (paymentMade is true)
+        {
+            gameStateIncludeParams.AudioFile = AudioFiles.MoneyPaid;
+        }
+
+        await socketMessageService.SendGameStateUpdate(context.Game.Id, gameStateIncludeParams);
         return;
     }
 
@@ -416,7 +430,8 @@ public class SpaceLandingService(
         {
             Players = true,
             GameLogs = true,
-            Game = true
+            Game = true,
+            AudioFile = AudioFiles.LandedOnEventTile
         }); 
         return;
     }
@@ -452,7 +467,8 @@ public class SpaceLandingService(
             {
                 Game = true,
                 Players = true,
-                GameLogs = true
+                GameLogs = true,
+                AudioFile = AudioFiles.LandedOnEventTile
             });
             //get the cards advance to space id, unless it's:
             // move back 3 spaces 
@@ -526,7 +542,8 @@ public class SpaceLandingService(
             {
                 Game = true,
                 Players = true,
-                GameLogs = true
+                GameLogs = true,
+                AudioFile = AudioFiles.LandedOnEventTile
             });
         }
     }   
