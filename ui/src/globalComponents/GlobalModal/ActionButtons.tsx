@@ -21,7 +21,7 @@ export const ActionButtons:React.FC<{
             <button onClick={() => {
                 globalDispatch({modalOpen:false,modalContent:null})
             }} className='min-w-[100px] bg-black text-white rounded p-[10px] hover:opacity-[0.8] transition-[0.2s]'>
-                Cancel
+                Close
             </button>
             <button disabled={loading || success || error || confirmDisabled} onClick={() => runCallback()} className={`${confirmButtonStyle === 'success' && !error ? 'bg-lime-500':'bg-[tomato]'} min-w-[100px] rounded p-[10px] text-white disabled:bg-[lightgrey] enabled:hover:opacity-[0.8] transition-[0.2s] flex justify-center`}>
                 {loading 

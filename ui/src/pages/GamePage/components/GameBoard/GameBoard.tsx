@@ -5,6 +5,7 @@ import { GameTile } from "./components/gameTile/GameTile";
 import { PlayerMovementContainer } from "./components/PlayerMovementContainer";
 import { useCurrentPlayer } from "@hooks";
 import { useGameState } from "@stateProviders";
+import { GlobalModal } from "@globalComponents";
 
 export const GameBoard = () => {
 
@@ -16,6 +17,10 @@ export const GameBoard = () => {
 
     return (
         <div ref={gameBoardRef} className='p-[10px] overflow-hidden rotate-[0deg] w-[100vmin] md:h-full md:max-h-[100vh] aspect-square bg-totorodarkgreen relative'>
+            <div className='hidden lg:block'>
+                <GlobalModal/>
+            </div>
+            
             {game?.movementInProgress && currentPlayerWasInJailLastTurn &&(
                 <PlayerMovementContainer tileRefs={tileRefs} />
             )}

@@ -71,7 +71,7 @@ export const ViewTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                 <div className='flex justify-between'>
                     <div className='flex items-center gap-[20px]'>
                         <img className='w-[30px] h-[30px]' src={leftSidePlayer?.iconUrl}/>
-                        <p>{player.playerName}</p>
+                        <p>{leftSidePlayer.playerName}</p>
                     </div>
                     <ArrowLeftRight size={32} />
                     <div className='flex items-center gap-[20px]'>

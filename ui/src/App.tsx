@@ -31,15 +31,18 @@ export const App = () => {
   return (
     <Routes>
       <Route path='/*' element={<>
-        <GlobalModal/>
         <ToastContainer/>
           <Routes>
             <Route path='lobby' element={<>
+              <GlobalModal/>
               <LobbyPage/>
             </>}/>
-            <Route path='game/:gameId' element={
+            <Route path='game/:gameId' element={<>
+              <div className='lg:hidden'>
+                <GlobalModal/>
+              </div>
               <GamePage/>
-            }/>
+            </>}/>
             <Route path='*' element={<Navigate to='lobby'/>}/>
           </Routes>
        </>}>

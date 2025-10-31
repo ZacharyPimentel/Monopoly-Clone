@@ -21,7 +21,7 @@ export const AdvancedActionButtons:React.FC<{buttonConfigs:AdvancedButtonConfig[
             <button onClick={() => {
                 globalDispatch({modalOpen:false,modalContent:null})
             }} className='min-w-[100px] bg-black text-white rounded p-[10px] hover:opacity-[0.8] transition-[0.2s] mr-auto'>
-                Cancel
+                Close
             </button>
             {buttonConfigs.map( (config,index) => {
                 return (
