@@ -180,6 +180,7 @@ jobs:
           ssh -i infra/id_rsa -p 6000 -o StrictHostKeyChecking=no ubuntu@127.0.0.1 <<'EOF'
 
             if [ "${{ env.api-changed }}" == "true" ]; then
+            echo "Loading ${{env.APP_NAME}}-api"
             oci os object get \
               --bucket-name app-tarballs \
               --name "${{ env.APP_NAME}}-api.tar" \
@@ -191,6 +192,7 @@ jobs:
             fi
 
             if [ "${{ env.ui-changed }}" == "true" ]; then
+              echo "Loading ${{env.APP_NAME}}-ui"
               oci os object get \
                 --bucket-name app-tarballs \
                 --name "${{ env.APP_NAME}}-ui.tar" \
