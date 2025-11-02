@@ -145,5 +145,5 @@ jobs:
             --bucket-name vm-scripts \
             --name restart_app.sh \
             --auth instance_principal \
-            --file - | bash -s -- ${{env.APP_NAME}} ${{env.UI_PORT}} ${{env.API_PORT}} "${{env.DB_CONNECTION_STRING}}" &
+            --file - | bash -s -- ${{env.APP_NAME}} ${{env.UI_PORT}} ${{env.API_PORT}} "${{env.DB_CONNECTION_STRING}}"
           EOF
