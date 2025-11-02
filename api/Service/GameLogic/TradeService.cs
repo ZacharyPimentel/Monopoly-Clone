@@ -27,6 +27,22 @@ public class TradeService(
 {
     public async Task CreateGameTrade(TradeCreateParams createParams)
     {
+        //Only one trade allowed at a time between two people
+        var tradingPlayerIds = new List<Guid> {
+            createParams.PlayerOne.PlayerId,
+            createParams.PlayerTwo.PlayerId
+        };
+        var playerTrades = await playerTradeRepository.GetActiveByPlayerIds(tradingPlayerIds);
+        var existingSharedTradeId = playerTrades
+            .GroupBy(pt => pt.TradeId)
+            .Where(g => g.Count() > 1)
+            .FirstOrDefault();
+
+        if (existingSharedTradeId != null)
+        {
+            throw new Exception("Only one trade is allowed between the same two people.");
+        }
+
         await tradeRepository.CreateFullTradeAsync(createParams);
         Player currentPlayer = guardService.GetPlayer();
         IEnumerable<Player> players = guardService.GetPlayers();

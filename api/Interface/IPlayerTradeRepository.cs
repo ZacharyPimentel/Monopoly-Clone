@@ -3,5 +3,5 @@ using api.Interface;
 namespace api.Interface;
 public interface IPlayerTradeRepository : IBaseRepository<PlayerTrade, int>
 {
-
+    Task<IEnumerable<PlayerTrade>> GetActiveByPlayerIds(IEnumerable<Guid> playerIds);
 }

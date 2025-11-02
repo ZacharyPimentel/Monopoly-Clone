@@ -5,16 +5,24 @@ import { useGlobalState, useGameState } from "@stateProviders";
 
 export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
     
-    const gameState = useGameState(['game']);
+    const gameState = useGameState(['game','trades']);
     const currentPlayer = usePlayer();
     const {dispatch:globalDispatch} = useGlobalState([]);
+
+    const currentPlayerTrades = gameState.trades.filter( (trade) => {
+        return trade.playerTrades.some( (pt) => pt.playerId === currentPlayer.player?.id)
+    })
+
+    const currentPlayerTradesWithPlayer = currentPlayerTrades.filter( trade => {
+        return trade.playerTrades.some(pt => pt.playerId === player.id);
+    })
 
     return (
         <li style={{opacity:player.active ? '1' : '0.5'}} key={player.id} className='flex flex-col gap-[20px]'>
             <div className={`flex items-center gap-[20px] border-l-2 pl-[5px] ${player.id === gameState.game?.currentPlayerTurn ? 'border-white' : 'border-transparent'}`}>
                 <img className='w-[30px] h-[30px]' src={player.iconUrl}/>
                 <p className='mr-auto'>{player.playerName} {player.id === currentPlayer.player?.id && '(You)'} {player.bankrupt && '(BANKRUPT)'}</p>
-                {currentPlayer.player?.id && currentPlayer.player?.id !== player.id && !player.bankrupt && !currentPlayer.player.bankrupt && (
+                {currentPlayer.player?.id && currentPlayer.player?.id !== player.id && !player.bankrupt && !currentPlayer.player.bankrupt && currentPlayerTradesWithPlayer.length === 0 && (
                     <button onClick={() => globalDispatch({
                         modalOpen:true,
                         modalContent:<CreateTradeModal tradeWithPlayer={player}/>}
