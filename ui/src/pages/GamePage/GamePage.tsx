@@ -17,13 +17,15 @@ export const GamePage = () => {
 
     //updates the socket group on the server to receive game events
     useEffect( () => {
-        listen(WebSocketEvents.PlayerUpdate)
-        listen(WebSocketEvents.Error)
+        listen(WebSocketEvents.PlayerUpdate);
+        listen(WebSocketEvents.Error);
+        listen(WebSocketEvents.Warning);
         listen(WebSocketEvents.GameStateUpdate);
         invoke.game.join(gameId!);
         return () => {
-            stopListen(WebSocketEvents.PlayerUpdate)
-            stopListen(WebSocketEvents.Error)
+            stopListen(WebSocketEvents.PlayerUpdate);
+            stopListen(WebSocketEvents.Error);
+            stopListen(WebSocketEvents.Warning);
             stopListen(WebSocketEvents.GameStateUpdate);
             invoke.game.leave(gameId!);
         }

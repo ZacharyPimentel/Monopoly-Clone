@@ -37,4 +37,5 @@ public enum WebSocketEvents
     TradeDecline,
     TradeList,
     TradeUpdate,
+    Warning
 }

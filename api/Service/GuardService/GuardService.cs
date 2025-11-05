@@ -98,6 +98,17 @@ public class GuardService(
         {
             await action();
         }
+        catch( FriendlyException error)
+        {
+            if (error.Type == ErrorType.Error)
+            {
+                await socketMessageService.SendToSelf(WebSocketEvents.Error, error.Message);
+            }
+            if(error.Type == ErrorType.Warning)
+            {
+                await socketMessageService.SendToSelf(WebSocketEvents.Warning, error.Message);
+            }
+        }
         catch (Exception error)
         {
             await socketMessageService.SendToSelf(WebSocketEvents.Error, error.Message);

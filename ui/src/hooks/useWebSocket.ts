@@ -181,10 +181,10 @@ export const useWebSocket = () => {
                     }
                 }
             },
-            listen: (eventEnum:1|3|4|7|12|20) => {
+            listen: (eventEnum:1|3|4|7|12|20|32) => {
                 globalState.ws.on(eventEnum.toString(), webSocketCallbacks[eventEnum])
             },
-            stopListen: (eventEnum:1|3|4|7|12|20) => {
+            stopListen: (eventEnum:1|3|4|7|12|20|32) => {
                 globalState.ws.off(eventEnum.toString(),webSocketCallbacks[eventEnum])
             },
         }

@@ -52,13 +52,15 @@ export const useWebSocketCallback = () => {
                 toast(message,{type:'error'})
                 navigate('/lobby')
             },
+            [WebSocketEvents.Warning] : (message:string) => {
+                toast(message,{type:'warning'})
+            },
             [WebSocketEvents.GameStateUpdate] : (gameData:GameStateResponse) => {
                 if(gameData.game !== null && !gameData.game){
                     navigate('/lobby')
                     return
                 }
 
-                console.log('61',gameData.audioFile)
                 //logic to determine if messages should be queued or not
 
                 if(gameData.game){

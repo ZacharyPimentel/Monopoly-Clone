@@ -36,4 +36,5 @@ export enum WebSocketEvents {
     TradeDecline = 29,
     TradeList = 30,
     TradeUpdate = 31,
+    Warning = 32,
 }

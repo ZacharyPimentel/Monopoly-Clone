@@ -25,6 +25,8 @@ public class TradeService(
     IGamePropertyRepository gamePropertyRepository
 ) : ITradeService
 {
+    private Trade? FullTrade { get; set; }
+
     public async Task CreateGameTrade(TradeCreateParams createParams)
     {
         //Only one trade allowed at a time between two people
@@ -40,7 +42,7 @@ public class TradeService(
 
         if (existingSharedTradeId != null)
         {
-            throw new Exception("Only one trade is allowed between the same two people.");
+            throw new FriendlyException(ErrorType.Error,"Only one trade is allowed between the same two players.");
         }
 
         await tradeRepository.CreateFullTradeAsync(createParams);
@@ -57,20 +59,25 @@ public class TradeService(
     }
     public async Task DeclineTrade(Player player, int tradeId)
     {
-        IEnumerable<PlayerTrade> playerTrades = await playerTradeRepository.SearchAsync(new PlayerTradeWhereParams
+        FullTrade = await tradeRepository.GetActiveFullTradeAsync(tradeId);
+        
+        //these guards are copied from ValidateTrade, some of that logic doesn't apply to declining trades.
+        if (!FullTrade.PlayerTrades.Any(pt => pt.PlayerId == guardService.GetPlayerId()))
         {
-            TradeId = tradeId
-        },
-        new { }
-        );
-        if (!playerTrades.Any(pt => pt.PlayerId == player.Id))
-        {
-            string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerCannotModifyTrade);
-            throw new Exception(errorMessage);
+            throw new Exception("You are not allowed to take actions in this trade");
         }
 
+        if (FullTrade.AcceptedBy is not null)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Cannot complete this action, trade has already been accepted");
+        }
+        if(FullTrade.DeclinedBy is not null)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Cannot complete this action, trade has already been declined");
+        }
+        
         Player otherPlayer = await playerRepository.GetByIdAsync(
-            playerTrades.Where(pt => pt.PlayerId != player.Id).First().PlayerId
+            FullTrade.PlayerTrades.Where(pt => pt.PlayerId != player.Id).First().PlayerId
         );
 
         await tradeRepository.UpdateAsync(tradeId, new TradeUpdateParams
@@ -98,13 +105,16 @@ public class TradeService(
             throw new Exception("Player offer is missing");
         }
 
+        FullTrade = await tradeRepository.GetActiveFullTradeAsync(tradeId);
+        await ValidateTrade(playerOneOffer,playerTwoOffer);
+
         Player currentPlayer = guardService.GetPlayer();
         IEnumerable<Player> players = guardService.GetPlayers();
         Player otherPlayer = players.First(p => p.Id != currentPlayer.Id);
-        await gameService.CreateGameLog(gameId, $"{currentPlayer.PlayerName} updated a trade with {otherPlayer.PlayerName}.");
 
         await tradeRepository.UpdateFullTradeAsync(tradeId, tradeUpdateParams);
-
+        
+        await gameService.CreateGameLog(gameId, $"{currentPlayer.PlayerName} updated a trade with {otherPlayer.PlayerName}.");
 
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {
@@ -113,32 +123,26 @@ public class TradeService(
             AudioFile = AudioFiles.TradeUpdated
         });
     }
-    
+
     public async Task AcceptTrade(Player player, int tradeId)
     {
-        Trade fullTrade = await tradeRepository.GetActiveFullTradeAsync(tradeId);
+        FullTrade = await tradeRepository.GetActiveFullTradeAsync(tradeId);
+        await ValidateTrade();
 
         //not allowed to accept if player was last to update the trade
-        if (fullTrade.LastUpdatedBy == player.Id)
-        {
-            string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerCannotModifyTrade);
-            throw new Exception(errorMessage);
-        }
-
-        //cannot accept if player is not a member of the trade
-        if (!fullTrade.PlayerTrades.Any(pt => pt.PlayerId == player.Id))
+        if (FullTrade.LastUpdatedBy == player.Id)
         {
             string errorMessage = EnumExtensions.GetEnumDescription(Errors.PlayerCannotModifyTrade);
             throw new Exception(errorMessage);
         }
 
         Player otherPlayer = await playerRepository.GetByIdAsync(
-            fullTrade.PlayerTrades.Where(pt => pt.PlayerId != player.Id).First().PlayerId
+            FullTrade.PlayerTrades.Where(pt => pt.PlayerId != player.Id).First().PlayerId
         );
 
         //accept trade here
-        PlayerTrade currentPlayerTrade = fullTrade.PlayerTrades.First(pt => pt.PlayerId == player.Id);
-        PlayerTrade otherPlayerTrade = fullTrade.PlayerTrades.First(pt => pt.PlayerId == otherPlayer.Id);
+        PlayerTrade currentPlayerTrade = FullTrade.PlayerTrades.First(pt => pt.PlayerId == player.Id);
+        PlayerTrade otherPlayerTrade = FullTrade.PlayerTrades.First(pt => pt.PlayerId == otherPlayer.Id);
         //update money and get out of jail free cards
         await playerRepository.UpdateAsync(player.Id, new PlayerUpdateParams
         {
@@ -178,5 +182,100 @@ public class TradeService(
             BoardSpaces = true,
             Players = true
         });
+    }
+    
+    private async Task ValidateTrade(PlayerTradeOffer? playerOneOffer = null, PlayerTradeOffer? playerTwoOffer = null)
+    {
+        if (FullTrade is null)
+        {
+            throw new Exception("Full trade should not be null when validating");
+        }
+
+        //true if only one condition is true (Exclusive OR)
+        if (playerOneOffer is null ^ playerTwoOffer is null)
+        {
+            throw new Exception("Both trade offers must be provided or neither when validating trade");
+        }
+        //prevent someone not part of the trade from taking action
+        if (!FullTrade.PlayerTrades.Any(pt => pt.PlayerId == guardService.GetPlayerId()))
+        {
+            throw new Exception("You are not allowed to take actions in this trade");
+        }
+
+        if (FullTrade.AcceptedBy is not null)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Cannot complete this action, trade has already been accepted");
+        }
+        if(FullTrade.DeclinedBy is not null)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Cannot complete this action, trade has already been declined");
+        }
+
+        Player playerOne;
+        Player playerTwo;
+
+        //map PlayerTrades to TradeOffers so same logic can be used for update and accept, decline, etc
+        if (playerOneOffer is null)
+        {
+            playerOne = await playerRepository.GetByIdAsync(FullTrade.PlayerTrades[0].PlayerId);
+            playerOneOffer = FullTrade.PlayerTrades.Select(pt => new PlayerTradeOffer
+            {
+                PlayerId = pt.PlayerId,
+                Money = pt.Money,
+                GetOutOfJailFreeCards = pt.GetOutOfJailFreeCards,
+                GamePropertyIds = [.. pt.TradeProperties.Select(tp => tp.GamePropertyId)]
+            }).ToList()[0];
+        }
+        else
+        {
+            playerOne = await playerRepository.GetByIdAsync(playerOneOffer.PlayerId);
+        }
+        if (playerTwoOffer is null)
+        {
+            playerTwo = await playerRepository.GetByIdAsync(FullTrade.PlayerTrades[1].PlayerId);
+            playerTwoOffer = FullTrade.PlayerTrades.Select(pt => new PlayerTradeOffer
+            {
+                PlayerId = pt.PlayerId,
+                Money = pt.Money,
+                GetOutOfJailFreeCards = pt.GetOutOfJailFreeCards,
+                GamePropertyIds = [.. pt.TradeProperties.Select(tp => tp.GamePropertyId)]
+            }).ToList()[1];
+        }
+        else
+        {
+            playerTwo = await playerRepository.GetByIdAsync(playerTwoOffer.PlayerId);
+        }
+
+        //validate get out of jail free cards
+        var offerOneGetOutOfJailFreeValid = playerOneOffer.GetOutOfJailFreeCards <= playerOne.GetOutOfJailFreeCards;
+        var offerTwoGetOutOfJailFreeValid = playerTwoOffer.GetOutOfJailFreeCards <= playerTwo.GetOutOfJailFreeCards;
+        if(!offerOneGetOutOfJailFreeValid || !offerTwoGetOutOfJailFreeValid)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Current Trade is invalid - A player in this trade does not have enough get out of jail free cards");
+        }
+        //validate money
+        var offerOneMoneyValid = playerOneOffer.Money <= playerOne.Money;
+        var offerTwoMoneyValid = playerTwoOffer.Money <= playerTwo.Money;
+        if(!offerOneMoneyValid || !offerTwoMoneyValid)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Current trade is invalid - A player in this trade does not have enough money.");
+        }
+        //validate game properties
+        var playerOneGameProperties = await gamePropertyRepository.SearchAsync(new GamePropertyWhereParams{ PlayerId = playerOne.Id, UpgradeCount = 0 },new { });
+        var playerTwoGameProperties = await gamePropertyRepository.SearchAsync(new GamePropertyWhereParams { PlayerId = playerTwo.Id, UpgradeCount = 0 }, new { });
+        var playerOneGamePropertyIds = playerOneGameProperties.Select(gp => gp.Id);
+        var playerTwoGamePropertiesIds = playerTwoGameProperties.Select(gp => gp.Id);
+
+        var playerOneGamePropertiesValid =
+            !playerOneGameProperties.Any(gp => gp.UpgradeCount > 0) &&
+            new HashSet<int>(playerOneGamePropertyIds).IsSupersetOf(playerOneOffer.GamePropertyIds);
+        var playerTwoGamePropertiesValid =
+            !playerTwoGameProperties.Any(gp => gp.UpgradeCount > 0) &&
+            new HashSet<int>(playerTwoGamePropertiesIds).IsSupersetOf(playerTwoOffer.GamePropertyIds);
+
+        if (!playerOneGamePropertiesValid || !playerTwoGamePropertiesValid)
+        {
+            throw new FriendlyException(ErrorType.Warning,"Current trade is invalid - A property in this trade has been improved or is no longer owned");
+        }
     }
 }

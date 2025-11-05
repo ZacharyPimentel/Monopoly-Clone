@@ -83,18 +83,6 @@ export const EditTradeModal:React.FC<{trade:Trade}> = ({trade}) => {
                     </div>
                 </div>
                 <AdvancedActionButtons buttonConfigs={advancedbuttonConfig}/>
-                {/* <ActionButtons
-                    confirmButtonStyle="success"
-                    confirmCallback={async() => {
-                        invoke.trade.update({
-                            tradeId: trade.id,
-                            playerOne:form.getValues().playerOne,
-                            playerTwo:form.getValues().playerTwo
-                        })
-                    }}
-                    confirmButtonText="Update Trade"
-                    confirmDisabled={!tradeHasSomethingFilledOut}
-                /> */}
             </div>
         </FormProvider>
     )
