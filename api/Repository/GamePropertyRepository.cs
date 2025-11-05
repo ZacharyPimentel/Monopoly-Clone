@@ -83,7 +83,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
             UPDATE GameProperty
             SET 
                 PlayerId = NULL,
-                UpgradeCount = 0,
+                UpgradeCount = 0
             WHERE 
                 GameId = @GameId
             AND
