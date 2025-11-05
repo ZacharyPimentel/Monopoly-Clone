@@ -1,4 +1,4 @@
-import { PlayerTradeOffer, Trade } from "@generated";
+import { PlayerTrade, PlayerTradeOffer, Trade } from "@generated";
 import { usePlayer } from "./usePlayer";
 import { useForm } from "react-hook-form";
 import { useGameState } from "@stateProviders";
@@ -18,8 +18,8 @@ export const useTradeForm = ({trade, tradePartnerId}:UseTradeFormParams) => {
     const {boardSpaces} = useGameState(['boardSpaces'])
     
     const currentPlayersTrade = trade?.playerTrades.find( pt => pt.playerId === player.id)
-    let leftSidePlayerTrade;
-    let rightSidePlayerTrade 
+    let leftSidePlayerTrade:PlayerTrade | undefined;
+    let rightSidePlayerTrade:PlayerTrade | undefined;
 
 
     if(currentPlayersTrade){
