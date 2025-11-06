@@ -135,15 +135,15 @@ jobs:
           ssh -i infra/id_rsa -N -L 6000:${{steps.get-private-ip.outputs.ip}}:22 \
           -p 22 \
           -o StrictHostKeyChecking=no \
-          ${{ steps.get-bastion-session-id.outputs.id }}@host.bastion.us-ashburn-1.oci.oraclecloud.com & sleep 5
+          ${{ steps.get-bastion-session-id.outputs.id }}@host.bastion.us-ashburn-1.oci.oraclecloud.com
 
           # Wait a few seconds to ensure tunnel is ready
           sleep 10
   
           ssh -i infra/id_rsa -p 6000 -o StrictHostKeyChecking=no ubuntu@127.0.0.1 <<'EOF'
             oci os object get \
-            --bucket-name vm-scripts \
-            --name restart_app.sh \
-            --auth instance_principal \
-            --file - | bash -s -- ${{env.APP_NAME}} ${{env.UI_PORT}} ${{env.API_PORT}} "${{env.DB_CONNECTION_STRING}}"
+              --bucket-name vm-scripts \
+              --name restart_app.sh \
+              --auth instance_principal \
+              --file - | sed 's/\r$//' | bash -s -- ${{ env.APP_NAME}}
           EOF
