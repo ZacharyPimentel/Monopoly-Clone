@@ -139,10 +139,11 @@ jobs:
 
           # Wait a few seconds to ensure tunnel is ready
           sleep 10
-
-          echo "Restarting App ${{env.APP_NAME}}"
   
           ssh -i infra/id_rsa -p 6000 -o StrictHostKeyChecking=no ubuntu@127.0.0.1 <<'EOF'
+
+            echo "Restarting app ${{env.APP_NAME}}"
+
             oci os object get \
               --bucket-name vm-scripts \
               --name restart_app.sh \
