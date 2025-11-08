@@ -445,6 +445,12 @@ public class PlayerService(
     public async Task DeclareBankruptcy()
     {
         Player player = guardService.GetPlayer();
+
+        if (player.Bankrupt)
+        {
+            throw new Exception("Player is already Bankrupt");
+        }
+
         player.Bankrupt = true;
         player.CanRoll = false;
         player.Money = 0;

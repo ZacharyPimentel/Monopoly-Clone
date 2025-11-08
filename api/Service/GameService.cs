@@ -153,7 +153,8 @@ public class GameService(
         {
             Game = true,
             Players = true,
-            GameLogs = true
+            GameLogs = true,
+            BoardSpaces = true
         });
     }
     public async Task JoinGame(Guid gameId)

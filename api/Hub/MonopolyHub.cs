@@ -539,6 +539,7 @@ namespace api.hub
                     .Init(currentSocketPlayer.PlayerId, currentSocketPlayer.GameId);
                 guards
                     .PlayerExists()
+                    .PlayerIsInCorrectGame()
                     .IsCurrentTurn();
 
                 await playerService.DeclareBankruptcy();

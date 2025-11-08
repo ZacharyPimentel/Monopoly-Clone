@@ -1,7 +1,8 @@
 import { usePlayer } from "@hooks";
 import { Player } from "@generated"
-import { CreateTradeModal } from "@globalComponents";
+import { CreateTradeModal, DeclareBankruptcyModal } from "@globalComponents";
 import { useGlobalState, useGameState } from "@stateProviders";
+import { BanknoteX } from "lucide-react";
 
 export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
     
@@ -23,11 +24,16 @@ export const PlayerInGameListitem:React.FC<{player:Player}> = ({player}) => {
                 <img className='w-[30px] h-[30px]' src={player.iconUrl}/>
                 <p className='mr-auto'>{player.playerName} {player.id === currentPlayer.player?.id && '(You)'} {player.bankrupt && '(BANKRUPT)'}</p>
                 {currentPlayer.player?.id && currentPlayer.player?.id !== player.id && !player.bankrupt && !currentPlayer.player.bankrupt && currentPlayerTradesWithPlayer.length === 0 && (
-                    <button onClick={() => globalDispatch({
+                    <button title={'Trade'} onClick={() => globalDispatch({
                         modalOpen:true,
                         modalContent:<CreateTradeModal tradeWithPlayer={player}/>}
                     )}>
                         <svg className='fill-black' height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z"/></svg>
+                    </button>
+                )}
+                {currentPlayer.player?.id && currentPlayer.player?.id === player.id && currentPlayer?.player?.id === gameState.game?.currentPlayerTurn && !currentPlayer.player.bankrupt && (
+                    <button title={'Go Bankrupt'} onClick={() => globalDispatch({modalOpen:true,modalContent:<DeclareBankruptcyModal/>})}>
+                        <BanknoteX/>
                     </button>
                 )}
                 <p>${player.money}</p>
