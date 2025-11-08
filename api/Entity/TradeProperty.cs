@@ -15,5 +15,5 @@ public class TradeProperty
     public int PlayerTradeId { get; set; }
     //joined fields
     public bool Mortgaged { get; set; }
-    public required string PropertyName { get; set; }
+    public string? PropertyName { get; set; }
 }

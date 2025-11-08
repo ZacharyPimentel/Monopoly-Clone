@@ -8,5 +8,5 @@ export interface TradeProperty {
     gamePropertyId: number;
     playerTradeId: number;
     mortgaged: boolean;
-    propertyName: string;
+    propertyName?: string;
 }

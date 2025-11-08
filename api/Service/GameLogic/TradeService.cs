@@ -29,6 +29,32 @@ public class TradeService(
 
     public async Task CreateGameTrade(TradeCreateParams createParams)
     {
+        //simulate a full trade before creation for validation purposes
+        FullTrade = new Trade
+        {
+            GameId = createParams.GameId,
+            InitiatedBy = createParams.PlayerOne.PlayerId,
+            LastUpdatedBy = createParams.PlayerOne.PlayerId,
+            PlayerTrades = [
+                new PlayerTrade{
+                    PlayerId = createParams.PlayerOne.PlayerId,
+                    Money = createParams.PlayerOne.Money,
+                    GetOutOfJailFreeCards = createParams.PlayerOne.GetOutOfJailFreeCards,
+                    TradeProperties = [.. createParams.PlayerOne.GamePropertyIds.Select( id => new TradeProperty {
+                        GamePropertyId = id
+                    })]
+                },
+                new PlayerTrade{
+                    PlayerId = createParams.PlayerTwo.PlayerId,
+                    Money = createParams.PlayerTwo.Money,
+                    GetOutOfJailFreeCards = createParams.PlayerTwo.GetOutOfJailFreeCards,
+                    TradeProperties = [.. createParams.PlayerTwo.GamePropertyIds.Select( id => new TradeProperty {
+                        GamePropertyId = id
+                    })]
+                }
+            ]
+        };
+        await ValidateTrade();
         //Only one trade allowed at a time between two people
         var tradingPlayerIds = new List<Guid> {
             createParams.PlayerOne.PlayerId,
@@ -256,26 +282,40 @@ public class TradeService(
         //validate money
         var offerOneMoneyValid = playerOneOffer.Money <= playerOne.Money;
         var offerTwoMoneyValid = playerTwoOffer.Money <= playerTwo.Money;
-        if(!offerOneMoneyValid || !offerTwoMoneyValid)
+        if (!offerOneMoneyValid || !offerTwoMoneyValid)
         {
-            throw new FriendlyException(ErrorType.Warning,"Current trade is invalid - A player in this trade does not have enough money.");
+            throw new FriendlyException(ErrorType.Warning, "Current trade is invalid - A player in this trade does not have enough money.");
         }
         //validate game properties
-        var playerOneGameProperties = await gamePropertyRepository.SearchAsync(new GamePropertyWhereParams{ PlayerId = playerOne.Id, UpgradeCount = 0 },new { });
-        var playerTwoGameProperties = await gamePropertyRepository.SearchAsync(new GamePropertyWhereParams { PlayerId = playerTwo.Id, UpgradeCount = 0 }, new { });
+        IEnumerable<GameProperty> gameProperties = await gamePropertyRepository.GetAllWithDetails(FullTrade.GameId);
+        var improvedSetNumbers = gameProperties
+        .Where(gp => gp.UpgradeCount > 0)  // only properties that are improved
+        .Select(gp => gp.SetNumber)        // select the set number
+        .Distinct()                        // optional: only unique set numbers
+        .ToList();    
+        var playerOneGameProperties = gameProperties.Where(gp => gp.PlayerId == playerOne.Id);
+        var playerTwoGameProperties = gameProperties.Where(gp => gp.PlayerId == playerTwo.Id);
         var playerOneGamePropertyIds = playerOneGameProperties.Select(gp => gp.Id);
         var playerTwoGamePropertiesIds = playerTwoGameProperties.Select(gp => gp.Id);
 
+        //make sure properties being offered are actually owned by the players
+        //also make sure no set properties being offered are improved
         var playerOneGamePropertiesValid =
-            !playerOneGameProperties.Any(gp => gp.UpgradeCount > 0) &&
-            new HashSet<int>(playerOneGamePropertyIds).IsSupersetOf(playerOneOffer.GamePropertyIds);
+            new HashSet<int>(playerOneGamePropertyIds).IsSupersetOf(playerOneOffer.GamePropertyIds) &&
+            !playerOneOffer.GamePropertyIds // none of the offered properties belong to an improved set
+                .Select(id => playerOneGameProperties.FirstOrDefault(gp => gp.Id == id)?.SetNumber)
+                .Where(setNumber => setNumber != null)
+                .Any(improvedSetNumbers.Contains);
         var playerTwoGamePropertiesValid =
-            !playerTwoGameProperties.Any(gp => gp.UpgradeCount > 0) &&
-            new HashSet<int>(playerTwoGamePropertiesIds).IsSupersetOf(playerTwoOffer.GamePropertyIds);
+            new HashSet<int>(playerTwoGamePropertiesIds).IsSupersetOf(playerTwoOffer.GamePropertyIds) &&
+            !playerOneOffer.GamePropertyIds // none of the offered properties belong to an improved set
+                .Select(id => playerTwoGameProperties.FirstOrDefault(gp => gp.Id == id)?.SetNumber)
+                .Where(setNumber => setNumber != null)
+                .Any(improvedSetNumbers.Contains);
 
         if (!playerOneGamePropertiesValid || !playerTwoGamePropertiesValid)
         {
-            throw new FriendlyException(ErrorType.Warning,"Current trade is invalid - A property in this trade has been improved or is no longer owned");
+            throw new FriendlyException(ErrorType.Warning,"Current trade is invalid - A property in a set in this trade has been improved or is no longer owned");
         }
     }
 }

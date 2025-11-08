@@ -10,8 +10,10 @@ export const PlayerOfferEdit:React.FC<{formControlPrefix:string, player:Player}>
 
     const multiSelectData:MultiSelectData[] = useMemo( () => {
             return gameState.boardSpaces
-                .filter((space): space is BoardSpace & { property: Property  } => 
-                    space.property?.playerId === player.id)
+                .filter((space): space is BoardSpace & { property: Property  } => {
+                    const setSpaces = gameState.boardSpaces.filter(nestedSpace => nestedSpace.property?.setNumber === space?.property?.setNumber)
+                    return space.property?.playerId === player.id && setSpaces.every(setSpace => setSpace.property?.upgradeCount === 0)
+                })
                 .sort( space => space.id) // want them to appear in board order in the trade window
                 .map( (space) => {
                     return {
