@@ -1,66 +1,72 @@
 import { AudioFiles } from '@generated';
-import { createContext, useCallback, useContext, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 
-const AudioContext = createContext<any | null>(null);
-
-// PUT ADDITIONAL SOUND PATHS HERE
-const audioFiles = {
-    [AudioFiles.PropertyPurchased]: '/audio/purchaseMade.wav',
-    [AudioFiles.TurnNotification]: '/audio/turnNotification.wav',
-    [AudioFiles.PlayerMovement]: '/audio/playerMoved.wav',
-    [AudioFiles.RollStart]: '/audio/woosh.mp3',
-    [AudioFiles.RollEnd]: '/audio/tap.wav',
-    [AudioFiles.TradeUpdated]:'/audio/notificationDing.mp3',
-    [AudioFiles.LandedOnEventTile]:'/audio/event.mp3',
-    [AudioFiles.MoneyPaid]:'/audio/chaChing.mp3'
-} as const;
-
-type AudioControl = {
-  play: () => void;
+type AudioContextType = {
+  play: (file: AudioFiles) => void;
+  volume: number;
   setVolume: (volume: number) => void;
 };
 
-type AudioOptions = Record<AudioFiles, AudioControl>;
+const AudioContext = createContext<AudioContextType | null>(null);
 
-export const AudioProvider:React.FC<{children:React.ReactNode}> = ({ children }) => {
+const audioFiles = {
+  [AudioFiles.PropertyPurchased]: '/audio/purchaseMade.wav',
+  [AudioFiles.TurnNotification]: '/audio/turnNotification.wav',
+  [AudioFiles.PlayerMovement]: '/audio/playerMoved.wav',
+  [AudioFiles.RollStart]: '/audio/woosh.mp3',
+  [AudioFiles.RollEnd]: '/audio/tap.wav',
+  [AudioFiles.TradeUpdated]: '/audio/notificationDing.mp3',
+  [AudioFiles.LandedOnEventTile]: '/audio/event.mp3',
+  [AudioFiles.MoneyPaid]: '/audio/chaChing.mp3',
+} as const;
 
-    //generate ref keys
-    const audioRefs = useRef<Record<AudioFiles, HTMLAudioElement>>(
-        Object.fromEntries(
-            (Object.values(AudioFiles).filter(v => typeof v === 'number') as AudioFiles[])
-            .map(key => [key, new Audio(audioFiles[key])])
-        ) as Record<AudioFiles, HTMLAudioElement>
-    );
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const volumeRef = useRef(0.5);
+  const [volume,setVolume] = useState(0.5);
 
-    //generate the context object
-    const audioOptions = Object.fromEntries(
-    (Object.values(AudioFiles).filter(v => typeof v === 'number') as AudioFiles[])
-        .map(key => [
-        key,
-        {
-            play: () => playAudio(audioRefs.current[key]),
-            setVolume: (volume: number) => setVolume(audioRefs.current[key], volume),
-        },
-        ])
-    ) as AudioOptions;
+  const audioCache = useRef<Record<AudioFiles, HTMLAudioElement>>({} as Record<AudioFiles, HTMLAudioElement>);
+  const play = useCallback((file: AudioFiles) => {
+      let audio = audioCache.current[file];
+      // Lazy load audio only when first used
+      if (!audio) {
+        const src = audioFiles[file];
+        if (!src) {
+          console.warn(`Audio file not found for key: ${file}`);
+          return;
+        }
+        audio = new Audio(src);
+        audioCache.current[file] = audio;
+      }
 
-    const playAudio = useCallback( (audioElement:HTMLAudioElement) => {
-        audioElement.currentTime = 0;
-        audioElement.volume = 0.5;
-        audioElement.play();
-    },[])
+      // Always reset volume/time and play fresh
+      audio.currentTime = 0;
+      audio.volume = volumeRef.current;
 
-    const setVolume = useCallback( (audioElement:HTMLAudioElement, volume:number) => {
-        audioElement.volume = volume;
-    },[])
+      // Play can sometimes reject (e.g., autoplay restrictions)
+      audio.play().catch(err => {
+        console.log('Audio playback failed:', err);
+      });
+    },
+    []
+  );
 
-    return (
-        <AudioContext.Provider value={audioOptions}>
-            {children}
-        </AudioContext.Provider>
-    );
-}
+  const changeVolume = useCallback((newVolume: number) => {
+    const clamped = Math.min(Math.max(newVolume, 0), 1);
+    volumeRef.current = clamped;
+    setVolume(clamped)
+  }, []);
 
-export function useAudio():AudioOptions {
-  return useContext(AudioContext);
+  const value: AudioContextType = {
+    play,
+    volume,
+    setVolume: changeVolume,
+  };
+
+  return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
+};
+
+export function useAudio(): AudioContextType {
+  const ctx = useContext(AudioContext);
+  if (!ctx) throw new Error('useAudio must be used within AudioProvider');
+  return ctx;
 }

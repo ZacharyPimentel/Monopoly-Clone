@@ -17,7 +17,7 @@ export const CurrentTurn = () => {
     const audio = useAudio();
 
     useEffect( () => {
-        audio[AudioFiles.TurnNotification].play();
+        audio.play(AudioFiles.TurnNotification);
     },[])
 
 

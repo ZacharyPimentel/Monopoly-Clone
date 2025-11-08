@@ -71,7 +71,7 @@ export const useWebSocketCallback = () => {
                         queueRef.current.queue.push( () => {
                             gameDispatch({...gameData})
                             if(gameData.audioFile !== undefined){
-                                audio[gameData.audioFile].play();
+                                audio.play(gameData.audioFile);
                             }
                         })
                         if (!queueRef.current.processingQueue) {
@@ -81,7 +81,7 @@ export const useWebSocketCallback = () => {
                     }else{
                         gameDispatch({...gameData});
                         if(gameData.audioFile !== undefined){
-                            audio[gameData.audioFile].play();
+                            audio.play(gameData.audioFile);
                         }
                     }
                 }else{
@@ -89,7 +89,7 @@ export const useWebSocketCallback = () => {
                         delete gameData.game;
                     }
                     if(gameData.audioFile !== undefined){
-                        audio[gameData.audioFile].play();
+                        audio.play(gameData.audioFile);
                     }
                     gameDispatch({...gameData});
                 }
