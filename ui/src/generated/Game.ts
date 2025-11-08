@@ -15,6 +15,7 @@ export interface Game {
     fullSetDoublePropertyRent: boolean;
     extraMoneyForLandingOnGo: boolean;
     collectMoneyFromFreeParking: boolean;
+    allowedToBuildUnevenly: boolean;
     moneyInFreeParking: number;
     currentPlayerTurn?: string;
     hasPassword?: boolean;

@@ -9,6 +9,7 @@ public class GameUpdateParams
     public bool? FullSetDoublePropertyRent { get; set; }
     public bool? ExtraMoneyForLandingOnGo { get; set; }
     public bool? CollectMoneyFromFreeParking { get; set; }
+    public bool? AllowedToBuildUnevenly { get; set; }
     public int? MoneyInFreeParking { get; set; }
     public bool? DiceRollInProgress { get; set; }
     public bool? MovementInProgress { get; set; }

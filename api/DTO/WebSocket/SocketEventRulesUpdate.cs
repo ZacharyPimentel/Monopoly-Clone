@@ -7,4 +7,5 @@ public class SocketEventRulesUpdate
     public bool? FullSetDoublePropertyRent { get; set; }
     public bool? ExtraMoneyForLandingOnGo { get; set; }
     public bool? CollectMoneyFromFreeParking { get; set; }
+    public bool? AllowedToBuildUnevenly {get; set; }
 }

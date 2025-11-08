@@ -1,6 +1,8 @@
 using System.Data;
+using api.Entity;
 using Dapper;
 using Newtonsoft.Json;
+namespace api.Database;
 public class DatabaseInitializer
 {
 
@@ -49,7 +51,7 @@ public class DatabaseInitializer
         
         foreach(var themeProperty in themeProperties)
         {
-            db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,SetNumber,Color) VALUES (@ThemeId,@PropertyId,@SetNumber,@Color)",themeProperty);
+            db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,Color) VALUES (@ThemeId,@PropertyId,@Color)",themeProperty);
         }
 
         //theme cards

@@ -8,4 +8,5 @@ export interface SocketEventRulesUpdate {
     fullSetDoublePropertyRent?: boolean;
     extraMoneyForLandingOnGo?: boolean;
     collectMoneyFromFreeParking?: boolean;
+    allowedToBuildUnevenly?: boolean;
 }

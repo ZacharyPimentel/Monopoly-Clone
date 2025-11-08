@@ -7,7 +7,6 @@ import {
 } from "@globalComponents";
 import { usePlayer } from "@hooks";
 import { useGameState, useGlobalState } from "@stateProviders";
-import { useMemo } from "react";
 
 export const Popover:React.FC<{
     property:Property,
@@ -16,18 +15,40 @@ export const Popover:React.FC<{
     propertyStyles:{position:string}
 }> = ({property,space,propertyStyles}) => {
 
-    const gameState = useGameState(['boardSpaces']);
+    const gameState = useGameState(['boardSpaces','game']);
     const {player,isCurrentTurn} = usePlayer();
     const {dispatch:globalDispatch} = useGlobalState([]);
-    
-    const playerOwnsAllSetProperties = useMemo( () => {
-        if(!property.setNumber) return false;
-        const setSpaces = gameState.boardSpaces.filter((space) => space.property?.setNumber === property.setNumber);
-        if(setSpaces.every(space => space?.property?.playerId === player?.id)){
-            return true
-        }
-        return false
-    },[property,isCurrentTurn])
+
+    const setSpaces = gameState.boardSpaces.filter((space) => space.property?.setNumber === property.setNumber);
+    const playerOwnsAllSetProperties = setSpaces.every(space => space?.property?.playerId === player?.id);
+    const anySetPropertyIsMortgaged = !setSpaces.every(space => !space?.property?.mortgaged)
+    const anySetPropertyIsUpgraded = !setSpaces.every(space => !space?.property?.upgradeCount || 0 > 0)
+    const allowedToBuildUnevenlySettingOn = gameState.game?.allowedToBuildUnevenly
+
+    const minUpgradeCount = Math.min(...setSpaces.map(s => s?.property?.upgradeCount || 0))
+    const maxUpgradeCount = Math.max(...setSpaces.map(s => s?.property?.upgradeCount || 0))
+
+    const sharedImprovementConditions =
+        playerOwnsAllSetProperties &&
+        isCurrentTurn &&
+        !property.mortgaged &&
+        !anySetPropertyIsMortgaged;
+
+    const upgradeAllowed =
+        sharedImprovementConditions &&
+        property.upgradeCount < 5 &&
+        (allowedToBuildUnevenlySettingOn ||property.upgradeCount + 1 <= minUpgradeCount + 1);
+
+    const downgradeAllowed =
+        sharedImprovementConditions &&
+        property.upgradeCount > 0 &&
+        (allowedToBuildUnevenlySettingOn ||property.upgradeCount - 1 >= maxUpgradeCount - 1);
+
+    const mortgageInteractionAllowed =
+        property.playerId === player?.id &&
+        isCurrentTurn &&
+        property.upgradeCount === 0 &&
+        !anySetPropertyIsUpgraded;
 
     return (
         <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>
@@ -52,7 +73,7 @@ export const Popover:React.FC<{
                 <p className='game-text'>House Cost: <b>${property.upgradeCost}</b></p>
                 <p className='game-text'>Mortgage Value: <b>${property.mortgageValue}</b></p>
             </div>
-            {playerOwnsAllSetProperties && isCurrentTurn && property.upgradeCount < 5 && (
+            {upgradeAllowed &&(
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<UpgradePropertyModal space={space}/>})
@@ -61,7 +82,7 @@ export const Popover:React.FC<{
                     </button>
                 </div>
             )}
-            {playerOwnsAllSetProperties && isCurrentTurn && property.upgradeCount !== 0 && (
+            {downgradeAllowed && (
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<DowngradePropertyModal space={space}/>})
@@ -70,7 +91,7 @@ export const Popover:React.FC<{
                     </button>
                 </div>
             )}
-            {property.playerId === player?.id && isCurrentTurn && property.upgradeCount === 0 && (
+            {mortgageInteractionAllowed && (
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         if(!property.mortgaged){

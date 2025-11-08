@@ -22,6 +22,7 @@ public class BoardSpaceRepository(IDbConnection db, IGameRepository gameReposito
                 p.MortgageValue,
                 p.upgradeCost,
                 p.BoardSpaceId, 
+                p.SetNumber,
                 gp.Id AS GamePropertyId, 
                 gp.PlayerId, 
                 gp.UpgradeCount, 
@@ -29,12 +30,10 @@ public class BoardSpaceRepository(IDbConnection db, IGameRepository gameReposito
                 gp.GameId,
                 tp.ThemeId,
                 tp.PropertyId,
-                tp.SetNumber,
                 tp.Color
             FROM Property p
             JOIN GameProperty gp ON p.Id = gp.PropertyId AND gp.GameId = @GameId
             LEFT JOIN ThemeProperty tp ON p.Id = tp.PropertyId AND tp.ThemeId = @ThemeId;
-
             SELECT * FROM PropertyRent;
         ";
 

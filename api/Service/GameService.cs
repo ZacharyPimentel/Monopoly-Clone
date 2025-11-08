@@ -217,6 +217,7 @@ public class GameService(
             FullSetDoublePropertyRent = rulesUpdateParams.FullSetDoublePropertyRent,
             ExtraMoneyForLandingOnGo = rulesUpdateParams.ExtraMoneyForLandingOnGo,
             CollectMoneyFromFreeParking = rulesUpdateParams.CollectMoneyFromFreeParking,
+            AllowedToBuildUnevenly = rulesUpdateParams.AllowedToBuildUnevenly
         });
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
         {

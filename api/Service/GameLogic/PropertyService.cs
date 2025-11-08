@@ -19,7 +19,9 @@ public class PropertyService(
     IGamePropertyRepository gamePropertyRepository,
     IGameService gameService,
     ISocketMessageService socketMessageService,
-    IPlayerRepository playerRepository
+    IPlayerRepository playerRepository,
+    IGameRepository gameRepository
+
 ) : IPropertyService
 {
     public async Task MortgageProperty(int gamePropertyId)
@@ -27,10 +29,9 @@ public class PropertyService(
         Player player = guardService.GetPlayer();
         Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
         GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
-        if (player.Id != gameProperty.PlayerId)
-        {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
-        }
+
+        await ValidatePlayerOwnsProperty(gameProperty);
+        await ValidatePropertyMortgageAllowed(gameProperty);
 
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
         {
@@ -51,10 +52,8 @@ public class PropertyService(
         Player player = guardService.GetPlayer();
         Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
         GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
-        if (player.Id != gameProperty.PlayerId)
-        {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
-        }
+
+        await ValidatePlayerOwnsProperty(gameProperty);
 
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
         {
@@ -77,17 +76,23 @@ public class PropertyService(
         Player player = guardService.GetPlayer();
         Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
         GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
-        if (player.Id != gameProperty.PlayerId)
+
+        await ValidatePlayerOwnsProperty(gameProperty);
+        await ValidatePropertyUpgradeAllowed(gameProperty);
+        await ValidatePlayerOwnsSet(gameProperty);
+
+        IEnumerable<GameProperty> setGameProperties = await gamePropertyRepository.GetBySetNumberWithDetails
+        (
+            gameProperty.GameId,
+            gameProperty.SetNumber
+        );
+        Game game = await gameRepository.GetByIdAsync(gameProperty.GameId);
+        if (!game.AllowedToBuildUnevenly)
         {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
-            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+            await ValidateUpgradeEvenly(gameProperty, setGameProperties);
         }
-        if (gameProperty.UpgradeCount == 5)
-        {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
-            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyCantBeUpgraded));
-        }
-        
+        await ValidateNoSetMortgaged(setGameProperties);
+
         int paymentAmount = gameProperty.UpgradeCost ?? 0;
 
         if (player.Money < paymentAmount)
@@ -114,23 +119,28 @@ public class PropertyService(
         Player player = guardService.GetPlayer();
         Guid gameId = guardService.SocketConnectionHasGameId().GetGameId();
         GameProperty gameProperty = await gamePropertyRepository.GetByIdWithDetailsAsync(gamePropertyId);
-        if (player.Id != gameProperty.PlayerId)
+
+        await ValidatePlayerOwnsProperty(gameProperty);
+        await ValidatePropertyDowngradeAllowed(gameProperty);
+        await ValidatePlayerOwnsSet(gameProperty);
+        IEnumerable<GameProperty> setGameProperties = await gamePropertyRepository.GetBySetNumberWithDetails
+        (
+            gameProperty.GameId,
+            gameProperty.SetNumber
+        );
+        Game game = await gameRepository.GetByIdAsync(gameProperty.GameId);
+        if (!game.AllowedToBuildUnevenly)
         {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
-            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+            await ValidateDowngradeEvenly(gameProperty, setGameProperties);
         }
 
-        if (gameProperty.UpgradeCount == 0)
-        {
-            await gameService.CreateGameLog(gameId, EnumExtensions.GetEnumDescription(Errors.PropertyCantBeDowngraded));
-            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PropertyCantBeDowngraded));
-        }
-
+        await ValidateNoSetMortgaged(setGameProperties);
+        
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
         {
             UpgradeCount = gameProperty.UpgradeCount - 1,
         });
-        int paymentAmount = (int)Math.Round((decimal)(gameProperty.UpgradeCost ?? 0) / 2) ;
+        int paymentAmount = (int)Math.Round((decimal)(gameProperty.UpgradeCost ?? 0) / 2);
         await playerRepository.AddMoneyToPlayer(player.Id, paymentAmount);
         await gameService.CreateGameLog(gameId, $"{player.PlayerName} downgraded {gameProperty.BoardSpaceName} for ${paymentAmount}.");
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
@@ -139,5 +149,75 @@ public class PropertyService(
             Players = true,
             GameLogs = true
         });
+    }
+
+    private async Task ValidatePropertyUpgradeAllowed(GameProperty gameProperty)
+    {
+        if (gameProperty.SetNumber is null || gameProperty.UpgradeCount == 5 || gameProperty.Mortgaged)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "This property is not allowed to be upgraded.");
+            throw new Exception("This property is not allowed to be upgraded.");
+        }
+    }
+    private async Task ValidatePropertyDowngradeAllowed(GameProperty gameProperty)
+    {
+        if (gameProperty.SetNumber is null || gameProperty.UpgradeCount == 0 || gameProperty.Mortgaged)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "This property is not allowed to be downgraded.");
+            throw new Exception("This property is not allowed to be downgraded.");
+        }
+    }
+    private async Task ValidatePlayerOwnsProperty(GameProperty gameProperty)
+    {
+        Player player = guardService.GetPlayer();
+        if (player.Id != gameProperty.PlayerId)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+            throw new Exception(EnumExtensions.GetEnumDescription(Errors.PlayerDoesNotOwnProperty));
+        }
+    }
+    private async Task ValidatePropertyMortgageAllowed(GameProperty gameProperty)
+    {
+        if (gameProperty.UpgradeCount > 0)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "Property cannot be mortgaged while improved.");
+            throw new Exception("Property cannot be mortgaged while improved.");
+        }
+    }
+    private async Task ValidatePlayerOwnsSet(GameProperty gameProperty)
+    {
+        IEnumerable<GameProperty> setGameProperties = await gamePropertyRepository.GetBySetNumberWithDetails(gameProperty.GameId, gameProperty.SetNumber);
+        Player player = guardService.GetPlayer();
+        if (setGameProperties.Any(gp => gp.PlayerId != player.Id))
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "Player does not own all set properties");
+            throw new Exception("Player does not own all set properties");
+        }
+    }
+    private async Task ValidateUpgradeEvenly(GameProperty gameProperty, IEnumerable<GameProperty> setGameProperties)
+    {
+        var minSetUpgradeCount = setGameProperties.Min(gp => gp.UpgradeCount);
+        if(gameProperty.UpgradeCount > minSetUpgradeCount)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "Not allowed to build unevenly.");
+            throw new Exception("Not allowed to build unevenly.");
+        }
+    }
+    private async Task ValidateDowngradeEvenly(GameProperty gameProperty, IEnumerable<GameProperty> setGameProperties)
+    {
+        var maxSetUpgradeCount = setGameProperties.Max(gp => gp.UpgradeCount);
+        if (gameProperty.UpgradeCount < maxSetUpgradeCount)
+        {
+            await gameService.CreateGameLog(gameProperty.GameId, "Not allowed to build unevenly.");
+            throw new Exception("Not allowed to build unevenly.");
+        }
+    }
+    private async Task ValidateNoSetMortgaged(IEnumerable<GameProperty> setGameProperties)
+    {
+        if(setGameProperties.Any(gp => gp.Mortgaged))
+        {
+            await gameService.CreateGameLog(setGameProperties.ToList()[0].GameId, "Cannot improve when a set property is mortgaged.");
+            throw new Exception("Cannot improve when a set property is mortgaged.");
+        }
     }
 }

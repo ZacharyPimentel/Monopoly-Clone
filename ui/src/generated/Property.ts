@@ -11,12 +11,12 @@ export interface Property {
     mortgageValue: number;
     upgradeCost: number;
     boardSpaceId: number;
+    setNumber?: number;
     propertyRents: PropertyRent[];
     gamePropertyId?: number;
     playerId?: string;
     upgradeCount: number;
     mortgaged?: boolean;
     gameId?: string;
-    setNumber?: number;
     color?: string;
 }

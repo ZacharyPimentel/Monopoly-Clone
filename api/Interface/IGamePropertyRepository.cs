@@ -5,6 +5,7 @@ public interface IGamePropertyRepository : IBaseRepository<GameProperty, int>
 {
     Task<bool> CreateForNewGameAsync(Guid gameId);
     Task<GameProperty> GetByIdWithDetailsAsync(int GamePropertyId);
+    Task<IEnumerable<GameProperty>> GetBySetNumberWithDetails(Guid gameId,int? setNumber);
     Task<bool> AssignAllToPlayer(Guid gameId, Guid playerId);
     Task<bool> UnassignAllFromPlayer(Guid gameId, Guid playerId);
 }

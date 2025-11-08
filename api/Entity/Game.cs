@@ -16,6 +16,7 @@ public class Game
     public bool FullSetDoublePropertyRent { get; set; }
     public bool ExtraMoneyForLandingOnGo { get; set; }
     public bool CollectMoneyFromFreeParking { get; set; }
+    public bool AllowedToBuildUnevenly { get; set; }
     public int MoneyInFreeParking { get; set; }
     public Guid? CurrentPlayerTurn { get; set; } //Join for PlayerId on TurnOrder with GameId
     public bool? HasPassword { get; set; } // Join for GameId on GamePassword

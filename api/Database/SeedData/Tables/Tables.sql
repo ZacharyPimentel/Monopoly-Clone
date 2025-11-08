@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS GAME(
     FullSetDoublePropertyRent BOOLEAN DEFAULT false,
     ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
     CollectMoneyFromFreeParking BOOLEAN DEFAULT false,
+    AllowedToBuildUnevenly BOOLEAN DEFAULT false,
     MoneyInFreeParking INTEGER DEFAULT 0,
     CreatedAt TimeStamp NOT NULL
 );
@@ -106,7 +107,7 @@ CREATE TABLE IF NOT EXISTS PLAYERDEBT(
 
 CREATE TABLE IF NOT EXISTS PROPERTY(
     Id INTEGER PRIMARY KEY,
-    SetNumber INTEGER,
+    SetNumber INTEGER CHECK (SetNumber BETWEEN 1 AND 8),
     PurchasePrice INTEGER,
     MortgageValue INTEGER,
     BoardSpaceId INTEGER,
@@ -129,7 +130,6 @@ CREATE TABLE IF NOT EXISTS THEMEPROPERTY(
     FOREIGN KEY (ThemeId) REFERENCES Theme(Id),
     PropertyId INTEGER,
     FOREIGN KEY (PropertyId) REFERENCES Property(Id),
-    SetNumber INTEGER CHECK (SetNumber BETWEEN 1 AND 8),
     Color TEXT NOT NULL
 );
 

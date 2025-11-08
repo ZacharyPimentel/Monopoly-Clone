@@ -136,6 +136,7 @@ public class TestGameSeeder(
             new { }
         );
         game = await gameRepository.GetByIdWithDetailsAsync(game.Id);
+        await gameRepository.UpdateAsync(game.Id,new GameUpdateParams { AllowedToBuildUnevenly = true });
         players = await playerRepository.SearchWithIconsAsync(new PlayerWhereParams { GameId = game.Id }, null);
         await spaceLandingService.HandleLandedOnSpace(players, game);
     }

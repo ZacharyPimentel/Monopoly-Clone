@@ -16,6 +16,7 @@ public class GameProperty
     public int? PurchasePrice { get; set; }
     public int? MortgageValue { get; set; }
     public int? UpgradeCost { get; set; }
+    public int? SetNumber {get;set;}
     //Joined from BoardSpaceTheme
     public string? BoardSpaceName { get; set; }
 }

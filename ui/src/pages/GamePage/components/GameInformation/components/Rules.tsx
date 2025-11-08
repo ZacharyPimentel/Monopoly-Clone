@@ -58,6 +58,17 @@ export const Rules = () => {
                         disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
                     />
                 </li>
+                {/* Allow Uneven Building */}
+                <li className='flex gap-[20px]'>
+                    <p className='flex-1'>Allow building houses unevenly</p>
+                    <input 
+                        checked={gameState.game?.allowedToBuildUnevenly || false} 
+                        type='checkbox' 
+                        className='scale-[1.5]'
+                        onChange={(e) => invoke.game.updateRules({allowedToBuildUnevenly:e.target.checked})}
+                        disabled={gameState.currentSocketPlayer?.playerId && !gameState.game?.gameStarted ? false : true} 
+                    />
+                </li>
             </ul>
         </div>
     )

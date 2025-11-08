@@ -35,6 +35,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 p.BoardSpaceId,
                 p.PurchasePrice,
                 p.MortgageValue,
+                p.SetNumber,
                 p.UpgradeCost,
                 g.Id,
                 bst.BoardSpaceName
@@ -57,6 +58,7 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 gp.MortgageValue = p.MortgageValue;
                 gp.PurchasePrice = p.PurchasePrice;
                 gp.UpgradeCost = p.UpgradeCost;
+                gp.SetNumber = p.SetNumber;
                 return gp;
             },
             new { GamePropertyId = gamePropertyId },
@@ -65,6 +67,57 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
 
         return result.Single();
     }
+
+    public async Task<IEnumerable<GameProperty>> GetBySetNumberWithDetails(Guid gameId,int? setNumber)
+    {
+        var sql = @"
+            SELECT
+                gp.Id,
+                gp.PlayerId,
+                gp.GameId,
+                gp.UpgradeCount,
+                gp.PropertyId,
+                gp.Mortgaged,
+                p.Id,
+                p.BoardSpaceId,
+                p.PurchasePrice,
+                p.MortgageValue,
+                p.SetNumber,
+                p.UpgradeCost,
+                g.Id,
+                bst.BoardSpaceName
+            FROM 
+                GameProperty gp
+            JOIN Property p ON p.Id = gp.PropertyId
+            JOIN Game g ON gp.GameId = g.Id
+            JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
+            WHERE
+                p.SetNumber = @SetNumber
+            AND
+                gp.GameId = @GameId
+        ";
+        var result = await db.QueryAsync<GameProperty, Property, Game, BoardSpaceTheme, GameProperty>(
+            sql,
+            (gp, p, g, bst) =>
+            {
+                gp.BoardSpaceName = bst.BoardSpaceName;
+                gp.BoardSpaceId = p.BoardSpaceId;
+                gp.MortgageValue = p.MortgageValue;
+                gp.PurchasePrice = p.PurchasePrice;
+                gp.UpgradeCost = p.UpgradeCost;
+                gp.SetNumber = p.SetNumber;
+                return gp;
+            },
+            new { 
+                GameId = gameId,
+                SetNumber = setNumber 
+            },
+            splitOn: "Id,Id,BoardSpaceName"
+        );
+
+        return result;
+    }
+
 
     public async Task<bool> AssignAllToPlayer(Guid GameId, Guid PlayerId)
     {
