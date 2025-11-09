@@ -57,10 +57,13 @@ public class GameRepository(IDbConnection db) : BaseRepository<Game, Guid>(db, "
         var sql = @"
             WITH FilteredTurnOrder AS (
                 SELECT 
-                t.PlayerId, t.GameId, t.PlayOrder
+                t.PlayerId, t.GameId, t.PlayOrder,
+                p.Id, p.Bankrupt
                 FROM TURNORDER AS t
-                WHERE HasPlayed = false 
+                JOIN Player p ON p.Id = t.PlayerId
+                WHERE HasPlayed = FALSE
                 AND t.GameId = @Id
+                AND p.Bankrupt = FALSE
                 ORDER BY PlayOrder
                 LIMIT 1
             )
