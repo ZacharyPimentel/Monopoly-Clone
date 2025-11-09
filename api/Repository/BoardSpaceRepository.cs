@@ -11,10 +11,10 @@ public class BoardSpaceRepository(IDbConnection db, IGameRepository gameReposito
         Game game = await gameRepository.GetByIdAsync(gameId);
 
         var sql = @"
-            SELECT bs.*, bst.BoardSpaceName
+            SELECT bs.*, bst.BoardSpaceName, bst.ThemeId
             FROM BoardSpace bs
             LEFT JOIN BoardSpaceTheme bst ON bs.Id = bst.BoardSpaceId
-            WHERE ThemeId = @ThemeId;
+            WHERE bst.ThemeId = @ThemeId;
 
             SELECT 
                 p.Id,
@@ -34,10 +34,11 @@ public class BoardSpaceRepository(IDbConnection db, IGameRepository gameReposito
             FROM Property p
             JOIN GameProperty gp ON p.Id = gp.PropertyId AND gp.GameId = @GameId
             LEFT JOIN ThemeProperty tp ON p.Id = tp.PropertyId AND tp.ThemeId = @ThemeId;
+            
             SELECT * FROM PropertyRent;
         ";
 
-        var multi = await db.QueryMultipleAsync(sql, new { GameId = gameId, game.ThemeId });
+        var multi = await db.QueryMultipleAsync(sql, new { GameId = gameId, ThemeId = game.ThemeId });
         var boardSpaces = multi.Read<BoardSpace>().ToList();
         var properties = multi.Read<Property>().ToList();
         var propertyRents = multi.Read<PropertyRent>().ToList();

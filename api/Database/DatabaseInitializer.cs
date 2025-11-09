@@ -37,47 +37,54 @@ public class DatabaseInitializer
             var sql = File.ReadAllText(seedDataPath);
             db.Execute(sql);
         }
-        //board space themes
-        var boardSpaceThemeJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/BoardSpaceTheme.json");
-        var boardSpaceTheme = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData);
-        foreach(var boardSpace in boardSpaceTheme)
-        {
-            db.Execute("INSERT INTO BOARDSPACETHEME (ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@ThemeId,@BoardSpaceId,@BoardSpaceName)",boardSpace);
-        }
-
-        //theme property
-        var themePropertyJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeProperty.json");
-        var themeProperties = JsonConvert.DeserializeObject<List<ThemeProperty>>(themePropertyJsonData);
-        
-        foreach(var themeProperty in themeProperties)
-        {
-            db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,Color) VALUES (@ThemeId,@PropertyId,@Color)",themeProperty);
-        }
-
-        //theme cards
-        var themeCardJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeCard.json");
-        var themeCards = JsonConvert.DeserializeObject<List<ThemeCard>>(themeCardJsonData);
-        foreach(var themeCard in themeCards)
-        {
-            db.Execute("INSERT INTO THEMECARD (CardId,ThemeId,CardDescription) VALUES (@CardId, @ThemeId,@CardDescription)",themeCard);
-        }
 
         //color groups
         var colorGroupJsonData = File.ReadAllText("./Database/SeedData/ColorGroup.json");
-        var colorGroups = JsonConvert.DeserializeObject<List<ColorGroup>>(colorGroupJsonData);
+        var colorGroups = JsonConvert.DeserializeObject<List<ColorGroup>>(colorGroupJsonData)!;
         foreach(var group in colorGroups)
         {
             db.Execute("INSERT INTO COLORGROUP (Id,GroupName) VALUES (@Id, @GroupName)",group);
         }
 
-        //theme colors
-        var themeColorJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeColor.json");
-        var themeColors = JsonConvert.DeserializeObject<List<ThemeColor>>(themeColorJsonData);
-        foreach(var themeColor in themeColors)
-        {
-            db.Execute("INSERT INTO ThemeColor (ThemeId,ColorGroupId,Color,Shade) VALUES (@ThemeId,@ColorGroupId,@Color,@Shade)",themeColor);
-        }
+        // Load all board space theme files across theme folders
+        var themeDirs = Directory.GetDirectories("./Database/SeedData/Themes");
 
+        foreach (var themeDir in themeDirs)
+        {
+            //board space themes
+            var bstFilePath = Path.Combine(themeDir, "BoardSpaceTheme.json");
+            var boardSpaceThemeJsonData = File.ReadAllText(bstFilePath);
+            var boardSpaceThemes = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData)!;
+            foreach (var boardSpaceTheme in boardSpaceThemes)
+            {
+                db.Execute("INSERT INTO BOARDSPACETHEME (ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@ThemeId,@BoardSpaceId,@BoardSpaceName)", boardSpaceTheme);
+            }
+            //theme properties
+            var tpFilePath = Path.Combine(themeDir, "ThemeProperty.json");
+            var themePropertyJsonData = File.ReadAllText(tpFilePath);
+            var themeProperties = JsonConvert.DeserializeObject<List<ThemeProperty>>(themePropertyJsonData)!;
+
+            foreach (var themeProperty in themeProperties)
+            {
+                db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,Color) VALUES (@ThemeId,@PropertyId,@Color)", themeProperty);
+            }
+            //theme cards
+            var themeCardFilePath = Path.Combine(themeDir, "ThemeCard.json");
+            var themeCardJsonData = File.ReadAllText(themeCardFilePath);
+            var themeCards = JsonConvert.DeserializeObject<List<ThemeCard>>(themeCardJsonData)!;
+            foreach (var themeCard in themeCards)
+            {
+                db.Execute("INSERT INTO THEMECARD (CardId,ThemeId,CardDescription) VALUES (@CardId, @ThemeId,@CardDescription)", themeCard);
+            }
+            //theme colors
+            var themeColorFilePath = Path.Combine(themeDir, "ThemeColor.json");
+            var themeColorJsonData = File.ReadAllText(themeColorFilePath);
+            var themeColors = JsonConvert.DeserializeObject<List<ThemeColor>>(themeColorJsonData)!;
+            foreach(var themeColor in themeColors)
+            {
+                db.Execute("INSERT INTO ThemeColor (ThemeId,ColorGroupId,Color,Shade) VALUES (@ThemeId,@ColorGroupId,@Color,@Shade)",themeColor);
+            }
+        }        
     }
     private static void DropAllTables(IDbConnection db)
     {
