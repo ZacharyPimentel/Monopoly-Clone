@@ -42,7 +42,7 @@ public class DatabaseInitializer
         var boardSpaceTheme = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData);
         foreach(var boardSpace in boardSpaceTheme)
         {
-            db.Execute("INSERT INTO BOARDSPACETHEME (ID, ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@Id, @ThemeId,@BoardSpaceId,@BoardSpaceName)",boardSpace);
+            db.Execute("INSERT INTO BOARDSPACETHEME (ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@ThemeId,@BoardSpaceId,@BoardSpaceName)",boardSpace);
         }
 
         //theme property
