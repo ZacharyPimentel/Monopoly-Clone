@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using api.DTO.Entity;
-using api.DTO.Websocket;
 using api.Entity;
 using api.Enumerable;
 using api.Helper;
@@ -40,7 +38,6 @@ public class SpaceLandingService(
     ISocketMessageService socketMessageService,
     IBoardMovementService boardMovementService,
     IGameService gameService,
-    IGameRepository gameRepository,
     IPaymentService paymentService
 ) : ISpaceLandingService
 {

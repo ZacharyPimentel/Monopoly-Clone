@@ -1,60 +1,60 @@
 [
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#4C9052",
         "Shade":10
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#56A45E",
         "Shade":9
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#69B070",
         "Shade":8
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#7DBA83",
         "Shade":7
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#91C596",
         "Shade":6
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#A5CFA9",
         "Shade":5
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#B9DABC",
         "Shade":4
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#CDE5CF",
         "Shade":3
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#E1EFE2",
         "Shade":2
     },
     {
-        "ThemeId":1,
+        "ThemeId":2,
         "ColorGroupId":1,
         "Color":"#F5FAF5",
         "Shade":1
