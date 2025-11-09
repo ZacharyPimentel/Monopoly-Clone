@@ -42,7 +42,7 @@ export const ChanceTile:React.FC<{space:BoardSpace}> = ({space}) => {
     return (
         <div className='h-full relative'>
             <div className='bg-[green] flex flex-col items-center justify-center w-full h-full shadow-lg border border-totorodarkgreen rounded-[5px]'>
-                <p className='text-[12px] hidden lg:flex'>{space.boardSpaceName}</p>
+                <p className='text-[12px] hidden lg:flex text-center'>{space.boardSpaceName}</p>
                 <CircleQuestionMark opacity={'50%'} width={'50%'}/>
             </div>
             <div style={{display: toastVisible ? 'flex' : 'none'}} className={`${positionStyles} bg-white flex-col w-[150px] p-[5px] shadow-lg border border-black text-[12px] z-[1]`}>
