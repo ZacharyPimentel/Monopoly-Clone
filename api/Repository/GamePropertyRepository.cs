@@ -43,7 +43,9 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 GameProperty gp
             JOIN Property p ON p.Id = gp.PropertyId
             JOIN Game g ON gp.GameId = g.Id
-            JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
+            JOIN BoardSpaceTheme bst 
+                ON bst.BoardSpaceId = p.BoardSpaceId
+                AND bst.ThemeId = g.ThemeId
             WHERE
                 gp.Id = @GamePropertyId
             AND
@@ -90,7 +92,9 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 GameProperty gp
             JOIN Property p ON p.Id = gp.PropertyId
             JOIN Game g ON gp.GameId = g.Id
-            JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
+            JOIN BoardSpaceTheme bst 
+                ON bst.BoardSpaceId = p.BoardSpaceId
+                AND bst.ThemeId = g.ThemeId
             WHERE
                 p.SetNumber = @SetNumber
             AND
@@ -141,7 +145,9 @@ public class GamePropertyRepository(IDbConnection db) : BaseRepository<GamePrope
                 GameProperty gp
             JOIN Property p ON p.Id = gp.PropertyId
             JOIN Game g ON gp.GameId = g.Id
-            JOIN BoardSpaceTheme bst ON bst.BoardSpaceId = p.BoardSpaceId
+            JOIN BoardSpaceTheme bst 
+                ON bst.BoardSpaceId = p.BoardSpaceId
+                AND bst.ThemeId = g.ThemeId
             WHERE gp.GameId = @GameId
         ";
         var result = await db.QueryAsync<GameProperty, Property, Game, BoardSpaceTheme, GameProperty>(

@@ -7,6 +7,7 @@ import {
 } from "@globalComponents";
 import { usePlayer } from "@hooks";
 import { useGameState, useGlobalState } from "@stateProviders";
+import { Layers } from "lucide-react";
 
 export const Popover:React.FC<{
     property:Property,
@@ -74,11 +75,14 @@ export const Popover:React.FC<{
                 <p className='game-text'>Mortgage Value: <b>${property.mortgageValue}</b></p>
             </div>
             {upgradeAllowed &&(
-                <div className='mt-[10px]'>
+                <div className='mt-[10px] flex gap-[5px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<UpgradePropertyModal space={space}/>})
-                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px]'}>
+                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px] rounded'}>
                         Upgrade
+                    </button>
+                    <button title={'Bulk Upgrade'} className={'bg-totorolightgreen p-[5px] text-[8px] md:text-[12px] rounded'}>
+                        <Layers size={20}/>
                     </button>
                 </div>
             )}
@@ -86,7 +90,7 @@ export const Popover:React.FC<{
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         globalDispatch({modalOpen:true,modalContent:<DowngradePropertyModal space={space}/>})
-                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px]'}>
+                    }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px] rounded'}>
                         Downgrade
                     </button>
                 </div>
@@ -105,7 +109,7 @@ export const Popover:React.FC<{
                                 modalContent: <UnmortgagePropertyModal space={space}/> 
                             })
                         }
-                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full text-[8px] md:text-[12px]`}>
+                    }} className={`${property.mortgaged ? 'bg-totorolightgreen' : 'bg-[tomato]'} p-[5px] w-full text-[8px] md:text-[12px] rounded`}>
                         {space?.property?.mortgaged
                             ? 'Unmortgage'
                             : 'Mortgage'
