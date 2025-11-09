@@ -1,0 +1,165 @@
+[
+    {
+        "CardId": 1,
+        "ThemeId": 1,
+        "CardDescription":"Advance to Boardwalk."
+    },
+    {
+        "CardId": 2,
+        "ThemeId": 1,
+        "CardDescription":"Advance to Go (Collect $200)."
+    },
+    {
+        "CardId": 3,
+        "ThemeId": 1,
+        "CardDescription":"Advance to Illinois Avenue. If you pass Go, collect $200."
+    },
+    {
+        "CardId": 4,
+        "ThemeId": 1,
+        "CardDescription":"Advance to St. Charles Place. If you pass Go, collect $200."
+    },
+    {
+        "CardId": 5,
+        "ThemeId": 1,
+        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay owner twice the rental to which they are otherwise entitled."
+    },
+    {
+        "CardId": 6,
+        "ThemeId": 1,
+        "CardDescription":"Advance to the nearest Railroad. If unowned, you may buy it from the Bank. If owned, pay owner twice the rental to which they are otherwise entitled."
+    },
+    {
+        "CardId": 7,
+        "ThemeId": 1,
+        "CardDescription":"Advance token to nearest Utility. If unowned, you may buy it from the Bank. If owned, throw dice and pay owner a total ten times amount thrown."
+    },
+    {
+        "CardId": 8,
+        "ThemeId": 1,
+        "CardDescription":"Bank pays you dividend of $50."
+    },
+    {
+        "CardId": 9,
+        "ThemeId": 1,
+        "CardDescription":"Get Out of Jail Free"
+    },
+    {
+        "CardId": 10,
+        "ThemeId": 1,
+        "CardDescription":"Go Back 3 Spaces."
+    },
+    {
+        "CardId": 11,
+        "ThemeId": 1,
+        "CardDescription":"Go to Jail. Go directly to Jail, do not pass Go, do not collect $200."
+    },
+    {
+        "CardId": 12,
+        "ThemeId": 1,
+        "CardDescription":"Make general repairs on all your property. For each house pay $25. For each hotel pay $100."
+    },
+    {
+        "CardId": 13,
+        "ThemeId": 1,
+        "CardDescription":"Speeding fine $15."
+    },
+    {
+        "CardId": 14,
+        "ThemeId": 1,
+        "CardDescription":"Take a trip to Reading Railroad. If you pass Go, collect $200."
+    },
+    {
+        "CardId": 15,
+        "ThemeId": 1,
+        "CardDescription":"You have been elected Chairman of the Board. Pay each player $50."
+    },
+    {
+        "CardId": 16,
+        "ThemeId": 1,
+        "CardDescription":"Your building loan matures. Collect $150"
+    },
+
+
+
+    {
+        "CardId": 17,
+        "ThemeId": 1,
+        "CardDescription":"Advance to Go (Collect $200)"
+    },
+    {
+        "CardId": 18,
+        "ThemeId": 1,
+        "CardDescription":"Bank error in your favor. Collect $200"
+    },
+    {
+        "CardId": 19,
+        "ThemeId": 1,
+        "CardDescription":"Doctor's fee. Pay $50"
+    },
+    {
+        "CardId": 20,
+        "ThemeId": 1,
+        "CardDescription":"From sale of stock you get $50"
+    },
+    {
+        "CardId": 21,
+        "ThemeId": 1,
+        "CardDescription":"Get Out of Jail Free"
+    },
+    {
+        "CardId": 22,
+        "ThemeId": 1,
+        "CardDescription":"Go to Jail. Go directly to jail, do not pass Go, do not collect $200"
+    },
+    {
+        "CardId": 23,
+        "ThemeId": 1,
+        "CardDescription":"Holiday fund matures. Receive $100"
+    },
+    {
+        "CardId": 24,
+        "ThemeId": 1,
+        "CardDescription":"Income tax refund. Collect $20"
+    },
+    {
+        "CardId": 25,
+        "ThemeId": 1,
+        "CardDescription":"It is your birthday. Collect $10 from every player"
+    },
+    {
+        "CardId": 26,
+        "ThemeId": 1,
+        "CardDescription":"Life insurance matures. Collect $100"
+    },
+    {
+        "CardId": 27,
+        "ThemeId": 1,
+        "CardDescription":"Pay hospital fees of $100"
+    },
+    {
+        "CardId": 28,
+        "ThemeId": 1,
+        "CardDescription":"Pay school fees of $50"
+    },
+    {
+        "CardId": 29,
+        "ThemeId": 1,
+        "CardDescription":"Receive $25 consultancy fee"
+    },
+    {
+        "CardId": 30,
+        "ThemeId": 1,
+        "CardDescription":"You are assessed for street repair. $40 per house. $115 per hotel"
+    },
+    {
+        "CardId": 31,
+        "ThemeId": 1,
+        "CardDescription":"You have won second prize in a beauty contest. Collect $10"
+    },
+    {
+        "CardId": 32,
+        "ThemeId": 1,
+        "CardDescription":"You inherit $100"
+    }
+]

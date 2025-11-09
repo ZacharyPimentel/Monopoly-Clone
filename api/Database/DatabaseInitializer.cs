@@ -37,22 +37,34 @@ public class DatabaseInitializer
             var sql = File.ReadAllText(seedDataPath);
             db.Execute(sql);
         }
-        //board space themes
-        var boardSpaceThemeJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/BoardSpaceTheme.json");
-        var boardSpaceTheme = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData);
-        foreach(var boardSpace in boardSpaceTheme)
+
+        // Load all board space theme files across theme folders
+        var themeDirs = Directory.GetDirectories("./Database/SeedData/Themes");
+
+        foreach (var themeDir in themeDirs)
         {
-            db.Execute("INSERT INTO BOARDSPACETHEME (ID, ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@Id, @ThemeId,@BoardSpaceId,@BoardSpaceName)",boardSpace);
+            var themeName = Path.GetFileName(themeDir);
+            //board space themes
+            var bstFilePath = Path.Combine(themeDir, "BoardSpaceTheme.json");
+            var boardSpaceThemeJsonData = File.ReadAllText(bstFilePath);
+            var boardSpaceThemes = JsonConvert.DeserializeObject<List<BoardSpaceTheme>>(boardSpaceThemeJsonData)!;
+            foreach (var boardSpaceTheme in boardSpaceThemes)
+            {
+                db.Execute("INSERT INTO BOARDSPACETHEME (ThemeId,BoardSpaceId,BoardSpaceName) VALUES (@ThemeId,@BoardSpaceId,@BoardSpaceName)", boardSpaceTheme);
+            }
+            //theme properties
+            var tpFilePath = Path.Combine(themeDir, "ThemeProperty  6                                    cv                                                                                                                                                                                                                                                                                                                                                                    556cv55vc6.json");
+            var themePropertyJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeProperty.json");
+            var themeProperties = JsonConvert.DeserializeObject<List<ThemeProperty>>(themePropertyJsonData);
+            
+            foreach(var themeProperty in themeProperties)
+            {
+                db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,Color) VALUES (@ThemeId,@PropertyId,@Color)",themeProperty);
+            }
         }
 
         //theme property
-        var themePropertyJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeProperty.json");
-        var themeProperties = JsonConvert.DeserializeObject<List<ThemeProperty>>(themePropertyJsonData);
         
-        foreach(var themeProperty in themeProperties)
-        {
-            db.Execute("INSERT INTO THEMEPROPERTY (ThemeId,PropertyId,Color) VALUES (@ThemeId,@PropertyId,@Color)",themeProperty);
-        }
 
         //theme cards
         var themeCardJsonData = File.ReadAllText("./Database/SeedData/Themes/Monopoly/ThemeCard.json");

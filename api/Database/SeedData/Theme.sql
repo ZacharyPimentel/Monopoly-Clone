@@ -1,3 +1,4 @@
 
-INSERT INTO Theme (Id,ThemeName) VALUES
-(1, 'Monopoly');
+INSERT INTO Theme (ThemeName) VALUES
+('Monopoly'),
+-- ('Disney')
