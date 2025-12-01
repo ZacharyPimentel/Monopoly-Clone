@@ -5,7 +5,6 @@ using api.Database;
 using api.Helper;
 using api.hub;
 using api.Interface;
-using api.RabbitMQ;
 using api.Repository;
 using api.Service;
 using api.Service.GameLogic;
