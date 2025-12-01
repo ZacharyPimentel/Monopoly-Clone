@@ -20,7 +20,7 @@ export const UtilityTile:React.FC<{space:BoardSpace,sideClass:string}> = ({space
 
     const propertyStyles = useMemo( () => {
         if(property.boardSpaceId === 13) return({
-            position: 'right-[70%] absolute top-[50%] top-[50%] translate-y-[-50%]'
+            position: 'right-[100%] absolute top-[50%] top-[50%] translate-y-[-50%]'
         })
         if(property.boardSpaceId === 29) return({
             position: 'absolute bottom-[100%] left-[50%] translate-x-[-50%]'

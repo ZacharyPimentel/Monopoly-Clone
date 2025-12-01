@@ -14,4 +14,5 @@ public class GameUpdateParams
     public bool? DiceRollInProgress { get; set; }
     public bool? MovementInProgress { get; set; }
     public bool? Deleted { get; set; }
+    public int? TurnNumber { get; set; }
 }

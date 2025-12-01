@@ -5,6 +5,7 @@ using api.Database;
 using api.Helper;
 using api.hub;
 using api.Interface;
+using api.RabbitMQ;
 using api.Repository;
 using api.Service;
 using api.Service.GameLogic;
@@ -43,18 +44,25 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 //if no db connection string
-if(string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnection"))){
+if (string.IsNullOrEmpty(builder.Configuration.GetConnectionString("DefaultConnection")))
+{
     Console.WriteLine("No connection string configured.");
     builder.Services.AddScoped<IDbConnection>(sp =>
         new SqliteConnection("Data Source=:memory:") // In-memory SQLite DB
     );
-//if found db connection string
-}else{
+    //if found db connection string
+}
+else
+{
     Console.WriteLine("Found connectionString, setting up database connection.");
     builder.Services.AddScoped<IDbConnection>(sp =>
          new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
 }
+
+//rabbitmq connection
+//builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMQ"));
+
 
 //add repositories for db calls
 builder.Services.AddScoped<IBoardSpaceRepository, BoardSpaceRepository>();
@@ -108,7 +116,12 @@ using (var scope = app.Services.CreateScope())
 {
     var dbConnection = scope.ServiceProvider.GetRequiredService<IDbConnection>();
     dbConnection.Open(); // Open the connection
-    DatabaseInitializer.Initialize(dbConnection); // Initialize the database
+    DatabaseInitializer.Initialize(
+        dbConnection,
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        app.Environment.IsDevelopment()
+    ); 
+    // Initialize the database
     if (app.Environment.IsDevelopment())
     {
         var seeder = scope.ServiceProvider.GetRequiredService<TestGameSeeder>();

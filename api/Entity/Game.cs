@@ -23,6 +23,7 @@ public class Game
     public int? ActivePlayerCount { get; set; } = 0; //Join for game PlayerId on Game when searching games
     public bool DiceRollInProgress { get; set; }
     public bool MovementInProgress { get; set; }
+    public int TurnNumber {get; set; }
     //Join for LastDiceRoll properties
     public int? DiceOne { get; set; }
     public int? DiceTwo { get; set; }

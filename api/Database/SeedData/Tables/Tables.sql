@@ -6,25 +6,27 @@ CREATE TABLE IF NOT EXISTS THEME(
 );
 
 CREATE TABLE IF NOT EXISTS GAME(
-    Id UUID PRIMARY KEY,
-    DiceRollInProgress BOOLEAN DEFAULT false,
-    GameName TEXT,
-    Password TEXT,
-    MovementInProgress BOOLEAN DEFAULT false,
-    InLobby BOOLEAN DEFAULT true,
-    GameOver BOOLEAN DEFAULT false,
+    AllowedToBuildUnevenly BOOLEAN DEFAULT false,
+    CollectMoneyFromFreeParking BOOLEAN DEFAULT false,
+    CreatedAt TimeStamp NOT NULL,
     Deleted BOOLEAN DEFAULT false,
+    DiceRollInProgress BOOLEAN DEFAULT false,
+    ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
+    FullSetDoublePropertyRent BOOLEAN DEFAULT false,
+    GameName TEXT,
+    GameOver BOOLEAN DEFAULT false,
     GameStarted BOOLEAN DEFAULT false,
+    Id UUID PRIMARY KEY,
+    InLobby BOOLEAN DEFAULT true,
+    MoneyInFreeParking INTEGER DEFAULT 0,
+    MovementInProgress BOOLEAN DEFAULT false,
+    Password TEXT,
     StartingMoney INTEGER DEFAULT 1500,
     ThemeId INTEGER NOT NULL,
-    FOREIGN KEY (ThemeId) REFERENCES THEME(Id),
-    FullSetDoublePropertyRent BOOLEAN DEFAULT false,
-    ExtraMoneyForLandingOnGo BOOLEAN DEFAULT false,
-    CollectMoneyFromFreeParking BOOLEAN DEFAULT false,
-    AllowedToBuildUnevenly BOOLEAN DEFAULT false,
-    MoneyInFreeParking INTEGER DEFAULT 0,
-    CreatedAt TimeStamp NOT NULL
+    TurnNumber INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (ThemeId) REFERENCES THEME(Id)
 );
+
 
 CREATE TABLE IF NOT EXISTS GAMEPASSWORD(
     Id SERIAL PRIMARY KEY,

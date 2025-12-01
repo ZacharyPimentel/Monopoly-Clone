@@ -1,6 +1,7 @@
 using System.Data;
 using api.Entity;
 using Dapper;
+using DbUp;
 using Newtonsoft.Json;
 namespace api.Database;
 public class DatabaseInitializer
@@ -9,12 +10,27 @@ public class DatabaseInitializer
     //Update this prefix if folder structure changes
     private const string PathPrefix = "./Database/SeedData/";
 
-    public static void Initialize(IDbConnection db)
+    public static void Initialize(IDbConnection db, string? dbConnectionString, bool resetDatabase)
     {
-        DropAllTables(db);
-        CreateAllTables(db);
-        SeedCodeTables(db);
+        if (resetDatabase)
+        {
+            DropAllTables(db);
+            CreateAllTables(db);
+            SeedCodeTables(db);
+        }
+        else
+        {
+            if(dbConnectionString is string connectionString){
+                ApplyMigrations(connectionString);
+            }
+            else
+            {
+                throw new Exception("DB Connection String Missing");
+            }
+        }
+        
     }
+
     private static void SeedCodeTables(IDbConnection db)
     {
         var tableNames = new[]{
@@ -115,6 +131,19 @@ public class DatabaseInitializer
         {
             transaction.Rollback();
             throw;
+        }
+    }
+    private static void ApplyMigrations(string dbConnectionString)
+    {
+        var upgrader = DeployChanges.To
+            .PostgresqlDatabase(dbConnectionString)
+            .WithScriptsFromFileSystem("./Database/Migrations")
+            .LogToConsole()
+            .Build();
+        var result = upgrader.PerformUpgrade();
+        if (!result.Successful)
+        {
+            throw new Exception("Database Migrations Failed", result.Error);
         }
     }
 }

@@ -143,6 +143,7 @@ public class GameService(
                 new PlayerWhereParams { InCurrentGame = true, GameId = game.Id },
                 new { }
             );
+            await gameRepository.UpdateAsync(game.Id, new GameUpdateParams { TurnNumber = game.TurnNumber + 1 });
         }
         TurnOrder nextTurn = await turnOrderRepository.GetNextTurnByGameAsync(game.Id);
         await playerRepository.UpdateAsync(nextTurn.PlayerId, new PlayerUpdateParams { CanRoll = true });

@@ -129,7 +129,7 @@ public class CardService(
         //subtract money from other game players
         foreach (var player in context.Players)
         {
-            if (player.Id == context.CurrentPlayer.Id) continue;
+            if (player.Id == context.CurrentPlayer.Id && !player.Bankrupt) continue;
             await paymentService.PayPlayer(player, context.CurrentPlayer, receiveAmount);
         }
     }
@@ -155,7 +155,7 @@ public class CardService(
         //pay other game players
         foreach (var player in context.Players)
         {
-            if (player.Id == context.CurrentPlayer.Id) continue;
+            if (player.Id == context.CurrentPlayer.Id && !player.Bankrupt) continue;
             await paymentService.PayPlayer(context.CurrentPlayer, player, payAmount);
         }
     }

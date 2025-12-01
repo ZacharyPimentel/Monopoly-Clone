@@ -19,11 +19,16 @@ export const App = () => {
       skipNegotiation: true,
       transport: signalR.HttpTransportType.WebSockets
     })
+    .withAutomaticReconnect()
     .build();
     connection.start()
       .then( () => {
         dispatch({ws:connection})
       })
+    connection.onclose(error => {
+        console.log("SignalR disconnected:", error);
+        alert("You've been disconnected, please reload your page and reconnect.")
+    });
   },[])
   
   if(!ws)return <div className='flex w-full h-full justify-center items-center'><LoadingSpinner/></div>
