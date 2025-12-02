@@ -49,7 +49,10 @@ export const Popover:React.FC<{
         property.playerId === player?.id &&
         isCurrentTurn &&
         property.upgradeCount === 0 &&
-        !anySetPropertyIsUpgraded;
+        !anySetPropertyIsUpgraded
+
+    const unmortgageAllowed = 
+        !property.mortgaged || (property.mortgaged && player.money > property.mortgageValue * 1.1)
 
     return (
         <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>
@@ -81,9 +84,9 @@ export const Popover:React.FC<{
                     }} className={'bg-totorolightgreen p-[5px] w-full text-[8px] md:text-[12px] rounded'}>
                         Upgrade
                     </button>
-                    <button title={'Bulk Upgrade'} className={'bg-totorolightgreen p-[5px] text-[8px] md:text-[12px] rounded'}>
+                    {/* <button title={'Bulk Upgrade'} className={'bg-totorolightgreen p-[5px] text-[8px] md:text-[12px] rounded'}>
                         <Layers size={20}/>
-                    </button>
+                    </button> */}
                 </div>
             )}
             {downgradeAllowed && (
@@ -95,7 +98,7 @@ export const Popover:React.FC<{
                     </button>
                 </div>
             )}
-            {mortgageInteractionAllowed && (
+            {mortgageInteractionAllowed && unmortgageAllowed && (
                 <div className='mt-[10px]'>
                     <button onClick={() => {
                         if(!property.mortgaged){

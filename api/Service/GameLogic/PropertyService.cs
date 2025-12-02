@@ -55,12 +55,19 @@ public class PropertyService(
 
         await ValidatePlayerOwnsProperty(gameProperty);
 
+        //Unmortgaging costs mortgage value + 10%, rounded to nearest integer
+        int paymentAmount = (int)Math.Round((gameProperty.MortgageValue ?? 0) * 1.1);
+
+        if(player.Money < paymentAmount)
+        {
+            throw new Exception("Player does not have enough money to Unmortgage");
+        }
+
         await gamePropertyRepository.UpdateAsync(gamePropertyId, new GamePropertyUpdateParams
         {
             Mortgaged = false
         });
-        //Unmortgaging costs mortgage value + 10%, rounded to nearest integer
-        int paymentAmount = (int)Math.Round((gameProperty.MortgageValue ?? 0) * 1.1);
+
         await playerRepository.SubtractMoneyFromPlayer(player.Id, paymentAmount);
         await gameService.CreateGameLog(gameId, $"{player.PlayerName} unmortgaged {gameProperty.BoardSpaceName} for ${paymentAmount}.");
         await socketMessageService.SendGameStateUpdate(gameId, new GameStateIncludeParams
