@@ -1,4 +1,5 @@
 using System.Data;
+using System.Reflection;
 using api.Entity;
 using Dapper;
 using DbUp;
@@ -135,9 +136,13 @@ public class DatabaseInitializer
     }
     private static void ApplyMigrations(string dbConnectionString)
     {
+        // Get path relative to the executing assembly
+        var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var migrationPath = Path.Combine(assemblyPath!, "Database", "Migrations");
+        
         var upgrader = DeployChanges.To
             .PostgresqlDatabase(dbConnectionString)
-            .WithScriptsFromFileSystem("Database/Migrations")
+            .WithScriptsFromFileSystem(migrationPath)
             .LogToConsole()
             .Build();
         var result = upgrader.PerformUpgrade();
