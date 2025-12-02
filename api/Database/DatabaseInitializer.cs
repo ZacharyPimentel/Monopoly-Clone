@@ -137,7 +137,7 @@ public class DatabaseInitializer
     {
         var upgrader = DeployChanges.To
             .PostgresqlDatabase(dbConnectionString)
-            .WithScriptsFromFileSystem("./Database/Migrations")
+            .WithScriptsFromFileSystem("Database/Migrations")
             .LogToConsole()
             .Build();
         var result = upgrader.PerformUpgrade();
