@@ -7,7 +7,6 @@ import {
 } from "@globalComponents";
 import { usePlayer } from "@hooks";
 import { useGameState, useGlobalState } from "@stateProviders";
-import { Layers } from "lucide-react";
 
 export const Popover:React.FC<{
     property:Property,
