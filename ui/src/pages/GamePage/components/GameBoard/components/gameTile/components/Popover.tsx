@@ -37,7 +37,7 @@ export const Popover:React.FC<{
     const upgradeAllowed =
         sharedImprovementConditions &&
         property.upgradeCount < 5 &&
-        (allowedToBuildUnevenlySettingOn ||property.upgradeCount + 1 <= minUpgradeCount + 1);
+        (allowedToBuildUnevenlySettingOn || property.upgradeCount + 1 <= minUpgradeCount + 1);
 
     const downgradeAllowed =
         sharedImprovementConditions &&
@@ -51,7 +51,7 @@ export const Popover:React.FC<{
         !anySetPropertyIsUpgraded
 
     const unmortgageAllowed = 
-        !property.mortgaged || (property.mortgaged && player.money > property.mortgageValue * 1.1)
+        !property.mortgaged || (property.mortgaged && (player?.money || 0) > property.mortgageValue * 1.1)
 
     return (
         <div className={`${propertyStyles?.position} bg-white hidden group-hover:flex flex-col w-[100px] md:w-[200px] p-[5px] shadow-lg border border-black text-[12px]`}>

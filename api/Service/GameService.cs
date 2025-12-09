@@ -60,7 +60,8 @@ public class GameService(
         await gameRepository.UpdateAsync(gameId, new GameUpdateParams { Deleted = true });
 
         var updatedGames = await gameRepository.GetAllWithPlayerCountAsync();
-        await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, updatedGames);
+        var activeGames = updatedGames.Where(g => g.Deleted = false && game.GameOver == false);
+        await socketMessageService.SendToAll(WebSocketEvents.GameUpdateAll, activeGames);
     }
     public async Task CreateGame(SocketEventGameCreate gameCreateParams)
     {
